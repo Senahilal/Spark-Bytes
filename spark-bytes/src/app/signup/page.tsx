@@ -1,0 +1,103 @@
+"use client";
+import React from "react";
+import { useState } from "react";
+import { useCreateUserWithEmailAndPassword } from "react-firebase-hooks/auth";
+import { auth } from "@/app/firebase/config";
+import { Input, Button, Card, Typography, Layout, Form, message, Divider } from "antd";
+import { MailOutlined, LockOutlined, UserOutlined } from "@ant-design/icons";
+
+const { Title, Text, Paragraph } = Typography;
+const { Content } = Layout;
+
+export default function SignUp() {
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+
+  const [createUserWithEmailAndPassword, user, loading, error] = 
+    useCreateUserWithEmailAndPassword(auth);
+
+  async function handleSignUp() {
+    if (!email || !password) {
+      message.error("Please provide both email and password");
+      return;
+    }
+    
+    try {
+      const res = await createUserWithEmailAndPassword(email, password);
+      console.log(res);
+      message.success("Account created successfully!");
+      setEmail("");
+      setPassword("");
+    } catch (err) {
+      console.log(err);
+      message.error("Failed to create account");
+    }
+  }
+  
+  return (
+    <Layout style={{ minHeight: "100vh", background: "#f0f2f5" }}>
+      <Content style={{ display: "flex", justifyContent: "center", alignItems: "center" }}>
+        <Card
+          style={{
+            width: 400,
+            borderRadius: 8,
+            boxShadow: "0 4px 12px rgba(0, 0, 0, 0.15)",
+            padding: "24px"
+          }}
+        >
+          <div style={{ textAlign: "center", marginBottom: 24 }}>
+            <Title level={2} style={{ marginBottom: 8 }}>Create Account</Title>
+            <Paragraph type="secondary">Enter your details to get started</Paragraph>
+          </div>
+          
+          <Form layout="vertical">
+            <Form.Item>
+              <Input
+                size="large"
+                prefix={<MailOutlined style={{ color: 'rgba(0,0,0,.25)' }} />}
+                placeholder="Email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+              />
+            </Form.Item>
+            
+            <Form.Item>
+              <Input.Password
+                size="large"
+                prefix={<LockOutlined style={{ color: 'rgba(0,0,0,.25)' }} />}
+                placeholder="Password"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+              />
+            </Form.Item>
+            
+            <Form.Item>
+              <Button
+                type="primary"
+                size="large"
+                block
+                onClick={handleSignUp}
+                loading={loading}
+              >
+                Sign Up
+              </Button>
+            </Form.Item>
+          </Form>
+          
+          {error && (
+            <div style={{ color: "#ff4d4f", textAlign: "center", marginBottom: 16 }}>
+              {error.message}
+            </div>
+          )}
+          
+          
+          <div style={{ textAlign: "center" }}>
+            <Text>
+              Already have an account? <a href="/login">Log in</a>
+            </Text>
+          </div>
+        </Card>
+      </Content>
+    </Layout>
+  );
+}
