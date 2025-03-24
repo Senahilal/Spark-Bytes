@@ -43,6 +43,7 @@ export default function Account() {
     );
   }
   
+
   // If no user and not loading, the useEffect will handle redirect
   if (!user) {
     return null;
