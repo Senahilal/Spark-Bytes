@@ -6,6 +6,11 @@ import Footer from "../../components/Footer";
 import { Form, Input, Button, Row, Col, Typography, Switch, Space } from "antd";
 import ProfileImagePlaceholder from "../../../public/profile_placeholder.jpg";
 import { useRouter } from "next/navigation";
+import { useAuthState } from "react-firebase-hooks/auth";
+import { auth } from "@/app/firebase/config";
+import { fetchUserData, updateUserData } from "@/app/firebase/repository";
+import { signOut } from "firebase/auth";
+import { message } from "antd";
 
 const { Title, Text } = Typography;
 
@@ -18,13 +23,88 @@ const ProfilePage = () => {
     const [emailNotifications, setEmailNotifications] = useState(true);
     const [isEditing, setIsEditing] = useState(false);
 
-    const handleSignOut = () => {
-        // TODO
+    const [user, loading] = useAuthState(auth);
+
+    const router = useRouter();
+
+    //redirect to login if not logged in
+    //if logged in fetch user data and display
+    useEffect(() => {
+        if (!loading && !user) {
+            router.push("/login");
+        } else if (user) {
+            fetchData(user);
+        }
+    }, [user, loading, router]);
+
+
+    const handleSignOut = async () => {
+        try {
+            await signOut(auth); // 1. Firebase sign out
+            localStorage.removeItem("user"); // 2. Optional: clear local storage (if you set it)
+            message.success("Signed out successfully"); // 3. Show confirmation
+            router.push("/login"); // 4. Redirect to login
+        } catch (error) {
+            console.error("Sign out error:", error);
+            message.error("Failed to sign out");
+        }
     };
 
-    //TODO: redirect to login if not logged in
 
-    //TODO: fetch data
+
+
+    //fetch user data
+    const fetchData = async (user: any) => {
+        try {
+            const userDoc = await fetchUserData(user);
+            if (userDoc) {
+                setFirstName(userDoc.first_name || "");
+                setLastName(userDoc.last_name || "");
+                setPhoneNumber(userDoc.phone || "");
+                setEmail(userDoc.email || "");
+                setSmsNotifications(userDoc.phone_notification || false);
+                setEmailNotifications(userDoc.email_notification || false);
+            }
+        } catch (err) {
+            console.error("Error fetching user data:", err);
+        }
+    };
+
+    //update user data
+    const handleSaveChanges = async () => {
+        if (!user) return;
+
+        const updatedData = {
+            first_name: firstName,
+            last_name: lastName,
+            phone: phoneNumber,
+            email: email,
+        };
+
+        try {
+            await updateUserData(user, updatedData);
+            console.log("User data updated successfully.");
+        } catch (error) {
+            console.error("Error updating user data:", error);
+        }
+    };
+
+    //handle sms switch
+    const handleSMSToggle = async (checked: boolean) => {
+        setSmsNotifications(checked);
+        if (user) {
+            await updateUserData(user, { phone_notification: checked });
+        }
+    };
+
+    //handle email switch
+    const handleEmailToggle = async (checked: boolean) => {
+        setEmailNotifications(checked);
+        if (user) {
+            await updateUserData(user, { email_notification: checked });
+        }
+    };
+
 
     return (
         <div style={{ minHeight: "100vh", display: "flex", flexDirection: "column" }}>
@@ -59,10 +139,16 @@ const ProfilePage = () => {
                     <Button
                         type="primary"
                         style={{ backgroundColor: "#2E7D32" }}
-                        onClick={() => setIsEditing((prev) => !prev)}
+                        onClick={async () => {
+                            if (isEditing) {
+                                await handleSaveChanges();
+                            }
+                            setIsEditing((prev) => !prev);
+                        }}
                     >
                         {isEditing ? "Save" : "Edit"}
                     </Button>
+
                 </div>
             </div>
 
@@ -136,7 +222,7 @@ const ProfilePage = () => {
                             <Text>Enable SMS Notifications</Text>
                             <Switch
                                 checked={smsNotifications}
-                                onChange={(checked) => setSmsNotifications(checked)}
+                                onChange={handleSMSToggle}
                                 style={{ backgroundColor: smsNotifications ? "#2E7D32" : undefined }}
                             />
                         </div>
@@ -154,7 +240,7 @@ const ProfilePage = () => {
                             <Text>Enable Email Notifications</Text>
                             <Switch
                                 checked={emailNotifications}
-                                onChange={(checked) => setEmailNotifications(checked)}
+                                onChange={handleEmailToggle}
                                 style={{ backgroundColor: emailNotifications ? "#2E7D32" : undefined }}
                             />
                         </div>
