@@ -1,10 +1,13 @@
 "use client";
 import React from "react";
 import { useState } from "react";
-import { useCreateUserWithEmailAndPassword } from "react-firebase-hooks/auth";
+import { useCreateUserWithEmailAndPassword, useSignInWithEmailAndPassword } from "react-firebase-hooks/auth";
 import { auth } from "@/app/firebase/config";
 import { Input, Button, Card, Typography, Layout, Form, message, Divider } from "antd";
 import { MailOutlined, LockOutlined, UserOutlined } from "@ant-design/icons";
+import { doc, setDoc } from "firebase/firestore";
+import { db } from "@/app/firebase/config";
+import { useRouter } from "next/navigation";
 
 const { Title, Text, Paragraph } = Typography;
 const { Content } = Layout;
@@ -16,6 +19,8 @@ export default function SignUp() {
   const [createUserWithEmailAndPassword, user, loading, error] = 
     useCreateUserWithEmailAndPassword(auth);
 
+  const router = useRouter();
+
   async function handleSignUp() {
     if (!email || !password) {
       message.error("Please provide both email and password");
@@ -25,9 +30,23 @@ export default function SignUp() {
     try {
       const res = await createUserWithEmailAndPassword(email, password);
       console.log(res);
+      // create user in firestore
+      if (!res) return;
+      await setDoc(doc(db, "users", res.user.uid), {
+        email: res.user.email,
+        uid: res.user.uid,
+        first_name: "",
+        last_name: "",
+        staff: false,
+        phone: "",
+        phone_notification: false,
+        email_notification: false,
+      });
+
       message.success("Account created successfully!");
       setEmail("");
       setPassword("");
+      router.push("/account");
     } catch (err) {
       console.log(err);
       message.error("Failed to create account");
