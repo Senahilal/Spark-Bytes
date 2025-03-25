@@ -6,6 +6,11 @@ import { Button, Card, Typography, Layout, Avatar, Divider, message, Space } fro
 import { UserOutlined, LogoutOutlined, MailOutlined } from "@ant-design/icons";
 import { useRouter } from "next/navigation";
 import { useAuthState } from "react-firebase-hooks/auth";
+import { doc, getDoc } from "firebase/firestore";
+import { db } from "@/app/firebase/config";
+import { fetchUserData } from "../firebase/repository";
+import { create } from "domain";
+
 
 const { Title, Text, Paragraph } = Typography;
 const { Content } = Layout;
@@ -13,11 +18,50 @@ const { Content } = Layout;
 export default function Account() {
   const router = useRouter();
   const [user, loading, error] = useAuthState(auth);
-  
+  console.log({user, loading, error});
+
+  // user data
+  const [email, setEmail] = useState("");
+  const [first_name, setFirstName] = useState("");
+  const [last_name, setLastName] = useState("");
+  const [phone, setPhone] = useState("");
+  const [staff, setStaff] = useState(false);
+  const [phone_notification, setPhoneNotification] = useState(false);
+  const [email_notification, setEmailNotification] = useState(false);
+
+
+  async function fetchData(user: any) {
+    try {
+      const userDoc = await fetchUserData(user);
+      if (userDoc) {
+        console.log("User data:", userDoc);
+        setEmail(userDoc.email);
+        setFirstName(userDoc.first_name);
+        setLastName(userDoc.last_name);
+        setPhone(userDoc.phone);
+        setStaff(userDoc.staff);
+        setPhoneNotification(userDoc.phone_notification);
+        setEmailNotification(userDoc.email_notification);
+
+      } else {
+        console.log("No such document!");
+      }
+    } catch (err) {
+      console.error("Error fetching user data:", err);
+    }
+  };
+
+
+
   useEffect(() => {
     // If user is not logged in and not in loading state, redirect to login
     if (!loading && !user) {
       router.push("/login");
+    }
+
+    else if (user) {
+      // Fetch user data from Firestore if user is logged in
+      fetchData(user);
     }
   }, [user, loading, router]);
 
@@ -81,13 +125,43 @@ export default function Account() {
                 <Text strong>{user.email}</Text>
               </div>
               
-              {user.displayName && (
+              {user && (
                 <div>
                   <Text type="secondary" style={{ display: "block", marginBottom: 4 }}>
                     <UserOutlined style={{ marginRight: 8 }} />
-                    Display Name
+                    First Name
                   </Text>
-                  <Text strong>{user.displayName}</Text>
+                  <Text strong>{first_name}</Text>
+
+                  <Text type="secondary" style={{ display: "block", marginBottom: 4 }}>
+                    <UserOutlined style={{ marginRight: 8 }} />
+                    Last Name
+                  </Text>
+                  <Text strong>{last_name}</Text>
+
+                  <Text type="secondary" style={{ display: "block", marginBottom: 4 }}>
+                    <UserOutlined style={{ marginRight: 8 }} />
+                    Phone
+                  </Text>
+                  <Text strong>{phone}</Text>
+
+                  <Text type="secondary" style={{ display: "block", marginBottom: 4 }}>
+                    <UserOutlined style={{ marginRight: 8 }} />
+                    Staff
+                  </Text>
+                  <Text strong>{staff ? "Yes" : "No"}</Text>
+
+                  <Text type="secondary" style={{ display: "block", marginBottom: 4 }}>
+                    <UserOutlined style={{ marginRight: 8 }} />
+                    Phone Notification
+                  </Text>
+                  <Text strong>{phone_notification ? "Yes" : "No"}</Text>
+
+                  <Text type="secondary" style={{ display: "block", marginBottom: 4 }}>
+                    <UserOutlined style={{ marginRight: 8 }} />
+                    Email Notification
+                  </Text>
+                  <Text strong>{email_notification ? "Yes" : "No"}</Text>
                 </div>
               )}
             </Space>

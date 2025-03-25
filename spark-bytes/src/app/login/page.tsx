@@ -31,7 +31,7 @@ export default function Login() {
       message.success("Logged in successfully!");
       setEmail("");
       setPassword("");
-      // Redirect to dashboard or home page would happen here
+      // Redirect to account page
       router.push("/account");
     } catch (err) {
       console.log(err);
