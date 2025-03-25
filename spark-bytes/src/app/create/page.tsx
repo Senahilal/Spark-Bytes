@@ -52,7 +52,7 @@ const handleFormSubmit = async () => {
     const docRef = await addDoc(collection(db, "events"), eventData);
     console.log("Document written with ID: ", docRef.id);
 
-    router.push("/dashboard"); // Navigate to dashboard after successful submission
+    router.push("/"); // Navigate to home after successful submission
   } catch (error) {
     console.error("Error adding document: ", error);
   }
