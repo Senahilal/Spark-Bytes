@@ -8,7 +8,7 @@ import { useRouter } from "next/navigation";
 import { useAuthState } from "react-firebase-hooks/auth";
 import { doc, getDoc } from "firebase/firestore";
 import { db } from "@/app/firebase/config";
-import { fetchUserData } from "../firebase/respository";
+import { fetchUserData } from "../firebase/repository";
 import { create } from "domain";
 
 
