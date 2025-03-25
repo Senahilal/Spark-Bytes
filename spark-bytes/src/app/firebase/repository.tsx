@@ -1,7 +1,6 @@
 import { useAuthState } from "react-firebase-hooks/auth";
-import { doc, getDoc, collection, addDoc, getDocs, where, query } from "firebase/firestore";
-import { db } from "@/app/firebase/config";
-import { auth } from "@/app/firebase/config";
+import { doc, getDoc, updateDoc, collection, addDoc, getDocs, where, query } from "firebase/firestore";
+import { db, auth } from "@/app/firebase/config";
 import LocalEvent from "../classes/LocalEvent";
 
 export async function fetchUserData(user: any) {
@@ -131,5 +130,17 @@ export async function fetchUserIdEvents(userId: string) {
     } catch (err) {
         console.error("Error fetching events: ", err);
         return null;
+    }
+}
+
+export async function updateUserData(user: any, updatedData: any) {
+    if (!user || !user.uid) return;
+
+    try {
+        const userRef = doc(db, "users", user.uid);
+        await updateDoc(userRef, updatedData);
+        console.log("User data updated.");
+    } catch (err) {
+        console.error("Error updating user data:", err);
     }
 }
