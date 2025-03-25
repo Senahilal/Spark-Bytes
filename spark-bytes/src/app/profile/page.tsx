@@ -258,8 +258,6 @@ const ProfilePage = () => {
                     </div>
                 </Form>
             </div>
-
-            <Footer />
         </div>
     );
 };
