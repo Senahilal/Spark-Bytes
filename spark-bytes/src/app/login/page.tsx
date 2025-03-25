@@ -32,7 +32,7 @@ export default function Login() {
       setEmail("");
       setPassword("");
       // Redirect to account page
-      router.push("/account");
+      router.push("/profile");
     } catch (err) {
       console.log(err);
       message.error("Failed to log in");

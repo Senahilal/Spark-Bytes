@@ -46,7 +46,7 @@ export default function SignUp() {
       message.success("Account created successfully!");
       setEmail("");
       setPassword("");
-      router.push("/account");
+      router.push("/profile");
     } catch (err) {
       console.log(err);
       message.error("Failed to create account");
