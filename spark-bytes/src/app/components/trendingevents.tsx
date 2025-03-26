@@ -1,10 +1,9 @@
 import React from 'react';
-import EventCard, { EventCardProps } from './eventcard';
-import { EventType } from '../types';
+import EventCard from './eventcard';
 
-const TrendingEvents: React.FC = () => {
+const TrendingEvents = () => {
   // Mock data based on the screenshot
-  const events: EventType[] = [
+  const events = [
     {
       id: '1',
       title: 'Cookie O\' Clock',
@@ -22,37 +21,38 @@ const TrendingEvents: React.FC = () => {
       time: '3pm',
       foodType: 'Cookies',
       hasNotification: true
-    },
-    {
-      id: '3',
-      title: 'Cookie O\' Clock',
-      location: 'BU Spark',
-      date: '3/19',
-      time: '3pm',
-      foodType: 'Cookies',
-      hasNotification: false
-    },
- 
+    }
   ];
 
   return (
-    <section className="py-10 bg-white">
-      <div className="container mx-auto px-4">
-        <h2 className="text-2xl font-bold mb-6 text-center">Trending Events</h2>
+    <section style={{ padding: '20px 0 60px 0', backgroundColor: 'white' }}>
+      <div style={{ maxWidth: '1200px', margin: '0 auto', padding: '0 16px' }}>
+        <h2 style={{ 
+          fontSize: '1.75rem', 
+          fontWeight: 'bold', 
+          marginBottom: '30px', 
+          textAlign: 'center' 
+        }}>
+          Trending Events
+        </h2>
         
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 max-w-4xl mx-auto">
-          {events.map((event) => {
-            const cardProps: EventCardProps = {
-              title: event.title,
-              location: event.location,
-              date: event.date,
-              time: event.time,
-              foodType: event.foodType,
-              hasNotification: event.hasNotification
-            };
-            
-            return <EventCard key={event.id} {...cardProps} />;
-          })}
+        <div style={{ 
+          display: 'flex',
+          justifyContent: 'center',
+          gap: '30px',
+          flexWrap: 'wrap'
+        }}>
+          {events.map((event) => (
+            <EventCard 
+              key={event.id}
+              title={event.title}
+              location={event.location}
+              date={event.date}
+              time={event.time}
+              foodType={event.foodType}
+              hasNotification={event.hasNotification}
+            />
+          ))}
         </div>
       </div>
     </section>

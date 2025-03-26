@@ -1,29 +1,46 @@
 import React from 'react';
-import Link from 'next/link';
 
 const Navbar: React.FC = () => {
   return (
-    <nav className="w-full bg-white p-4 shadow-sm">
-      <div className="container mx-auto flex items-center">
-      <div className="flex-1">
-        <Link href="/" className="flex items-center gap-2">
-          <div className="w-10 h-10 bg-gray-200 flex items-center justify-center rounded">
-            <span className="text-gray-500 text-sm">(Logo)</span>
+    <nav style={{ 
+      width: '100%', 
+      backgroundColor: 'white', 
+      padding: '12px'
+    }}>
+      <div style={{ 
+        display: 'flex', 
+        justifyContent: 'space-between',
+        alignItems: 'center',
+        maxWidth: '1200px',
+        margin: '0 auto'
+      }}>
+        <div style={{ display: 'flex', alignItems: 'center' }}>
+          <div style={{ 
+            width: '80px', 
+            height: '40px', 
+            backgroundColor: '#f3f4f6', 
+            display: 'flex', 
+            alignItems: 'center', 
+            justifyContent: 'center'
+          }}>
+            <span style={{ color: '#6b7280' }}>(Logo)</span>
           </div>
-          <span className="font-semibold text-xl">Spark!Bytes</span>
-        </Link>
         </div>
         
-        <div className="hidden md:flex items-center space-x-4">
-          <Link href="/profile" className="text-gray-700 hover:text-green-600">
-            My Account
-          </Link>
-        </div>
-        
-        <div className="flex items-center">
-          <div className="w-10 h-10 bg-teal-500 rounded-full flex items-center justify-center text-white">
-            A
-          </div>
+        <div style={{ 
+          width: '60px', 
+          height: '60px', 
+          backgroundColor: '#14b8a6', 
+          borderRadius: '50%', 
+          display: 'flex', 
+          alignItems: 'center', 
+          justifyContent: 'center', 
+          color: 'white',
+          fontWeight: 'bold',
+          fontSize: '1.5rem',
+          boxShadow: '0 4px 8px rgba(0,0,0,0.1)'
+        }}>
+          A
         </div>
       </div>
     </nav>
