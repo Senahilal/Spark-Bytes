@@ -1,12 +1,20 @@
 import React from 'react';
-import Link from 'next/link';
 
 const Footer: React.FC = () => {
   return (
-    <footer className="bg-lime-100 py-6">
-      <div className="container mx-auto px-4 text-center">
-        <p className="text-gray-600 mb-4">© 2025 Spark Bytes | Boston University</p>
-        
+    <footer style={{ 
+      backgroundColor: '#DEEFB7', 
+      padding: '12px 0',
+      textAlign: 'center'
+    }}>
+      <div style={{ 
+        maxWidth: '1200px', 
+        margin: '0 auto', 
+        padding: '0 16px'
+      }}>
+        <p style={{ color: '#4b5563', margin: 0 }}>
+          Spark!Bytes 
+        </p>
       </div>
     </footer>
   );
