@@ -2,7 +2,7 @@ import React from 'react';
 import EventCard from './eventcard';
 
 const TrendingEvents = () => {
-  // Mock data based on the screenshot
+  // placeholders
   const events = [
     {
       id: '1',
