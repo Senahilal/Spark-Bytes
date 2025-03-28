@@ -3,13 +3,17 @@ import Image from 'next/image';
 import Logo from './logo';
 import AccountIcon from './accounticon';
 import Button from './button';
+import Link from 'next/link';
 
 const Hero = () => {
   return (
       <div style={{ position: 'relative' }}>
       {/* Logo and Account Icon */}
       <Logo />
-      <AccountIcon />
+
+      <Link href="/profile">
+        <AccountIcon />
+      </Link>
   
       {/* Background image */}
       <div style={{ position: 'relative', width: '100%', height: '320px', overflow: 'hidden' }}>
@@ -44,7 +48,7 @@ const Hero = () => {
               gap: '26px' 
             }}>
               <Button href="/EventListing">Find Free Food Now</Button>
-              <Button href="/post">Post an Event</Button>
+              <Button href="/create">Post an Event</Button>
             </div>
           </div>
           

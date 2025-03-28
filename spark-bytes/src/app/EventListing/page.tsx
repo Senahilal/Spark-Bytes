@@ -15,7 +15,7 @@ const { Search } = Input;
 export default function FindPage() {
   const [searchQuery, setSearchQuery] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
-  
+
   // !! Placeholders - change these !!
   const events = [
     {
@@ -70,56 +70,60 @@ export default function FindPage() {
     <div style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column' }}>
       {/* header */}
       <div style={{ backgroundColor: '#DEEFB7', padding: '60px' }}>
-      <div style={{ 
-        display: 'flex', 
-        justifyContent: 'space-between',
-        alignItems: 'center',
-        maxWidth: '1200px',
-        margin: '0 auto'
-      }}>
-        <Link href="/">
-          <Logo />
-        </Link>
+        <div style={{
+          display: 'flex',
+          justifyContent: 'space-between',
+          alignItems: 'center',
+          maxWidth: '1200px',
+          margin: '0 auto'
+        }}>
+          <Link href="/">
+            <Logo />
+          </Link>
 
-        {/* post an event button */}
-        <div style={{ 
-          display: 'flex', 
-          justifyContent: 'flex-end', 
-          alignItems: 'center', 
-          gap: '10px'}}>
-          <Button href="/post">
-        Post an Event
-      </Button>
-          <AccountIcon />
+          {/* post an event button */}
+          <div style={{
+            display: 'flex',
+            justifyContent: 'flex-end',
+            alignItems: 'center',
+            gap: '10px'
+          }}>
+            <Button href="/create">
+              Post an Event
+            </Button>
+
+            <Link href="/profile">
+              <AccountIcon />
+            </Link>
+          </div>
         </div>
-      </div>
-        
-        <div style={{ 
-          maxWidth: '1200px', 
+
+        <div style={{
+          maxWidth: '1200px',
           margin: '40px auto 20px',
           display: 'flex',
           flexDirection: 'column',
           alignItems: 'flex-start'
           // gap: '10px'
         }}>
-          <div style={{ 
-    display: 'flex',
-    alignItems: 'center',
-    gap: '10px',
-    marginBottom: '30px' 
-  }}></div>
+          <div style={{
+            display: 'flex',
+            alignItems: 'center',
+            gap: '10px',
+            marginBottom: '30px'
+          }}></div>
           <span role="img" aria-label="food" style={{ fontSize: '24px' }}>🍽️</span>
           <h1 style={{ fontSize: '28px', fontWeight: 'bold', margin: 0 }}>
             Find Free Food on Campus!
           </h1>
         </div>
-        
+
         {/* Search bar */}
-        <div style={{ 
-    width: '100%',
-    maxWidth: '650px',
-    alignSelf: 'flex-start'
-  }}>
+        <div style={{
+          width: '100%',
+          maxWidth: '650px',
+          alignSelf: 'flex-start'
+        }}>
           <Search
             placeholder="Type a location, food type, or keyword"
             onSearch={handleSearch}
@@ -129,21 +133,21 @@ export default function FindPage() {
           />
         </div>
       </div>
-      
+
       {/* Main content */}
       <div style={{ padding: '20px', maxWidth: '1200px', margin: '0 auto', flex: 1 }}>
-        
+
         {/* !! Implement filter buttons !! */}
-        
+
         {/* Event cards grid */}
-        <div style={{ 
+        <div style={{
           display: 'grid',
           gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))',
           gap: '24px',
           marginBottom: '40px'
         }}>
           {events.map(event => (
-            <EventCard 
+            <EventCard
               key={event.id}
               title={event.title}
               location={event.location}
@@ -154,7 +158,7 @@ export default function FindPage() {
             />
           ))}
         </div>
-        
+
         {/* Pagination */}
         <div style={{ marginTop: '20px', display: 'flex', justifyContent: 'center' }}>
           <Pagination
@@ -165,7 +169,7 @@ export default function FindPage() {
           />
         </div>
       </div>
-      
+
       <Footer />
     </div>
   );
