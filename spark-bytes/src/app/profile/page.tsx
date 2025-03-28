@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect } from "react";
 import Image from "next/image";
-import Footer from "../../components/Footer";
+import Footer from '../components/footer';
 import { Form, Input, Button, Row, Col, Typography, Switch, Space } from "antd";
 import ProfileImagePlaceholder from "../../../public/profile_placeholder.jpg";
 import { useRouter } from "next/navigation";
@@ -258,6 +258,7 @@ const ProfilePage = () => {
                     </div>
                 </Form>
             </div>
+            <Footer/>
         </div>
     );
 };
