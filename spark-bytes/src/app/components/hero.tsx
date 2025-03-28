@@ -43,8 +43,8 @@ const Hero = () => {
               flexDirection: 'row', 
               gap: '26px' 
             }}>
-              <Button>Find Free Food Now</Button>
-              <Button>Post an Event</Button>
+              <Button href="/EventListing">Find Free Food Now</Button>
+              <Button href="/post">Post an Event</Button>
             </div>
           </div>
           
