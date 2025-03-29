@@ -2,19 +2,41 @@
 
 import React, { useState } from 'react';
 import Link from 'next/link';
-import { Input, Dropdown, Space, Pagination } from 'antd';
+import { Input, Dropdown, Space, Pagination, DatePicker, Select, ConfigProvider } from 'antd';
 import { SearchOutlined, DownOutlined } from '@ant-design/icons';
 import Logo from '../components/logo';
 import AccountIcon from '../components/accounticon';
 import EventCard from '../components/eventcard';
 import Footer from '../components/footer';
 import Button from '../components/button';
+import dayjs, { Dayjs } from "dayjs";
 
 const { Search } = Input;
+const { Option } = Select;
+
+<ConfigProvider
+  theme={{
+    components: {
+      Select: {
+        selectorBg: "#E3F4C9",           // background of the input
+        optionSelectedBg: "#C5E1A5",     // background when you select an item
+        multipleItemBg: "#E3F4C9",       // background of the tags
+        controlHeight: 40,               // makes height match DatePicker
+        borderRadius: 8,                 // rounded corners
+      },
+    },
+  }}
+></ConfigProvider>
 
 export default function FindPage() {
   const [searchQuery, setSearchQuery] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
+
+  //Filtering
+  const [selectedDate, setSelectedDate] = useState<Dayjs | null>(null);
+  const [selectedLocation, setSelectedLocation] = useState<string[]>([]);
+  const [selectedFoodType, setSelectedFoodType] = useState<string[]>([]);
+
 
   // !! Placeholders - change these !!
   const events = [
@@ -138,6 +160,114 @@ export default function FindPage() {
       <div style={{ padding: '20px', maxWidth: '1200px', margin: '0 auto', flex: 1 }}>
 
         {/* !! Implement filter buttons !! */}
+        <Space size="middle" style={{ marginBottom: 24 }}>
+          {/* Date Picker */}
+          <ConfigProvider
+            theme={{
+              token: {
+                colorPrimary: "#036D19",
+                colorBorder: "#E3F4C9",
+                colorBgContainer: "#E3F4C9",
+              },
+              components: {
+                DatePicker: {
+                  borderRadius: 8,
+                  controlHeight: 45,
+                },
+              },
+            }}
+          >
+            <DatePicker
+              onChange={(date) => setSelectedDate(date)}
+              placeholder="Event Date"
+              style={{
+                width: 350,
+                boxShadow: "0 1px 3px rgba(0,0,0,0.2)",
+              }}
+              popupStyle={{ zIndex: 2000 }}
+            />
+          </ConfigProvider>
+
+
+          {/* Location Select */}
+          <ConfigProvider
+            theme={{
+              components: {
+                Select: {
+                  selectorBg: "#E3F4C9",              // Background color
+                  multipleItemBg: "#E3F4C9",          // Tags in multi-select
+                  optionSelectedBg: "#E3F4C9",        // Background color when option is selected
+                  activeOutlineColor: "transparent",  // Prevent blue glow
+                  controlHeight: 45,
+                  borderRadius: 8,
+                },
+              },
+              token: {
+                colorBorder: "#E3F4C9",
+                colorPrimary: "#036D19",
+              },
+            }}
+          >
+            <Select
+              mode="multiple"
+              placeholder="Location"
+              onChange={(value) => setSelectedLocation(value)}
+              style={{
+                width: 350,
+                backgroundColor: "#E3F4C9",
+                boxShadow: "0 1px 3px rgba(0,0,0,0.2)",
+                borderRadius: "8px",
+              }}
+              allowClear
+              maxTagCount={2}
+            >
+              <Option value="East Campus">East Campus</Option>
+              <Option value="Central Campus">Central Campus</Option>
+              <Option value="West Campus">West Campus</Option>
+            </Select>
+          </ConfigProvider>
+
+          {/* Food Type Select */}
+          <ConfigProvider
+            theme={{
+              components: {
+                Select: {
+                  selectorBg: "#E3F4C9",              // Background color
+                  multipleItemBg: "#E3F4C9",          // Tags in multi-select
+                  optionSelectedBg: "#E3F4C9",        // Background color when option is selected
+                  activeOutlineColor: "transparent",  // Prevent blue glow
+                  controlHeight: 45,
+                  borderRadius: 8,
+                },
+              },
+              token: {
+                colorBorder: "#E3F4C9",
+                colorPrimary: "#036D19",
+              },
+            }}
+          >
+            <Select
+              mode="multiple"
+              placeholder="Food Type"
+              onChange={(value) => setSelectedFoodType(value)}
+              style={{
+                width: 350,
+                backgroundColor: "#E3F4C9",
+                boxShadow: "0 1px 3px rgba(0,0,0,0.2)",
+                borderRadius: "8px",
+              }}
+              allowClear
+              maxTagCount={2}
+            >
+              <Option value="Vegan">Vegan</Option>
+              <Option value="Vegetarian">Vegetarian</Option>
+              <Option value="Halal">Halal</Option>
+            </Select>
+          </ConfigProvider>
+
+        </Space>
+
+
 
         {/* Event cards grid */}
         <div style={{
