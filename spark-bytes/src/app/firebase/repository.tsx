@@ -144,3 +144,21 @@ export async function updateUserData(user: any, updatedData: any) {
         console.error("Error updating user data:", err);
     }
 }
+
+export async function fetchAllEvents() {
+    try {
+      const eventsCollection = collection(db, "events");
+      const snapshot = await getDocs(eventsCollection);
+  
+      const eventsList = snapshot.docs.map(doc => ({
+        id: doc.id,
+        ...doc.data()
+      }));
+  
+      console.log("Events:", eventsList);
+      return eventsList;
+    } catch (err) {
+      console.error("Error fetching events:", err);
+      return null;
+    }
+  }

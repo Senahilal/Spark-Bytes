@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { Input, Dropdown, Space, Pagination, DatePicker, Select, ConfigProvider } from 'antd';
 import { SearchOutlined, DownOutlined } from '@ant-design/icons';
@@ -10,6 +10,7 @@ import EventCard from '../components/eventcard';
 import Footer from '../components/footer';
 import Button from '../components/button';
 import dayjs, { Dayjs } from "dayjs";
+import { fetchAllEvents } from '../firebase/repository';
 
 const { Search } = Input;
 const { Option } = Select;
@@ -32,6 +33,18 @@ export default function FindPage() {
   const [searchQuery, setSearchQuery] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
 
+  const [events, setEvents] = useState<any[]>([]);
+
+  //fetching all events
+  useEffect(() => {
+    const loadEvents = async () => {
+      const data = await fetchAllEvents();
+      if (data) setEvents(data);
+    };
+
+    loadEvents();
+  }, []);
+
   //Filtering
   const [selectedDate, setSelectedDate] = useState<Dayjs | null>(null);
   const [selectedLocation, setSelectedLocation] = useState<string[]>([]);
@@ -39,7 +52,7 @@ export default function FindPage() {
 
 
   // !! Placeholders - change these !!
-  const events = [
+  const events_placeholder = [
     {
       id: '1',
       title: 'Cookie O\' Clock',
@@ -51,24 +64,6 @@ export default function FindPage() {
     },
     {
       id: '2',
-      title: 'Cookie O\' Clock',
-      location: 'BU Spark',
-      date: '3/19',
-      time: '3pm',
-      foodType: 'Cookies',
-      hasNotification: true
-    },
-    {
-      id: '3',
-      title: 'Cookie O\' Clock',
-      location: 'BU Spark',
-      date: '3/19',
-      time: '3pm',
-      foodType: 'Cookies',
-      hasNotification: false
-    },
-    {
-      id: '4',
       title: 'Cookie O\' Clock',
       location: 'BU Spark',
       date: '3/19',
@@ -159,8 +154,9 @@ export default function FindPage() {
       {/* Main content */}
       <div style={{ padding: '20px', maxWidth: '1200px', margin: '0 auto', flex: 1 }}>
 
-        {/* !! Implement filter buttons !! */}
+        {/*FILTER*/}
         <Space size="middle" style={{ marginBottom: 24 }}>
+
           {/* Date Picker */}
           <ConfigProvider
             theme={{
@@ -266,7 +262,7 @@ export default function FindPage() {
           </ConfigProvider>
 
         </Space>
-
+        {/* FILTER ENDS HERE */}
 
 
         {/* Event cards grid */}
