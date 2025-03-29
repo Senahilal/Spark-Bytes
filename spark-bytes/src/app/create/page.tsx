@@ -17,92 +17,95 @@ const { Item } = Form;
 
 const CreateEventPage: React.FC = () => {
 
-const router = useRouter();
-// const [user] = useAuthState(auth);
-const [form] = Form.useForm();
-const [eventDate, setEventDate] = useState<dayjs.Dayjs | null>(null);
+  const router = useRouter();
+  // const [user] = useAuthState(auth);
+  const [form] = Form.useForm();
+  const [eventDate, setEventDate] = useState<dayjs.Dayjs | null>(null);
 
-const onDateChange: DatePickerProps['onChange'] = (date) => {
-setEventDate(date);
-};
+  const onDateChange: DatePickerProps['onChange'] = (date) => {
+    setEventDate(date);
+  };
 
-const onFinish = (values: any) => {
-  console.log('Received values of form: ', values);
-// Handle form submission here
-};
+  const onFinish = (values: any) => {
+    console.log('Received values of form: ', values);
+    // Handle form submission here
+  };
 
-//Used coPilot to help with the form submission
-const handleFormSubmit = async () => {
-  try {
-    const user = auth.currentUser;
-    if (!user) {
-      console.error("No user is signed in.");
-      return;
+  //Used coPilot to help with the form submission
+  const handleFormSubmit = async () => {
+    try {
+      const user = auth.currentUser;
+      if (!user) {
+        console.error("No user is signed in.");
+        return;
+      }
+
+      const values = form.getFieldsValue();
+      const eventData = {
+        title: values.title,
+        location: values.location,
+        date: eventDate ? eventDate.toISOString() : null,
+        userId: user.uid,
+        createdAt: new Date(),
+      };
+
+      const docRef = await addDoc(collection(db, "events"), eventData);
+      console.log("Document written with ID: ", docRef.id);
+
+      router.push("/"); // Navigate to home after successful submission
+    } catch (error) {
+      console.error("Error adding document: ", error);
     }
-
-    const values = form.getFieldsValue();
-    const eventData = {
-      title: values.title,
-      location: values.location,
-      date: eventDate ? eventDate.toISOString() : null,
-      userId: user.uid,
-      createdAt: new Date().toISOString(),
-    };
-
-    const docRef = await addDoc(collection(db, "events"), eventData);
-    console.log("Document written with ID: ", docRef.id);
-
-    router.push("/"); // Navigate to home after successful submission
-  } catch (error) {
-    console.error("Error adding document: ", error);
-  }
-};
+  };
 
   return (
     <>
-    <div  className={styles.container}>
-    </div>
-    <div style={{ maxWidth: '400px', margin: '0 auto', padding: '20px' }}>
+      <div className={styles.container}>
+      </div>
+      <div style={{ maxWidth: '400px', margin: '0 auto', padding: '20px' }}>
         <Card title="Create Event" style={{ marginBottom: '20px' }} className={styles.card}>
-        <Form form={form} onFinish={onFinish} layout="vertical">
+          <Form form={form} onFinish={onFinish} layout="vertical">
             <Item
-            label="Title"
-            name="title"
-            rules={[{ required: true, message: 'Please input the event title!' }]}
+              label="Title"
+              name="title"
+              rules={[{ required: true, message: 'Please input the event title!' }]}
             >
-            <Input placeholder="Enter event title" />
+              <Input placeholder="Enter event title" />
             </Item>
 
             <Item
-            label="Location"
-            name="location"
-            rules={[{ required: true, message: 'Please input the event location!' }]}
+              label="Location"
+              name="location"
+              rules={[{ required: true, message: 'Please input the event location!' }]}
             >
-            <Input placeholder="Enter event location" />
+              <Input placeholder="Enter event location" />
             </Item>
 
             <Item
-            label="Date"
-            name="date"
-            rules={[{ required: true, message: 'Please select the event date!' }]}
+              label="Date"
+              name="date"
+              rules={[{ required: true, message: 'Please select the event date!' }]}
             >
-            <DatePicker onChange={onDateChange} style={{ width: '100%' }} />
+              <DatePicker
+                format="MM/DD/YYYY"
+                onChange={onDateChange}
+                style={{ width: '100%' }} />
             </Item>
 
             <Item>
-            <Button
-              type="primary"
-              htmlType="submit"
-              style={{ width: '100%' }}
-              className={styles.button}
-              onClick={handleFormSubmit}
-            >
-              POST
-            </Button>
+              <Button
+                type="primary"
+                htmlType="submit"
+                style={{ width: '100%' }}
+                className={styles.button}
+                onClick={handleFormSubmit}
+              >
+                POST
+              </Button>
             </Item>
-        </Form>
+          </Form>
         </Card>
-    </div>
+      </div>
     </>
   );
 };
