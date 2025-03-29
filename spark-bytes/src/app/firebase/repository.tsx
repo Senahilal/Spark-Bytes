@@ -4,15 +4,15 @@ import { db, auth } from "@/app/firebase/config";
 import LocalEvent from "../classes/LocalEvent";
 
 export async function fetchUserData(user: any) {
-    // Retrieves all data for a given user from Firestore
-    // doc.uid is the unique identifier for the user
-    // doc.email is the email of the user
-    // doc.first_name is the first name of the user
-    // doc.last_name is the last name of the user
-    // doc.phone is the phone number of the user
-    // doc.staff is a boolean indicating if the user is a staff member
-    // doc.phone_notification is a boolean indicating if the user wants phone notifications
-    // doc.email_notification is a boolean indicating if the user wants email notifications
+  // Retrieves all data for a given user from Firestore
+  // doc.uid is the unique identifier for the user
+  // doc.email is the email of the user
+  // doc.first_name is the first name of the user
+  // doc.last_name is the last name of the user
+  // doc.phone is the phone number of the user
+  // doc.staff is a boolean indicating if the user is a staff member
+  // doc.phone_notification is a boolean indicating if the user wants phone notifications
+  // doc.email_notification is a boolean indicating if the user wants email notifications
 
   if (!user) return null;
   if (!user.uid) return null;
@@ -32,32 +32,32 @@ export async function fetchUserData(user: any) {
 }
 
 export async function createEvent(event: LocalEvent) {
-    // Creates a new event in Firestore
+  // Creates a new event in Firestore
 
-    try {
-        const eventRef = await addDoc(collection(db, "events"), {
-            user: event.user,
-            title: event.title,
-            description: event.description,
-            start: event.start,
-            end: event.end,
-            location: event.location,
-            organizer: event.organizer,
-            food_provider: event.food_provider,
-            food_type: event.food_type,
-            createdAt: event.createdAt,
-        });
+  try {
+    const eventRef = await addDoc(collection(db, "events"), {
+      user: event.user,
+      title: event.title,
+      description: event.description,
+      start: event.start,
+      end: event.end,
+      location: event.location,
+      organizer: event.organizer,
+      food_provider: event.food_provider,
+      food_type: event.food_type,
+      createdAt: event.createdAt,
+    });
 
-        console.log("Event created with ID: ", eventRef.id);
+    console.log("Event created with ID: ", eventRef.id);
 
-        // return local event object
-        event.id = eventRef.id;
-        return event;
-    }
-    catch (err) {
-        console.error("Error creating event: ", err);
-        return null;
-    }
+    // return local event object
+    event.id = eventRef.id;
+    return event;
+  }
+  catch (err) {
+    console.error("Error creating event: ", err);
+    return null;
+  }
 }
 
 /**
@@ -94,71 +94,100 @@ export async function createEvent(event: LocalEvent) {
   };
  */
 
-export async function fetchEvents() {
-    // Fetches all events from Firestore and returns them as an array of LocalEvent objects
-    try {
-        const eventsCollection = collection(db, "events");
-        const events = await getDocs(eventsCollection);
-        const eventsList: LocalEvent[] = [];
-        events.forEach((doc) => {
-            const event = doc.data() as LocalEvent;
-            event.id = doc.id;
-            eventsList.push(event);
-        });
-        console.log("Events: ", eventsList);
-        return eventsList;
-    } catch (err) {
-        console.error("Error fetching events: ", err);
-        return null;
-    }
-}
+// export async function fetchEvents() {
+//   // Fetches all events from Firestore and returns them as an array of LocalEvent objects
+//   try {
+//     const eventsCollection = collection(db, "events");
+//     const events = await getDocs(eventsCollection);
+//     const eventsList: LocalEvent[] = [];
+//     events.forEach((doc) => {
+//       const event = doc.data() as LocalEvent;
+//       event.id = doc.id;
+//       eventsList.push(event);
+//     });
+//     console.log("Events: ", eventsList);
+//     return eventsList;
+//   } catch (err) {
+//     console.error("Error fetching events: ", err);
+//     return null;
+//   }
+// }
 
 
 export async function fetchUserIdEvents(userId: string) {
-    // Fetches all events for a specific user from Firestore and returns them as an array of LocalEvent objects
-    try {
-        const eventsQuery = query(collection(db, "events"), where("user", "==", userId));
-        const events = await getDocs(eventsQuery);
-        const eventsList: LocalEvent[] = [];
-        events.forEach((doc) => {
-            const event = doc.data() as LocalEvent;
-            event.id = doc.id;
-            eventsList.push(event);
-        });
-        console.log("Events: ", eventsList);
-        return eventsList;
-    } catch (err) {
-        console.error("Error fetching events: ", err);
-        return null;
-    }
+  // Fetches all events for a specific user from Firestore and returns them as an array of LocalEvent objects
+  try {
+    const eventsQuery = query(collection(db, "events"), where("user", "==", userId));
+    const events = await getDocs(eventsQuery);
+    const eventsList: LocalEvent[] = [];
+    events.forEach((doc) => {
+      const event = doc.data() as LocalEvent;
+      event.id = doc.id;
+      eventsList.push(event);
+    });
+    console.log("Events: ", eventsList);
+    return eventsList;
+  } catch (err) {
+    console.error("Error fetching events: ", err);
+    return null;
+  }
 }
 
 export async function updateUserData(user: any, updatedData: any) {
-    if (!user || !user.uid) return;
+  if (!user || !user.uid) return;
 
-    try {
-        const userRef = doc(db, "users", user.uid);
-        await updateDoc(userRef, updatedData);
-        console.log("User data updated.");
-    } catch (err) {
-        console.error("Error updating user data:", err);
-    }
+  try {
+    const userRef = doc(db, "users", user.uid);
+    await updateDoc(userRef, updatedData);
+    console.log("User data updated.");
+  } catch (err) {
+    console.error("Error updating user data:", err);
+  }
 }
 
 export async function fetchAllEvents() {
-    try {
-      const eventsCollection = collection(db, "events");
-      const snapshot = await getDocs(eventsCollection);
-  
-      const eventsList = snapshot.docs.map(doc => ({
-        id: doc.id,
-        ...doc.data()
-      }));
-  
-      console.log("Events:", eventsList);
-      return eventsList;
-    } catch (err) {
-      console.error("Error fetching events:", err);
-      return null;
-    }
+  try {
+    const eventsCollection = collection(db, "events");
+    const snapshot = await getDocs(eventsCollection);
+
+    const eventsList = snapshot.docs.map(doc => ({
+      id: doc.id,
+      ...doc.data()
+    }));
+
+    console.log("Events:", eventsList);
+    return eventsList;
+  } catch (err) {
+    console.error("Error fetching events:", err);
+    return null;
   }
+}
+
+
+// export async function fetchEvents(
+//   date?: string,
+//   location?: string,
+//   foodType?: string
+// ) {
+//   try {
+//     const eventsRef = collection(db, "events");
+
+//     // No filters selected → fetch all events
+//     if (!date && !location && !foodType) {
+//       return fetchAllEvents()
+//     }
+
+//     // Apply filters if selected
+//     const filters = [];
+//     if (date) filters.push(where("date", "==", date));
+//     if (location) filters.push(where("location", "==", location));
+//     if (foodType) filters.push(where("foodType", "==", foodType));
+
+//     const filteredQuery = query(eventsRef, ...filters);
+//     const snapshot = await getDocs(filteredQuery);
+//     return snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+//   } catch (error) {
+//     console.error("Error fetching events with filters:", error);
+//     return [];
+//   }
+// }
