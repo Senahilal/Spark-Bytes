@@ -1,23 +1,85 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import Link from 'next/link';
-import { Input, Dropdown, Space, Pagination } from 'antd';
+import { Input, Dropdown, Space, Pagination, DatePicker, Select, ConfigProvider } from 'antd';
 import { SearchOutlined, DownOutlined } from '@ant-design/icons';
 import Logo from '../components/logo';
 import AccountIcon from '../components/accounticon';
 import EventCard from '../components/eventcard';
 import Footer from '../components/footer';
 import Button from '../components/button';
+import dayjs, { Dayjs } from "dayjs";
+import { fetchAllEvents } from '../firebase/repository';
 
 const { Search } = Input;
+const { Option } = Select;
 
 export default function FindPage() {
   const [searchQuery, setSearchQuery] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
 
+  const [events, setEvents] = useState<any[]>([]);
+  const originalEventsRef = useRef<any[]>([]);
+
+
+  //fetching all events
+  useEffect(() => {
+    const loadEvents = async () => {
+      const fetchedEvents = await fetchAllEvents();
+      if (fetchedEvents) {
+        originalEventsRef.current = fetchedEvents;
+        setEvents(fetchedEvents);
+      }
+    };
+    loadEvents();
+  }, []);
+
+
+  //Filtering
+  const [selectedDate, setSelectedDate] = useState<Dayjs | null>(null);
+  const [selectedLocation, setSelectedLocation] = useState<string[]>([]);
+  const [selectedFoodType, setSelectedFoodType] = useState<string[]>([]);
+
+  useEffect(() => {
+    const applyFilters = () => {
+      let filtered = originalEventsRef.current;
+
+      if (selectedDate) {
+        const selected = selectedDate.format("MM/DD/YYYY");
+
+        filtered = filtered.filter((event) => {
+          // Skip if start is missing
+          if (!event.start) return false;
+
+          const eventDate = dayjs(event.start.toDate()).format("MM/DD/YYYY");
+          return eventDate === selected;
+        });
+      }
+
+      if (selectedLocation.length > 0) {
+        filtered = filtered.filter((event) =>
+          selectedLocation.includes(event.location)
+        );
+      }
+
+      if (selectedFoodType.length > 0) {
+        filtered = filtered.filter((event) =>
+          event.food_type?.some((type: string) => selectedFoodType.includes(type))
+        );
+      }
+
+      setEvents(filtered);
+    };
+
+    applyFilters();
+  }, [selectedDate, selectedLocation, selectedFoodType]);
+
+
+
+
   // !! Placeholders - change these !!
-  const events = [
+  const events_placeholder = [
     {
       id: '1',
       title: 'Cookie O\' Clock',
@@ -29,24 +91,6 @@ export default function FindPage() {
     },
     {
       id: '2',
-      title: 'Cookie O\' Clock',
-      location: 'BU Spark',
-      date: '3/19',
-      time: '3pm',
-      foodType: 'Cookies',
-      hasNotification: true
-    },
-    {
-      id: '3',
-      title: 'Cookie O\' Clock',
-      location: 'BU Spark',
-      date: '3/19',
-      time: '3pm',
-      foodType: 'Cookies',
-      hasNotification: false
-    },
-    {
-      id: '4',
       title: 'Cookie O\' Clock',
       location: 'BU Spark',
       date: '3/19',
@@ -137,27 +181,146 @@ export default function FindPage() {
       {/* Main content */}
       <div style={{ padding: '20px', maxWidth: '1200px', margin: '0 auto', flex: 1 }}>
 
-        {/* !! Implement filter buttons !! */}
+        {/*FILTER*/}
+        <Space size="middle" style={{ marginBottom: 24 }}>
+
+          {/* Date Picker */}
+          <ConfigProvider
+            theme={{
+              token: {
+                colorPrimary: "#036D19",
+                colorBorder: "#E3F4C9",
+                colorBgContainer: "#E3F4C9",
+              },
+              components: {
+                DatePicker: {
+                  borderRadius: 8,
+                  controlHeight: 45,
+                },
+              },
+            }}
+          >
+            <DatePicker
+              format="MM/DD/YYYY"
+              onChange={(date) => setSelectedDate(date)}
+              placeholder="Event Date"
+              style={{
+                width: 350,
+                boxShadow: "0 1px 3px rgba(0,0,0,0.2)",
+              }}
+              popupStyle={{ zIndex: 2000 }}
+            />
+          </ConfigProvider>
+
+
+          {/* Location Select */}
+          <ConfigProvider
+            theme={{
+              components: {
+                Select: {
+                  selectorBg: "#E3F4C9",              // Background color
+                  multipleItemBg: "#E3F4C9",          // Tags in multi-select
+                  optionSelectedBg: "#E3F4C9",        // Background color when option is selected
+                  activeOutlineColor: "transparent",
+                  controlHeight: 45,
+                  borderRadius: 8,
+                },
+              },
+              token: {
+                colorBorder: "#E3F4C9",
+                colorPrimary: "#036D19",
+              },
+            }}
+          >
+            <Select
+              mode="multiple"
+              placeholder="Location"
+              onChange={(value) => setSelectedLocation(value)}
+              style={{
+                width: 350,
+                backgroundColor: "#E3F4C9",
+                boxShadow: "0 1px 3px rgba(0,0,0,0.2)",
+                borderRadius: "8px",
+              }}
+              allowClear
+              maxTagCount={2}
+            >
+              <Option value="East Campus">East Campus</Option>
+              <Option value="Central Campus">Central Campus</Option>
+              <Option value="West Campus">West Campus</Option>
+              <Option value="Test Location">Test Location</Option>
+            </Select>
+          </ConfigProvider>
+
+          {/* Food Type Select */}
+          <ConfigProvider
+            theme={{
+              components: {
+                Select: {
+                  selectorBg: "#E3F4C9",              // Background color
+                  multipleItemBg: "#E3F4C9",          // Tags in multi-select
+                  optionSelectedBg: "#E3F4C9",        // Background color when option is selected
+                  activeOutlineColor: "transparent",
+                  controlHeight: 45,
+                  borderRadius: 8,
+                },
+              },
+              token: {
+                colorBorder: "#E3F4C9",
+                colorPrimary: "#036D19",
+              },
+            }}
+          >
+            <Select
+              mode="multiple"
+              placeholder="Food Type"
+              onChange={(value) => setSelectedFoodType(value)}
+              style={{
+                width: 350,
+                backgroundColor: "#E3F4C9",
+                boxShadow: "0 1px 3px rgba(0,0,0,0.2)",
+                borderRadius: "8px",
+              }}
+              allowClear
+              maxTagCount={2}
+            >
+              <Option value="Vegan">Vegan</Option>
+              <Option value="Vegetarian">Vegetarian</Option>
+              <Option value="Halal">Halal</Option>
+              <Option value="Test Food Type">Test Food Type</Option>
+            </Select>
+          </ConfigProvider>
+
+        </Space>
+        {/* FILTER ENDS HERE */}
+
+
 
         {/* Event cards grid */}
-        <div style={{
-          display: 'grid',
-          gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))',
-          gap: '24px',
-          marginBottom: '40px'
-        }}>
-          {events.map(event => (
-            <EventCard
-              key={event.id}
-              title={event.title}
-              location={event.location}
-              date={event.date}
-              time={event.time}
-              foodType={event.foodType}
-              hasNotification={event.hasNotification}
-            />
-          ))}
-        </div>
+        {events && events.length === 0 ? (
+          <div style={{ textAlign: "center", marginTop: "40px", fontSize: "18px", color: "#666", margin: "30px", }}>
+            No events found matching your criteria.
+          </div>
+        ) : (
+          <div style={{
+            display: 'grid',
+            gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))',
+            gap: '24px',
+            marginBottom: '40px'
+          }}>
+            {events.map(event => (
+              <EventCard
+                key={event.id}
+                title={event.title}
+                location={event.location}
+                date={event.date}
+                time={event.time}
+                foodType={event.foodType}
+                hasNotification={event.hasNotification}
+              />
+            ))}
+          </div>
+        )}
 
         {/* Pagination */}
         <div style={{ marginTop: '20px', display: 'flex', justifyContent: 'center' }}>
