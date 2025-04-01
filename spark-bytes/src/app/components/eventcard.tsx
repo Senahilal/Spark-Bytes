@@ -17,6 +17,39 @@ const EventCard = ({
   foodType, 
   hasNotification 
 }: EventCardProps) => {
+
+  const getEventStatus = () => {
+    const eventDateTime = new Date(`${date}T${time}`);
+    const now = new Date();
+    
+    // Add an hour as buffern--> Used chat for thisformuklation
+    const oneHourAfter = new Date(eventDateTime.getTime() + 60 * 60 * 1000);
+    
+    if (now < eventDateTime) {
+      return 'upcoming'; // orange
+    } else if (now >= eventDateTime && now <= oneHourAfter) {
+      return 'ongoing'; // green
+    } else {
+      return 'past'; // red
+    }
+  };
+  const status = getEventStatus();
+  const statusColors = {
+    upcoming: 'bg-orange-500',
+    ongoing: 'bg-green-500',
+    past: 'bg-red-500'
+  };
+  const statusIcons = {
+    upcoming: '🔜',
+    ongoing: '✅',
+    past: '❌'
+  };
+  const statusText = {
+    upcoming: 'Upcoming',
+    ongoing: 'Happening now',
+    past: 'Event ended'
+  };
+
   return (
     <div className="rounded-lg shadow-md bg-white p-4 transition-transform hover:scale-[1.01] cursor-pointer">
       <div className="flex justify-between items-start mb-2">
@@ -31,7 +64,10 @@ const EventCard = ({
           </div>
         )}
       </div>
-      
+      <div className="flex items-center mb-2">
+        <span className={`w-2 h-2 rounded-full ${statusColors[status]} mr-2`}></span>
+        <span className="text-xs text-gray-500">{statusText[status]}</span>
+      </div>
       <div className="flex items-center mb-2">
         <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" className="w-4 h-4 mr-1 text-gray-500">
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />

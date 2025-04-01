@@ -1,5 +1,7 @@
 import React from 'react';
 import Image from 'next/image';
+import Button from './button';
+import Link from 'next/link';
 
 const Hero: React.FC = () => {
   return (
@@ -28,9 +30,9 @@ const Hero: React.FC = () => {
             <button style={{ backgroundColor: "#036D19" }} className="text-white rounded-full py-3 px-6 font-medium hover:opacity-90">
                 Find Free Food Now
               </button>
-              <button style={{ backgroundColor: "#036D19" }} className="text-white rounded-full py-3 px-6 font-medium hover:opacity-90">
+                <Button href="/create">
                 Post an Event
-              </button>
+                </Button>
             </div>
           </div>
           
