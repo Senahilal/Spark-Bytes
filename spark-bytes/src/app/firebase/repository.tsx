@@ -1,5 +1,5 @@
 import { useAuthState } from "react-firebase-hooks/auth";
-import { doc, getDoc, updateDoc, collection, addDoc, getDocs, where, query } from "firebase/firestore";
+import { doc, getDoc, updateDoc, collection, addDoc, getDocs, where, query, deleteDoc } from "firebase/firestore";
 import { db, auth } from "@/app/firebase/config";
 import LocalEvent from "../classes/LocalEvent";
 
@@ -192,3 +192,15 @@ export async function fetchAllEvents() {
 //     return [];
 //   }
 // }
+
+export async function deleteEvent(eventId: string) {
+  // takes an event Id and deletes that specific event from Firestore
+  try {
+    const eventRef = doc(db, "events", eventId);
+    await deleteDoc(eventRef);
+
+    console.log("Event deleted with ID: ", eventId);
+  } catch (err) {
+    console.error("Error deleting event: ", err);
+  }
+}
