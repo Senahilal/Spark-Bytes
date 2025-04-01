@@ -39,13 +39,17 @@ export async function createEvent(event: LocalEvent) {
       user: event.user,
       title: event.title,
       description: event.description,
+      date: event.date,
       start: event.start,
       end: event.end,
+      area: event.area,
       location: event.location,
-      organizer: event.organizer,
       food_provider: event.food_provider,
       food_type: event.food_type,
-      createdAt: event.createdAt,
+      created_at: event.created_at,
+      last_updated_by: event.last_updated_by,
+      last_updated_at: event.created_at,
+      followers: event.followers,
     });
 
     console.log("Event created with ID: ", eventRef.id);
@@ -62,36 +66,33 @@ export async function createEvent(event: LocalEvent) {
 
 /**
  * EXAMPLE CALL TO CRAETE NEW EVENT
- * async function createNewEvent() {
+
+  async function createNewEvent() {
+
+    // make sure user is logged in
+    // const [user, loading, error] = useAuthState(auth);
+    // Create a new event object
+    // Ensure that the event object matches the LocalEvent interface
     var event: LocalEvent = {
       description: "Test Event",
       end: new Date(),
       food_provider: ["Test Food Provider"],
       food_type: ["Test Food Type"],
+      area: "Test Area", //Should be one of the specific areas in the app
       location: "Test Location",
-      organizer: "Test Organizer",
+      date: new Date(),
       start: new Date(),
       title: "Test Event",
       user: user?.uid || "",
-      createdAt: new Date(),
+      created_at: new Date(),
+      followers: [user?.uid || ""],
+      last_updated_by: user?.uid || "",
     };
-    const title = "Test Event";
-    const description = "This is a test event";
-    const start = new Date();
-    const end = new Date();
-    const location = "Test Location";
-    const organizer = "Test Organizer";
-    const food_provider = ["Test Food Provider"];
-    const food_type = ["Test Food Type"];
-    const userId = user;
-
-    if (!userId) {
-      console.error("User ID is not available");
-      return;
-    }
 
     createEvent(event);
   };
+
+  createNewEvent();
  */
 
 // export async function fetchEvents() {
