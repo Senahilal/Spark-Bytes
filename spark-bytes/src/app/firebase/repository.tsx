@@ -2,7 +2,7 @@ import { useAuthState } from "react-firebase-hooks/auth";
 import { doc, getDoc, updateDoc, collection, addDoc, getDocs, where, query, deleteDoc } from "firebase/firestore";
 import { db, auth } from "@/app/firebase/config";
 import LocalEvent from "../classes/LocalEvent";
-
+/** 
 export async function fetchUserData(user: any) {
   // Retrieves all data for a given user from Firestore
   // doc.uid is the unique identifier for the user
@@ -30,6 +30,36 @@ export async function fetchUserData(user: any) {
     return null;
   }
 }
+*/
+
+
+export async function fetchUserData(userId: string) {
+  // Retrieves all data for a given user from Firestore
+  // doc.uid is the unique identifier for the user
+  // doc.email is the email of the user
+  // doc.first_name is the first name of the user
+  // doc.last_name is the last name of the user
+  // doc.phone is the phone number of the user
+  // doc.phone_notification is a boolean indicating if the user wants phone notifications
+  // doc.email_notification is a boolean indicating if the user wants email notifications
+  // doc.organizer is a boolean indicating if the user is an organizer
+  // doc.admin is a boolean indicating if the user is an admin
+
+  try {
+    const userDoc = await getDoc(doc(db, "users", userId));
+    if (userDoc.exists()) {
+      console.log("User data:", userDoc.data());
+      return userDoc.data();
+    } else {
+      console.log("No such document!");
+      return null;
+    }
+  } catch (err) {
+    console.error("Error fetching user data:", err);
+    return null;
+  }
+}
+
 
 export async function createEvent(event: LocalEvent) {
   // Creates a new event in Firestore
@@ -50,6 +80,7 @@ export async function createEvent(event: LocalEvent) {
       last_updated_by: event.last_updated_by,
       last_updated_at: event.created_at,
       followers: event.followers,
+      reminder_sent: false,
     });
 
     console.log("Event created with ID: ", eventRef.id);

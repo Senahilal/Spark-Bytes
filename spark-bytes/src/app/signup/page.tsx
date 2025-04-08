@@ -41,6 +41,8 @@ export default function SignUp() {
         phone: "",
         phone_notification: false,
         email_notification: false,
+        organizer: false,
+        admin: false,
       });
 
       message.success("Account created successfully!");
