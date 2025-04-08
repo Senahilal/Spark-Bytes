@@ -11,11 +11,14 @@ interface LocalEvent {
     // food_type is an array of food types for the event
     food_type: string[];
 
-    // location is the location of the event
+    // area is the area of campus for the event, e.g. east, west, fenway
+    area: string;
+
+    // location is the specific location of the event
     location: string;
 
-    // organizer is the organizer of the event
-    organizer: string;
+    // date is the day of the event
+    date: Date;
 
     // start is the start date and time of the event
     start: Date;
@@ -29,8 +32,17 @@ interface LocalEvent {
     // id is the id of the event
     id?: string;
 
-    // createdAt is the date and time when the event was created
-    createdAt?: Date;
+    // created_at is the date and time when the event was created
+    created_at?: Date;
+
+    //last_updated_by is the uid of the user who last updated the event
+    last_updated_by?: string;
+
+    // last_updated_at is the date and time when the event was last updated
+    last_updated_at?: Date;
+
+    // followers is an array of uids of users who are following the event, receiving notifications
+    followers?: string[];
 }
 
 export default LocalEvent;  // Export the LocalEvent interface

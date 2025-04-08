@@ -16,7 +16,7 @@ import { db } from "@/app/firebase/config";
 
 import utc from 'dayjs/plugin/utc';
 import timezone from 'dayjs/plugin/timezone';
-import LocalEvent from "../classes/LocalEvent";
+import LocalEvent from "@/app/classes/LocalEvent";
 
 dayjs.extend(utc);
 dayjs.extend(timezone);
@@ -25,35 +25,17 @@ const easternTimeZone = 'America/New_York';
 
 
 const { Item } = Form;
-
-const formItemLayout = {
-  labelCol: {
-    xs: { span: 24 },
-    sm: { span: 4 },
-  },
-  wrapperCol: {
-    xs: { span: 24 },
-    sm: { span: 20 },
-  },
-};
-
-const formItemLayoutWithOutLabel = {
-  wrapperCol: {
-    xs: { span: 24, offset: 0 },
-    sm: { span: 20, offset: 4 },
-  },
-};
-
 const CreateEventPage: React.FC = () => {
 
 const router = useRouter();
 // const [user] = useAuthState(auth);
 const [form] = Form.useForm();
-const [eventDate, setEventDate] = useState<dayjs.Dayjs>(new dayjs.Dayjs());
-const [endDate, setEndDate] = useState<dayjs.Dayjs>(new dayjs.Dayjs());
+const [eventDate, setEventDate] = useState<dayjs.Dayjs>(dayjs());
+const [endDate, setEndDate] = useState<dayjs.Dayjs>(dayjs());
 const [foodItems, setFoodItems] = useState<string[]>([]);
-const [currentFoodItem, setCurrentFoodItem] = useState("");
 const [selectedFoodType, setSelectedFoodType] = useState<string[]>([]);
+const [currentFoodProvider, setCurrentFoodProvider] = useState("");
+const [providers, setProvider] = useState<string[]>([]);
 
 
 const options = ['Halal', 'Vegetarian', 'Vegan', 'Gluten Free', 'Nut Free'];
@@ -110,9 +92,9 @@ const handleFormSubmit = async () => {
       end: endDate.toDate(), //Need to change this to be a Date Object e.g. new Date()
       food_type: selectedFoodType,
       user: user.uid,
-      createdAt: new Date(),
+      date: new Date(),
       description: values.description,
-      food_provider: foodItems,
+      food_provider: providers,
     };
     const docRef = await addDoc(collection(db, "events"), eventData);
     console.log("Document written with ID: ", docRef.id);
@@ -124,16 +106,16 @@ const handleFormSubmit = async () => {
 };
 
 const handleAddFoodProvider = () => {
-  if (currentFoodItem.trim()) {
-    setFoodItems([...foodItems, currentFoodItem.trim()]);
-    setCurrentFoodItem(""); // Clear the input field
+  if (currentFoodProvider.trim()) {
+    setProvider([...providers, currentFoodProvider.trim()]);
+    setCurrentFoodProvider(""); // Clear the input field
   }
 };
 
 const handleRemoveFoodProvider = (index: number) => {
-  const newItems = [...foodItems];
+  const newItems = [...providers];
   newItems.splice(index, 1); // Remove the item at the specified index
-  setFoodItems(newItems);
+  setProvider(newItems);
 };
 
 const onFinish = (values: any) => {
@@ -299,21 +281,21 @@ return (
           <div>
             <Input
               placeholder="Enter provider and press Enter"
-              value={currentFoodItem}
-              onChange={(e) => setCurrentFoodItem(e.target.value)}
+              value={currentFoodProvider}
+              onChange={(e) => setCurrentFoodProvider(e.target.value)}
               onPressEnter={handleAddFoodProvider}
               style={{ width: 'calc(100% - 80px)', marginRight: 8 }}
             />
             <Button
               type="primary"
               onClick={handleAddFoodProvider}
-              disabled={!currentFoodItem.trim()}
+              disabled={!currentFoodProvider.trim()}
             >
               Add
             </Button>
           </div>
           <div style={{ marginTop: 8 }}>
-            {foodItems.map((item, index) => (
+            {providers.map((item, index) => (
               <Tag
                 key={index}
                 closable
