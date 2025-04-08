@@ -1,6 +1,9 @@
+"use client"
+
 import React, { useState } from 'react';
 import { MdNotifications, MdLocationOn, MdCalendarToday, MdRestaurant, MdClose, MdShare } from 'react-icons/md';
 import { Modal } from 'antd';
+import CloseButton from './closeButton';
 
 // interface - add more if needed
 interface EventCardProps {
@@ -16,7 +19,6 @@ interface EventCardProps {
 }
 
 const EventCard = ({ 
-  id,
   title, 
   location, 
   date, 
@@ -24,9 +26,10 @@ const EventCard = ({
   foodType, 
   hasNotification,
   address = "665 Commonwealth Ave", // default value for demo
-  imageUrl = "/images/cookies.jpg" // default value for demo
+  imageUrl = "/insomnia_cookies.jpeg" // default value for demo
 }: EventCardProps) => {
   const [isModalVisible, setIsModalVisible] = useState(false);
+  const [isNotified, setIsNotified] = useState(hasNotification || false);
 
   const showModal = () => {
     setIsModalVisible(true);
@@ -36,6 +39,12 @@ const EventCard = ({
     e.stopPropagation(); // Prevent the card click event from firing
     setIsModalVisible(false);
   };
+
+  const handleNotifyMe = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    setIsNotified(!isNotified);
+  };
+
 
   return (
     <>
@@ -59,7 +68,7 @@ const EventCard = ({
         {/* title and notification icon */}
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
           <h3 style={{ fontSize: '1.25rem', fontWeight: 'bold', margin: '0' }}>{title}</h3>
-          {hasNotification && (
+          {isNotified && (
             <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
               <MdNotifications size={20} />
             </div>
@@ -93,7 +102,10 @@ const EventCard = ({
         footer={null}
         width={600}
         centered
-        bodyStyle={{ padding: 0, borderRadius: '12px', overflow: 'hidden' }}
+        closeIcon={null}
+        styles={{ 
+          body: {padding: 0, borderRadius: '12px', overflow: 'hidden'}
+         }}
         style={{ borderRadius: '12px', overflow: 'hidden' }}
       >
         <div style={{ position: 'relative' }}>
@@ -107,18 +119,58 @@ const EventCard = ({
           }}>
             <h2 style={{ color: 'white', margin: 0, fontSize: '24px' }}>{title}</h2>
             <div style={{ display: 'flex', gap: '10px' }}>
-              <MdNotifications size={24} color="white" />
+              {isNotified && <MdNotifications size={24} color="white" />}
               <MdShare size={24} color="white" />
             </div>
           </div>
 
-          {/* Cookie image */}
-          <div style={{ width: '100%', height: '300px', overflow: 'hidden' }}>
-            <img 
-              src={imageUrl} 
-              alt={`${foodType} at ${title}`} 
-              style={{ width: '100%', height: '100%', objectFit: 'cover' }}
-            />
+          {/* Image */}
+          <div style={{ 
+            padding: '30px 20px 20px 20px', 
+            display: 'flex',
+            justifyContent: 'center',
+            backgroundColor: 'white'
+          }}>
+            {imageUrl ? (
+              <div style={{
+                width: '90%',
+                height: '300px',
+                overflow: 'hidden',
+                borderRadius: '8px',
+                boxShadow: '0 2px 10px rgba(0,0,0,0.1)'
+              }}>
+                <img 
+                  src={imageUrl} 
+                  alt={`${foodType} at ${title}`} 
+                  style={{ 
+                    width: '100%', 
+                    height: '100%', 
+                    objectFit: 'cover',
+                    display: 'block' 
+                  }}
+                  onError={(e) => {
+                    const target = e.target as HTMLImageElement;
+                    target.onerror = null;
+                    target.src = '/logo.png'; // Fallback image
+                    console.log('Error loading image:', imageUrl);
+                  }}
+                />
+              </div>
+            ) : (
+              <div style={{ 
+                width: '90%',
+                height: '300px',
+                display: 'flex', 
+                alignItems: 'center', 
+                justifyContent: 'center',
+                backgroundColor: '#f5f5f5',
+                color: '#666',
+                borderRadius: '8px',
+                boxShadow: '0 2px 10px rgba(0,0,0,0.1)'
+              }}>
+                No image available
+              </div>
+            )}
           </div>
 
           {/* Event details */}
@@ -160,7 +212,7 @@ const EventCard = ({
             </div>
           </div>
           
-          {/* Close button - positioned absolute */}
+          {/* Close button - positioned absolute
           <button 
             onClick={handleCancel} 
             style={{
@@ -179,7 +231,26 @@ const EventCard = ({
             }}
           >
             <MdClose size={20} />
-          </button>
+          </button> */}
+
+          {/* Buttons at the bottom */}
+          <div style={{ 
+              display: 'flex', 
+              justifyContent: 'center', 
+              gap: '15px',
+              marginTop: '15px',
+              marginBottom: '20px'
+            }}>
+              <CloseButton 
+                onClick={handleNotifyMe} 
+                label={isNotified ? "Cancel Notification" : "Notify Me"}
+                style={isNotified ? { backgroundColor: '#888', cursor: 'pointer' } : {}}
+              />
+              <CloseButton 
+                onClick={handleCancel} 
+                label="Close"
+              />
+            </div>
         </div>
       </Modal>
     </>
