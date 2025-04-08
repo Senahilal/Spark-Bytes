@@ -80,6 +80,7 @@ export async function createEvent(event: LocalEvent) {
       last_updated_by: event.last_updated_by,
       last_updated_at: event.created_at,
       followers: event.followers,
+      reminder_sent: false,
     });
 
     console.log("Event created with ID: ", eventRef.id);
