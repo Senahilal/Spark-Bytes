@@ -76,9 +76,9 @@ export async function createEvent(event: LocalEvent) {
       location: event.location,
       food_provider: event.food_provider,
       food_type: event.food_type,
-      created_at: event.created_at,
-      last_updated_by: event.last_updated_by,
-      last_updated_at: event.created_at,
+      created_at: new Date(),
+      last_updated_by: event.user,
+      last_updated_at: new Date(),
       followers: event.followers,
       reminder_sent: false,
     });
