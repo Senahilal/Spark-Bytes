@@ -7,31 +7,75 @@ import { useRouter } from "next/navigation";
 import { useAuthState } from "react-firebase-hooks/auth";
 import styles from './CreateEventPage.module.css';
 
-import { Form, Input, DatePicker, Button, Card, Row, Col, List, Tag } from 'antd';
+import { Form, Input, DatePicker, Button, Card, Row, Col, List, Tag, Select, Menu, Checkbox, Dropdown  } from 'antd';
+import { DownOutlined } from '@ant-design/icons';
 import type { DatePickerProps } from 'antd';
 import dayjs from 'dayjs';
 import { collection, addDoc } from "firebase/firestore";
 import { db } from "@/app/firebase/config";
 
+import utc from 'dayjs/plugin/utc';
+import timezone from 'dayjs/plugin/timezone';
+import LocalEvent from "../classes/LocalEvent";
+
+dayjs.extend(utc);
+dayjs.extend(timezone);
+
+const easternTimeZone = 'America/New_York';
+
+
 const { Item } = Form;
+
+const formItemLayout = {
+  labelCol: {
+    xs: { span: 24 },
+    sm: { span: 4 },
+  },
+  wrapperCol: {
+    xs: { span: 24 },
+    sm: { span: 20 },
+  },
+};
+
+const formItemLayoutWithOutLabel = {
+  wrapperCol: {
+    xs: { span: 24, offset: 0 },
+    sm: { span: 20, offset: 4 },
+  },
+};
 
 const CreateEventPage: React.FC = () => {
 
 const router = useRouter();
 // const [user] = useAuthState(auth);
 const [form] = Form.useForm();
-const [eventDate, setEventDate] = useState<dayjs.Dayjs | null>(null);
+const [eventDate, setEventDate] = useState<dayjs.Dayjs>(new dayjs.Dayjs());
+const [endDate, setEndDate] = useState<dayjs.Dayjs>(new dayjs.Dayjs());
 const [foodItems, setFoodItems] = useState<string[]>([]);
 const [currentFoodItem, setCurrentFoodItem] = useState("");
+const [selectedFoodType, setSelectedFoodType] = useState<string[]>([]);
 
-const onDateChange: DatePickerProps['onChange'] = (date) => {
-setEventDate(date);
+
+const options = ['Halal', 'Vegetarian', 'Vegan', 'Gluten Free', 'Nut Free'];
+
+const handleMenuClick = (e) => {
+  const value = e.key;
+  setSelectedFoodType((prev) =>
+    prev.includes(value)
+      ? prev.filter((item) => item !== value)
+      : [...prev, value]
+  );
 };
 
-// const onFinish = (values: any) => {
-//   console.log('Received values of form: ', values);
-// // Handle form submission here
-// };
+const menu = (
+  <Menu>
+    {options.map((item) => (
+      <Menu.Item key={item} onClick={handleMenuClick}>
+        <Checkbox checked={selectedFoodType.includes(item)}>{item}</Checkbox>
+      </Menu.Item>
+    ))}
+  </Menu>
+);
 
 //Used coPilot to help with the form submission
 const handleFormSubmit = async () => {
@@ -43,17 +87,33 @@ const handleFormSubmit = async () => {
     }
 
     const values = form.getFieldsValue();
+    /** 
     const eventData = {
       title: values.title,
       location: values.location,
-      start_date: eventDate ? eventDate.toISOString() : null,
-      end_date: values.endDate ? values.endDate.toISOString() : null,
-      foodItems: values.foodItems,
-      userId: user.uid,
-      createdAt: new Date().toISOString(),
+      area: values.area,
+      start: eventDate ? eventDate.toDate() : null,
+      end: values.endDate ? dayjs(values.endDate).toDate() : null,
+      food_type: selectedFoodType,
+      user: user.uid,
+      createdAt: new Date(),
+      description: values.description,
 
     };
+    */    
 
+    var eventData: LocalEvent = {
+      title: values.title,
+      location: values.location,
+      area: values.area,
+      start: eventDate.toDate(), //Need to change this to be a Date Object e.g. new Date()
+      end: endDate.toDate(), //Need to change this to be a Date Object e.g. new Date()
+      food_type: selectedFoodType,
+      user: user.uid,
+      createdAt: new Date(),
+      description: values.description,
+      food_provider: foodItems,
+    };
     const docRef = await addDoc(collection(db, "events"), eventData);
     console.log("Document written with ID: ", docRef.id);
 
@@ -63,16 +123,16 @@ const handleFormSubmit = async () => {
   }
 };
 
-const handleAddFoodItem = () => {
+const handleAddFoodProvider = () => {
   if (currentFoodItem.trim()) {
     setFoodItems([...foodItems, currentFoodItem.trim()]);
-    setCurrentFoodItem("");
+    setCurrentFoodItem(""); // Clear the input field
   }
 };
 
-const handleRemoveFoodItem = (index: number) => {
+const handleRemoveFoodProvider = (index: number) => {
   const newItems = [...foodItems];
-  newItems.splice(index, 1);
+  newItems.splice(index, 1); // Remove the item at the specified index
   setFoodItems(newItems);
 };
 
@@ -85,6 +145,7 @@ const onFinish = (values: any) => {
   console.log('Event data:', eventData);
   // Handle form submission here
 };
+
 
 return (
   <>
@@ -103,6 +164,26 @@ return (
             </Item>
 
             <Item
+              label="Description"
+              name="description"
+              rules={[{ required: true, message: 'Please input the event description!' }]}
+            >
+              <Input placeholder="Enter description" />
+            </Item>
+
+            <Item
+              label="Area"
+              name="area"
+              rules={[{ required: true, message: 'Please input the event area!' }]}
+            >
+              <Select placeholder="Select a campus">
+                <Select.Option value="West Campus">West Campus</Select.Option>
+                <Select.Option value="East Campus">East Campus</Select.Option>
+                <Select.Option value="Central Campus">Central Campus</Select.Option>
+              </Select>
+            </Item>
+
+            <Item
               label="Location"
               name="location"
               rules={[{ required: true, message: 'Please input the event location!' }]}
@@ -118,10 +199,18 @@ return (
                 rules={[{ required: true, message: 'Please select the start date!' }]}
               >
                 <DatePicker 
-                onChange={(date) => setEventDate(date)} 
+                onChange={(date) => {
+                  if (date) {
+                    const easternDate = dayjs(date).tz(easternTimeZone);
+                    console.log('Start date in ET:', easternDate.format('YYYY-MM-DD hh:mm A'));
+                    setEventDate(easternDate);
+                  }
+                }} 
                 style={{ width: '100%' }} 
-                showTime={{ format: 'HH:mm' }}
-                format="YYYY-MM-DD HH:mm"
+                showTime={{ format: 'hh:mm A',
+                  use12Hours: true,
+                 }}
+                format="MMMM DD, YYYY hh:mm A"
                 />
               </Item>
               </Col>
@@ -131,11 +220,20 @@ return (
                 name="endDate"
                 rules={[{ required: true, message: 'Please select the end date!' }]}
               >
-                <DatePicker 
-                onChange={(date) => console.log('End date selected:', date)} 
-                style={{ width: '100%' }} 
-                showTime={{ format: 'HH:mm' }}
-                format="YYYY-MM-DD HH:mm"
+                <DatePicker
+                  onChange={(date) => {
+                    if (date) {
+                      const easternDate = dayjs(date).tz(easternTimeZone);
+                      console.log('End date in ET:', easternDate.format('YYYY-MM-DD hh:mm A'));
+                      setEndDate(easternDate);
+                    }
+                  }}
+                  style={{ width: '100%' }}
+                  showTime={{
+                    format: 'hh:mm A',
+                    use12Hours: true,
+                  }}
+                  format="MMMM DD, YYYY hh:mm A"
                 />
               </Item>
               </Col>
@@ -144,9 +242,17 @@ return (
         </Card>
       </Col>
       <Col span={12}>
-        <Card title="Food Items" className={styles.card}>
-          <div style={{ marginBottom: 16 }}>
-            <Input
+        <Card title="Food Type" className={styles.card}>
+          <div style={{ marginBottom: 16 }}/>
+          <Dropdown overlay={menu} trigger={['click']}>
+            <Button>
+              {selectedFoodType.length > 0
+                ? selectedFoodType.join(', ')
+                : 'Select Food Type'}{' '}
+              <DownOutlined />
+            </Button>
+          </Dropdown>
+            {/* <Input
               value={currentFoodItem}
               onChange={(e) => setCurrentFoodItem(e.target.value)}
               placeholder="Enter food item"
@@ -182,7 +288,43 @@ return (
               </List.Item>
             )}
             locale={{ emptyText: 'No food items added yet' }}
-          />
+          /> */}
+        </Card>
+        <Card>
+        <Item
+          label="Food Provider"
+          name="food_provider"
+          rules={[{ required: true, message: 'Please input at least one food provider!' }]}
+        >
+          <div>
+            <Input
+              placeholder="Enter provider and press Enter"
+              value={currentFoodItem}
+              onChange={(e) => setCurrentFoodItem(e.target.value)}
+              onPressEnter={handleAddFoodProvider}
+              style={{ width: 'calc(100% - 80px)', marginRight: 8 }}
+            />
+            <Button
+              type="primary"
+              onClick={handleAddFoodProvider}
+              disabled={!currentFoodItem.trim()}
+            >
+              Add
+            </Button>
+          </div>
+          <div style={{ marginTop: 8 }}>
+            {foodItems.map((item, index) => (
+              <Tag
+                key={index}
+                closable
+                onClose={() => handleRemoveFoodProvider(index)}
+                color="green"
+              >
+                {item}
+              </Tag>
+            ))}
+          </div>
+        </Item>
         </Card>
       </Col>
     </Row>
