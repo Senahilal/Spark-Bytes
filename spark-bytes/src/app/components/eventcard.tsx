@@ -1,9 +1,9 @@
 "use client"
 
 import React, { useState } from 'react';
-import { MdNotifications, MdLocationOn, MdCalendarToday, MdRestaurant, MdClose, MdShare } from 'react-icons/md';
+import { MdNotifications, MdLocationOn, MdCalendarToday, MdRestaurant, MdClose, MdShare, MdPeople } from 'react-icons/md';
 import { Modal } from 'antd';
-import CloseButton from './closeButton';
+import CloseButton from './closeButton'; // Note: The 'C' is capitalized here
 
 // interface - add more if needed
 interface EventCardProps {
@@ -42,7 +42,7 @@ const EventCard = ({
 
   const handleNotifyMe = (e: React.MouseEvent) => {
     e.stopPropagation();
-    setIsNotified(!isNotified);
+    setIsNotified(!isNotified); // Toggle notification state
   };
 
 
@@ -62,7 +62,6 @@ const EventCard = ({
           gap: '13px',
           cursor: 'pointer',
           transition: 'transform 0.2s, box-shadow 0.2s',
-
         }}
       >
         {/* title and notification icon */}
@@ -174,8 +173,14 @@ const EventCard = ({
           </div>
 
           {/* Event details */}
-          <div style={{ padding: '20px' }}>
+          <div style={{ 
+            padding: '20px', 
+            display: 'flex',
+            flexDirection: 'column',
+            alignItems: 'center'
+          }}>
             <div style={{ 
+              width: '90%',
               display: 'flex', 
               alignItems: 'center', 
               justifyContent: 'space-between',
@@ -184,14 +189,54 @@ const EventCard = ({
               <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
                 <MdLocationOn size={24} />
                 <div>
-                  <div style={{ fontWeight: 'bold' }}>{location}</div>
+                  <div style={{ fontWeight: 'bold', fontSize: '16px' }}>{location}</div>
                   <div>{address}</div>
                 </div>
               </div>
-              <div style={{ color: 'red', fontWeight: 'bold' }}>1/30</div>
+              <div style={{ 
+                display: 'flex', 
+                flexDirection: 'column', 
+                alignItems: 'center'
+              }}>
+                <div style={{ 
+                  display: 'flex', 
+                  alignItems: 'center', 
+                  gap: '5px',
+                  color: 'red',
+                  fontWeight: 'bold'
+                }}>
+                  <MdPeople size={18} />
+                  <span>Availability</span>
+                </div>
+                <div style={{ 
+                  marginTop: '8px',
+                  display: 'flex',
+                  gap: '4px'
+                }}>
+                  <div style={{ 
+                    width: '10px', 
+                    height: '10px', 
+                    borderRadius: '50%', 
+                    backgroundColor: 'red' 
+                  }}></div>
+                  <div style={{ 
+                    width: '10px', 
+                    height: '10px', 
+                    borderRadius: '50%', 
+                    backgroundColor: '#ddd' 
+                  }}></div>
+                  <div style={{ 
+                    width: '10px', 
+                    height: '10px', 
+                    borderRadius: '50%', 
+                    backgroundColor: '#ddd' 
+                  }}></div>
+                </div>
+              </div>
             </div>
             
             <div style={{ 
+              width: '90%',
               display: 'flex', 
               alignItems: 'center', 
               gap: '10px',
@@ -202,6 +247,7 @@ const EventCard = ({
             </div>
             
             <div style={{ 
+              width: '90%',
               display: 'flex', 
               alignItems: 'center', 
               gap: '10px',
@@ -212,27 +258,6 @@ const EventCard = ({
             </div>
           </div>
           
-          {/* Close button - positioned absolute
-          <button 
-            onClick={handleCancel} 
-            style={{
-              position: 'absolute',
-              top: '10px',
-              right: '10px',
-              background: 'rgba(255,255,255,0.7)',
-              borderRadius: '50%',
-              width: '30px',
-              height: '30px',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              border: 'none',
-              cursor: 'pointer'
-            }}
-          >
-            <MdClose size={20} />
-          </button> */}
-
           {/* Buttons at the bottom */}
           <div style={{ 
               display: 'flex', 
@@ -241,15 +266,17 @@ const EventCard = ({
               marginTop: '15px',
               marginBottom: '20px'
             }}>
-              <CloseButton 
-                onClick={handleNotifyMe} 
-                label={isNotified ? "Cancel Notification" : "Notify Me"}
-                style={isNotified ? { backgroundColor: '#888', cursor: 'pointer' } : {}}
-              />
-              <CloseButton 
-                onClick={handleCancel} 
-                label="Close"
-              />
+              <div style={{ width: '90%', display: 'flex', justifyContent: 'center', gap: '15px' }}>
+                <CloseButton 
+                  onClick={handleNotifyMe} 
+                  label={isNotified ? "Cancel Notification" : "Notify Me"}
+                  style={isNotified ? { backgroundColor: '#888', cursor: 'pointer' } : {}}
+                />
+                <CloseButton 
+                  onClick={handleCancel} 
+                  label="Close"
+                />
+              </div>
             </div>
         </div>
       </Modal>
