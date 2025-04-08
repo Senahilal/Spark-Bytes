@@ -11,6 +11,10 @@ import { auth } from "@/app/firebase/config";
 import { fetchUserData, updateUserData } from "@/app/firebase/repository";
 import { signOut } from "firebase/auth";
 import { message } from "antd";
+import { fetchUserIdEvents } from "@/app/firebase/repository";
+import EventCard from '../components/eventcard';
+
+
 
 const { Title, Text } = Typography;
 
@@ -25,6 +29,10 @@ const ProfilePage = () => {
 
     const [user, loading] = useAuthState(auth);
 
+    const [showMyEvents, setShowMyEvents] = useState(true);
+    const [userEvents, setUserEvents] = useState<any[]>([]);
+
+
     const router = useRouter();
 
     //redirect to login if not logged in
@@ -34,6 +42,7 @@ const ProfilePage = () => {
             router.push("/login");
         } else if (user) {
             fetchData(user);
+            fetchUserEvents(user.uid);
         }
     }, [user, loading, router]);
 
@@ -69,6 +78,15 @@ const ProfilePage = () => {
             console.error("Error fetching user data:", err);
         }
     };
+
+    //fetch user events
+    const fetchUserEvents = async (userId: string) => {
+        const events = await fetchUserIdEvents(userId);
+        if (events) {
+            setUserEvents(events);
+        }
+    };
+
 
     //update user data
     const handleSaveChanges = async () => {
@@ -136,129 +154,190 @@ const ProfilePage = () => {
                         </div>
                     </Space>
 
-                    <Button
-                        type="primary"
-                        style={{ backgroundColor: "#2E7D32" }}
-                        onClick={async () => {
-                            if (isEditing) {
-                                await handleSaveChanges();
-                            }
-                            setIsEditing((prev) => !prev);
-                        }}
-                    >
-                        {isEditing ? "Save" : "Edit"}
-                    </Button>
-
                 </div>
             </div>
 
-            {/* Main Form */}
-            <div style={{ flex: 1, padding: "40px 24px" }}>
-                <Form
-                    layout="vertical"
-                    style={{ maxWidth: "1024px", margin: "0 auto" }}
+            {/* Toggle buttons to switch between posts and account information */}
+
+            <div style={{ display: 'flex', gap: '12px', marginTop: '20px', justifyContent: 'center' }}>
+                <Button
+                    type={showMyEvents ? "primary" : "default"}
+                    style={{ backgroundColor: showMyEvents ? "#2E7D32" : undefined }}
+                    onClick={() => setShowMyEvents(true)}
                 >
-                    <Row gutter={24}>
-                        <Col xs={24} md={12}>
-                            <Form.Item label="First Name">
-                                <Input
-                                    placeholder="First Name"
-                                    value={firstName}
-                                    onChange={(e) => setFirstName(e.target.value)}
-                                    size="large"
-                                    disabled={!isEditing}
-                                />
-                            </Form.Item>
-                        </Col>
-                        <Col xs={24} md={12}>
-                            <Form.Item label="Last Name">
-                                <Input
-                                    placeholder="Last Name"
-                                    value={lastName}
-                                    onChange={(e) => setLastName(e.target.value)}
-                                    size="large"
-                                    disabled={!isEditing}
-                                />
-                            </Form.Item>
-                        </Col>
-                        <Col xs={24} md={12}>
-                            <Form.Item label="Phone Number">
-                                <Input
-                                    placeholder="Phone Number"
-                                    value={phoneNumber}
-                                    onChange={(e) => setPhoneNumber(e.target.value)}
-                                    size="large"
-                                    disabled={!isEditing}
-                                />
-                            </Form.Item>
-                        </Col>
-                        <Col xs={24} md={12}>
-                            <Form.Item label="Email Address">
-                                <Input
-                                    placeholder="Email Address"
-                                    value={email}
-                                    onChange={(e) => setEmail(e.target.value)}
-                                    size="large"
-                                    disabled={!isEditing}
-                                />
-                            </Form.Item>
-                        </Col>
-                    </Row>
-
-                    <div style={{ marginTop: "48px" }}>
-                        <Title level={4}>Notification Preferences</Title>
-
-                        <div
-                            style={{
-                                display: "flex",
-                                justifyContent: "space-between",
-                                alignItems: "center",
-                                border: "1px solid #d9d9d9",
-                                padding: "12px 16px",
-                                borderRadius: "8px",
-                                marginBottom: "16px",
-                            }}
-                        >
-                            <Text>Enable SMS Notifications</Text>
-                            <Switch
-                                checked={smsNotifications}
-                                onChange={handleSMSToggle}
-                                style={{ backgroundColor: smsNotifications ? "#2E7D32" : undefined }}
-                            />
-                        </div>
-
-                        <div
-                            style={{
-                                display: "flex",
-                                justifyContent: "space-between",
-                                alignItems: "center",
-                                border: "1px solid #d9d9d9",
-                                padding: "12px 16px",
-                                borderRadius: "8px",
-                            }}
-                        >
-                            <Text>Enable Email Notifications</Text>
-                            <Switch
-                                checked={emailNotifications}
-                                onChange={handleEmailToggle}
-                                style={{ backgroundColor: emailNotifications ? "#2E7D32" : undefined }}
-                            />
-                        </div>
-                    </div>
-
-                    <div style={{ textAlign: "center", marginTop: "48px" }}>
-                        <Button
-                            type="primary"
-                            size="large"
-                            style={{ backgroundColor: "#2E7D32", padding: "10px 32px" }}
-                            onClick={handleSignOut}
-                        >
-                            Sign Out
-                        </Button>
-                    </div>
-                </Form>
+                    My Events
+                </Button>
+                <Button
+                    type={!showMyEvents ? "primary" : "default"}
+                    style={{ backgroundColor: !showMyEvents ? "#2E7D32" : undefined }}
+                    onClick={() => setShowMyEvents(false)}
+                >
+                    Account Info
+                </Button>
             </div>
-            <Footer/>
+
+            {/* Horizontal line to separate sections */}
+            <hr style={{
+                marginTop: '16px',
+                marginBottom: '32px',
+                border: 'none',
+                borderTop: '1px solidrgb(8, 6, 6)', // light grey
+                maxWidth: '1024px',
+                marginLeft: 'auto',
+                marginRight: 'auto'
+            }} />
+
+
+            {showMyEvents ? (
+                //USER EVENTS SECTION
+                <div style={{
+                    display: "flex", flexWrap: "wrap", gap: "24px", marginTop: "40px", minHeight: '60vh',
+                    justifyContent: 'center'
+                }}>
+                    {userEvents.length === 0 ? (
+                        <span style={{ fontSize: '18px', color: '#666' }}>
+                            No events posted yet.
+                        </span>
+                    ) : (
+                        userEvents.map(event => (
+                            <EventCard
+                                key={event.id}
+                                id={event.id}
+                                title={event.title}
+                                location={event.location}
+                                date={new Date(event.start.seconds * 1000).toLocaleDateString()}
+                                time={new Date(event.start.seconds * 1000).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                                foodType={event.food_type?.join(', ') || 'N/A'}
+                            />
+                        ))
+                    )}
+                </div>
+            ) : (
+
+                //Account Information Section
+                <div style={{ flex: 1, padding: "40px 24px" }}>
+
+                    <Form
+                        layout="vertical"
+                        style={{ maxWidth: "1024px", margin: "0 auto" }}
+                    >
+                        <div>
+                            <Row gutter={24}>
+                                <Col xs={24} md={12}>
+                                    <Form.Item label="First Name">
+                                        <Input
+                                            placeholder="First Name"
+                                            value={firstName}
+                                            onChange={(e) => setFirstName(e.target.value)}
+                                            size="large"
+                                            disabled={!isEditing}
+                                        />
+                                    </Form.Item>
+                                </Col>
+                                <Col xs={24} md={12}>
+                                    <Form.Item label="Last Name">
+                                        <Input
+                                            placeholder="Last Name"
+                                            value={lastName}
+                                            onChange={(e) => setLastName(e.target.value)}
+                                            size="large"
+                                            disabled={!isEditing}
+                                        />
+                                    </Form.Item>
+                                </Col>
+                                <Col xs={24} md={12}>
+                                    <Form.Item label="Phone Number">
+                                        <Input
+                                            placeholder="Phone Number"
+                                            value={phoneNumber}
+                                            onChange={(e) => setPhoneNumber(e.target.value)}
+                                            size="large"
+                                            disabled={!isEditing}
+                                        />
+                                    </Form.Item>
+                                </Col>
+                                <Col xs={24} md={12}>
+                                    <Form.Item label="Email Address">
+                                        <Input
+                                            placeholder="Email Address"
+                                            value={email}
+                                            onChange={(e) => setEmail(e.target.value)}
+                                            size="large"
+                                            disabled={!isEditing}
+                                        />
+                                    </Form.Item>
+                                </Col>
+                            </Row>
+                            <Button
+                                type="primary"
+                                style={{ backgroundColor: "#2E7D32" }}
+                                onClick={async () => {
+                                    if (isEditing) {
+                                        await handleSaveChanges();
+                                    }
+                                    setIsEditing((prev) => !prev);
+                                }}
+                            >
+                                {isEditing ? "Save" : "Edit"}
+                            </Button>
+                        </div>
+
+                        <div style={{ marginTop: "48px" }}>
+                            <Title level={4}>Notification Preferences</Title>
+
+                            <div
+                                style={{
+                                    display: "flex",
+                                    justifyContent: "space-between",
+                                    alignItems: "center",
+                                    border: "1px solid #d9d9d9",
+                                    padding: "12px 16px",
+                                    borderRadius: "8px",
+                                    marginBottom: "16px",
+                                }}
+                            >
+                                <Text>Enable SMS Notifications</Text>
+                                <Switch
+                                    checked={smsNotifications}
+                                    onChange={handleSMSToggle}
+                                    style={{ backgroundColor: smsNotifications ? "#2E7D32" : undefined }}
+                                />
+                            </div>
+
+                            <div
+                                style={{
+                                    display: "flex",
+                                    justifyContent: "space-between",
+                                    alignItems: "center",
+                                    border: "1px solid #d9d9d9",
+                                    padding: "12px 16px",
+                                    borderRadius: "8px",
+                                }}
+                            >
+                                <Text>Enable Email Notifications</Text>
+                                <Switch
+                                    checked={emailNotifications}
+                                    onChange={handleEmailToggle}
+                                    style={{ backgroundColor: emailNotifications ? "#2E7D32" : undefined }}
+                                />
+                            </div>
+                        </div>
+
+                        <div style={{ textAlign: "center", marginTop: "48px" }}>
+                            <Button
+                                type="primary"
+                                size="large"
+                                style={{ backgroundColor: "#2E7D32", padding: "10px 32px" }}
+                                onClick={handleSignOut}
+                            >
+                                Sign Out
+                            </Button>
+                        </div>
+                    </Form>
+                </div>
+            )}
+
+            <Footer />
         </div>
     );
 };
