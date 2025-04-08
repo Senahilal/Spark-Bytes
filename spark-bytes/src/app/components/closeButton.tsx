@@ -20,7 +20,7 @@ const CloseButton: React.FC<CloseButtonProps> = ({
       onClick={onClick} 
       className={className}
       style={{
-        background: '#036D19',
+        backgroundColor: '#036D19',
         color: 'white',
         border: 'none',
         borderRadius: '8px',
@@ -29,7 +29,7 @@ const CloseButton: React.FC<CloseButtonProps> = ({
         fontWeight: 'bold',
         cursor: 'pointer',
         boxShadow: '0 2px 4px rgba(0,0,0,0.2)',
-        transition: 'background-color 0.2s ease',
+        transition: 'backgroundColor 0.2s ease',
         ...style
       }}
       onMouseOver={(e) => {
