@@ -19,6 +19,7 @@ interface EventCardProps {
 }
 
 const EventCard = ({ 
+  id,
   title, 
   location, 
   date, 
@@ -36,13 +37,13 @@ const EventCard = ({
   };
 
   const handleCancel = (e: React.MouseEvent) => {
-    e.stopPropagation(); // Prevent the card click event from firing
+    e.stopPropagation();
     setIsModalVisible(false);
   };
 
   const handleNotifyMe = (e: React.MouseEvent) => {
     e.stopPropagation();
-    setIsNotified(!isNotified); // Toggle notification state
+    setIsNotified(!isNotified); 
   };
 
 
@@ -179,6 +180,7 @@ const EventCard = ({
             flexDirection: 'column',
             alignItems: 'center'
           }}>
+            {/* Location */}
             <div style={{ 
               width: '90%',
               display: 'flex', 
@@ -193,6 +195,8 @@ const EventCard = ({
                   <div>{address}</div>
                 </div>
               </div>
+
+              {/* Availability */}
               <div style={{ 
                 display: 'flex', 
                 flexDirection: 'column', 
@@ -235,6 +239,7 @@ const EventCard = ({
               </div>
             </div>
             
+            {/* Date */}
             <div style={{ 
               width: '90%',
               display: 'flex', 
@@ -246,6 +251,7 @@ const EventCard = ({
               <div>{date} @{time}</div>
             </div>
             
+            {/* Food */}
             <div style={{ 
               width: '90%',
               display: 'flex', 
