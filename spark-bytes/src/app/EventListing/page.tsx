@@ -163,18 +163,53 @@ export default function FindPage() {
         </div>
 
         {/* Search bar */}
-        <div style={{
-          width: '100%',
-          maxWidth: '650px',
-          alignSelf: 'flex-start'
-        }}>
-          <Search
+        <div
+          style={{
+            display: 'flex',
+            alignItems: 'center',
+            borderRadius: '30px',
+            border: '1.5px solid #036D19',
+            backgroundColor: 'transparent',
+            padding: '2px 10px',
+            maxWidth: '500px',
+            width: '100%',
+          }}
+        >
+          <input
+            type="text"
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
             placeholder="Type a location, food type, or keyword"
-            onSearch={handleSearch}
-            enterButton={<SearchOutlined />}
-            size="large"
-            style={{ borderRadius: '50px' }}
+            style={{
+              flex: 1,
+              border: 'none',
+              outline: 'none',
+              backgroundColor: 'transparent',
+              color: 'white',
+              fontSize: '13px',
+              padding: '4px 0',
+              marginRight: '6px',
+            }}
           />
+          <button
+            onClick={() => handleSearch(searchQuery)}
+            style={{
+              backgroundColor: '#024e13',
+              color: 'white',
+              border: 'none',
+              borderRadius: '50%',
+              width: '24px',
+              height: '24px',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              fontSize: '12px',
+              cursor: 'pointer',
+            }}
+            aria-label="Search"
+          >
+            <SearchOutlined />
+          </button>
         </div>
       </div>
 
@@ -308,17 +343,26 @@ export default function FindPage() {
             gap: '24px',
             marginBottom: '40px'
           }}>
-            {events.map(event => (
+            {events.map(event => {
+
+            const start = event.start?.toDate?.();
+            const formattedDate = start ? dayjs(start).format("MM/DD/YYYY") : "Unknown Date";
+            const formattedTime = start ? dayjs(start).format("h:mm A") : "Unknown Time";
+
+            return (
               <EventCard
                 key={event.id}
+                id={event.id}
                 title={event.title}
                 location={event.location}
-                date={event.date}
-                time={event.time}
-                foodType={event.foodType}
+                date={formattedDate}
+                time={formattedTime}
+                foodType={event.foodType || event.food_type?.join(", ")}
                 hasNotification={event.hasNotification}
               />
-            ))}
+            );
+          })}
+
           </div>
         )}
 
