@@ -13,6 +13,8 @@ import { signOut } from "firebase/auth";
 import { message } from "antd";
 import { fetchUserIdEvents } from "@/app/firebase/repository";
 import EventCard from '../components/eventcard';
+import dayjs, { Dayjs } from "dayjs";
+
 
 
 
@@ -199,17 +201,32 @@ const ProfilePage = () => {
                             No events posted yet.
                         </span>
                     ) : (
-                        userEvents.map(event => (
-                            <EventCard
-                                key={event.id}
-                                id={event.id}
-                                title={event.title}
-                                location={event.location}
-                                date={new Date(event.start.seconds * 1000).toLocaleDateString()}
-                                time={new Date(event.start.seconds * 1000).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
-                                foodType={event.food_type?.join(', ') || 'N/A'}
-                            />
-                        ))
+                        userEvents.map(event => {
+
+                            const start = event.start?.toDate?.();
+                            const formattedDate = start ? dayjs(start).format("MM/DD/YYYY") : "Unknown Date";
+                            const formattedTime = start ? dayjs(start).format("h:mm A") : "Unknown Time";
+                            const end = event.end?.toDate?.();
+                            const formattedEndTime = start ? dayjs(end).format("h:mm A") : "Unknown Time";
+
+                            return (
+                                <EventCard
+                                    key={event.id}
+                                    id={event.id}
+                                    title={event.title}
+                                    area={event.area}
+                                    location={event.location}
+                                    date={formattedDate}
+                                    time={formattedTime}
+                                    endTime={formattedEndTime}
+                                    description={event.description}
+                                    foodType={event.foodType || event.food_type?.join(", ")}
+                                    foodProvider={event.foodProvider}
+                                    followers={event.followers}
+                                    hasNotification={event.hasNotification}
+                                />
+                            );
+                        })
                     )}
                 </div>
             ) : (

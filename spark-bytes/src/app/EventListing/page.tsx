@@ -59,7 +59,7 @@ export default function FindPage() {
 
       if (selectedLocation.length > 0) {
         filtered = filtered.filter((event) =>
-          selectedLocation.includes(event.location)
+          selectedLocation.includes(event.area)
         );
       }
 
@@ -348,16 +348,23 @@ export default function FindPage() {
             const start = event.start?.toDate?.();
             const formattedDate = start ? dayjs(start).format("MM/DD/YYYY") : "Unknown Date";
             const formattedTime = start ? dayjs(start).format("h:mm A") : "Unknown Time";
+            const end = event.end?.toDate?.();
+            const formattedEndTime = start ? dayjs(end).format("h:mm A") : "Unknown Time";
 
             return (
               <EventCard
                 key={event.id}
                 id={event.id}
                 title={event.title}
+                area={event.area}
                 location={event.location}
                 date={formattedDate}
                 time={formattedTime}
+                description={event.description}
+                endTime={formattedEndTime}
                 foodType={event.foodType || event.food_type?.join(", ")}
+                foodProvider={event.foodProvider}
+                followers={event.followers}
                 hasNotification={event.hasNotification}
               />
             );
