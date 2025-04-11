@@ -178,7 +178,7 @@ const ProfilePage = () => {
                 <div
                     style={{
                         maxWidth: "1024px",
-                        margin: '60px auto 20px',
+                        margin: '80px auto 20px',
                         display: "flex",
                         justifyContent: "space-between",
                         alignItems: "center",
@@ -377,7 +377,8 @@ const ProfilePage = () => {
                     <div style={{ maxWidth: "1024px", margin: "48px auto 0 auto" }}>
                         <Title level={4}>Notification Preferences</Title>
 
-                        <div
+                        {/* Wont be used*/}
+                        {/* <div
                             style={{
                                 display: "flex",
                                 justifyContent: "space-between",
@@ -394,7 +395,7 @@ const ProfilePage = () => {
                                 onChange={handleSMSToggle}
                                 style={{ backgroundColor: smsNotifications ? "#2E7D32" : undefined }}
                             />
-                        </div>
+                        </div> */}
 
                         <div
                             style={{
