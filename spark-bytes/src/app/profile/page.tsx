@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useState, useEffect } from "react";
+import Link from 'next/link';
 import Image from "next/image";
 import Footer from '../components/footer';
 import { Form, Input, Button, Row, Col, Typography, Switch, Space } from "antd";
@@ -13,6 +14,7 @@ import { signOut } from "firebase/auth";
 import { message, Tag } from "antd";
 import { fetchUserIdEvents } from "@/app/firebase/repository";
 import EventCard from '../components/eventcard';
+import Logo from '../components/logo';
 import dayjs, { Dayjs } from "dayjs";
 
 
@@ -159,12 +161,24 @@ const ProfilePage = () => {
 
     return (
         <div style={{ minHeight: "100vh", display: "flex", flexDirection: "column" }}>
+
             {/* Header */}
             <div style={{ backgroundColor: "#E3F4C9", padding: "24px" }}>
+                <div style={{
+                    display: 'flex',
+                    justifyContent: 'space-between',
+                    alignItems: 'center',
+                    maxWidth: '1200px',
+                    margin: '0 auto'
+                }}>
+                    <Link href="/">
+                        <Logo />
+                    </Link>
+                </div>
                 <div
                     style={{
                         maxWidth: "1024px",
-                        margin: "0 auto",
+                        margin: '60px auto 20px',
                         display: "flex",
                         justifyContent: "space-between",
                         alignItems: "center",
@@ -227,10 +241,22 @@ const ProfilePage = () => {
                     display: "flex", flexWrap: "wrap", gap: "24px", marginTop: "10px", minHeight: '60vh',
                     justifyContent: 'center'
                 }}>
+
                     {userEvents.length === 0 ? (
-                        <span style={{ fontSize: '18px', color: '#666', marginTop: "30px" }}>
-                            No events posted yet.
-                        </span>
+                        <div style={{ textAlign: 'center', marginTop: "30px" }}>
+                            <span style={{ fontSize: '18px', color: '#666' }}>
+                                No events posted yet.
+                            </span>
+                            <br />
+                            <Button
+                                type="primary"
+                                style={{ marginTop: '16px', backgroundColor: "#2E7D32" }}
+                                onClick={() => router.push("/create")}
+                            >
+                                + Post Event
+                            </Button>
+                        </div>
+
                     ) : (
                         <div
                             style={{
@@ -243,6 +269,13 @@ const ProfilePage = () => {
                                 minHeight: '60vh',
                             }}
                         >
+                            <Button
+                                type="primary"
+                                style={{ backgroundColor: "#2E7D32" }}
+                                onClick={() => router.push("/create")}
+                            >
+                                + Post Event
+                            </Button>
                             {userEvents.map(event => {
                                 const start = event.start?.toDate?.();
                                 const formattedDate = start ? dayjs(start).format("MM/DD/YYYY") : "Unknown Date";
