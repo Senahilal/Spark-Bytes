@@ -1,15 +1,13 @@
 "use client";
 import React, { useState } from "react";
-import { signOut } from "firebase/auth";
+import Link from 'next/link';
+import Logo from '../components/logo';
 import { auth } from "@/app/firebase/config";
-import { UserOutlined, LogoutOutlined, MailOutlined } from "@ant-design/icons";
 import { useRouter } from "next/navigation";
-import { useAuthState } from "react-firebase-hooks/auth";
 import styles from './CreateEventPage.module.css';
 
 import { Form, Input, DatePicker, Button, Card, Row, Col, List, Tag, Select, Menu, Checkbox, Dropdown  } from 'antd';
 import { DownOutlined } from '@ant-design/icons';
-import type { DatePickerProps } from 'antd';
 import dayjs from 'dayjs';
 import { collection, addDoc } from "firebase/firestore";
 import { db } from "@/app/firebase/config";
@@ -17,6 +15,7 @@ import { db } from "@/app/firebase/config";
 import utc from 'dayjs/plugin/utc';
 import timezone from 'dayjs/plugin/timezone';
 import LocalEvent from "@/app/classes/LocalEvent";
+import AccountIcon from "../components/accounticon";
 
 dayjs.extend(utc);
 dayjs.extend(timezone);
@@ -40,24 +39,28 @@ const [selectedFoodType, setSelectedFoodType] = useState<string[]>([]);
 
 const options = ['Halal', 'Vegetarian', 'Vegan', 'Gluten Free', 'Nut Free'];
 
-const handleMenuClick = (e) => {
+interface MenuClickEvent {
+  key: string;
+}
+
+const handleMenuClick = (e: MenuClickEvent): void => {
   const value = e.key;
-  setSelectedFoodType((prev) =>
+  setSelectedFoodType((prev: string[]) =>
     prev.includes(value)
       ? prev.filter((item) => item !== value)
       : [...prev, value]
   );
 };
 
-const menu = (
-  <Menu>
-    {options.map((item) => (
-      <Menu.Item key={item} onClick={handleMenuClick}>
-        <Checkbox checked={selectedFoodType.includes(item)}>{item}</Checkbox>
-      </Menu.Item>
-    ))}
-  </Menu>
-);
+// const menu = (
+//   <Menu>
+//     {options.map((item) => (
+//       <Menu.Item key={item} onClick={handleMenuClick}>
+//         <Checkbox checked={selectedFoodType.includes(item)}>{item}</Checkbox>
+//       </Menu.Item>
+//     ))}
+//   </Menu>
+// );
 
 //Used coPilot to help with the form submission
 const handleFormSubmit = async () => {
@@ -132,6 +135,12 @@ const onFinish = (values: any) => {
 return (
   <>
   <div className={styles.container}/>
+  <Link href="/">
+    <Logo />
+  </Link>
+  <Link href="/profile">
+    <AccountIcon />
+  </Link>
   <div style={{ padding: '24px' }}>
     <Row gutter={24}>
       <Col span={12}>
@@ -226,7 +235,17 @@ return (
       <Col span={12}>
         <Card title="Food Type" className={styles.card}>
           <div style={{ marginBottom: 16 }}/>
-          <Dropdown overlay={menu} trigger={['click']}>
+          <Dropdown menu={{ items: options.map((item) => ({
+            key: item,
+            label: (
+              <Checkbox
+                checked={selectedFoodType.includes(item)}
+                onChange={() => handleMenuClick({ key: item })}
+              >
+                {item}
+              </Checkbox>
+            ),
+          })) }} trigger={['click']}>
             <Button>
               {selectedFoodType.length > 0
                 ? selectedFoodType.join(', ')
@@ -234,79 +253,44 @@ return (
               <DownOutlined />
             </Button>
           </Dropdown>
-            {/* <Input
-              value={currentFoodItem}
-              onChange={(e) => setCurrentFoodItem(e.target.value)}
-              placeholder="Enter food item"
-              onPressEnter={handleAddFoodItem}
-              style={{ width: 'calc(100% - 80px)', marginRight: 8 }}
-            />
-            <Button 
-              onClick={handleAddFoodItem} 
-              type="primary"
-              disabled={!currentFoodItem.trim()}
-            >
-              Add
-            </Button>
-          </div>
-
-          <List
-            size="small"
-            bordered
-            dataSource={foodItems}
-            renderItem={(item, index) => (
-              <List.Item
-                actions={[
-                  <Button 
-                    type="link" 
-                    danger 
-                    onClick={() => handleRemoveFoodItem(index)}
-                  >
-                    Remove
-                  </Button>
-                ]}
-              >
-                <Tag color="geekblue">{item}</Tag>
-              </List.Item>
-            )}
-            locale={{ emptyText: 'No food items added yet' }}
-          /> */}
         </Card>
+
         <Card>
-        <Item
-          label="Food Provider"
-          name="food_provider"
-          rules={[{ required: true, message: 'Please input at least one food provider!' }]}
-        >
-          <div>
-            <Input
-              placeholder="Enter provider and press Enter"
-              value={currentFoodItem}
-              onChange={(e) => setCurrentFoodItem(e.target.value)}
-              onPressEnter={handleAddFoodProvider}
-              style={{ width: 'calc(100% - 80px)', marginRight: 8 }}
-            />
-            <Button
-              type="primary"
-              onClick={handleAddFoodProvider}
-              disabled={!currentFoodItem.trim()}
-            >
-              Add
-            </Button>
-          </div>
-          <div style={{ marginTop: 8 }}>
-            {foodItems.map((item, index) => (
-              <Tag
-                key={index}
-                closable
-                onClose={() => handleRemoveFoodProvider(index)}
-                color="green"
+          <Form form={form} onFinish={onFinish} layout="vertical">
+          <Item
+            label="Food Provider"
+            rules={[{ required: true, message: 'Please input at least one food provider!' }]}
+          >
+            <div>
+              <Input
+                placeholder="Enter provider and press Enter"
+                value={currentFoodItem}
+                onChange={(e) => setCurrentFoodItem(e.target.value)}
+                onPressEnter={handleAddFoodProvider}
+                style={{ width: 'calc(100% - 80px)', marginRight: 8 }}
+              />
+              <Button
+                type="primary"
+                onClick={handleAddFoodProvider}
+                disabled={!currentFoodItem.trim()}
               >
-                {item}
-              </Tag>
-            ))}
-          </div>
-        </Item>
+                Add
+              </Button>
+            </div>
+            <div style={{ marginTop: 8 }}>
+              {foodItems.map((item, index) => (
+                <Tag
+                  key={index}
+                  closable
+                  onClose={() => handleRemoveFoodProvider(index)}
+                  color="green"
+                >
+                  {item}
+                </Tag>
+              ))}
+            </div>
+          </Item>
+          </Form>
         </Card>
       </Col>
     </Row>
