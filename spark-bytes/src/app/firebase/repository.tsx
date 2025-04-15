@@ -81,6 +81,7 @@ export async function createEvent(event: LocalEvent) {
       last_updated_at: new Date(),
       followers: event.followers,
       reminder_sent: false,
+      imageURL: event.imageUrl ? event.imageUrl : "https://a.espncdn.com/combiner/i?img=/i/teamlogos/ncaa/500/104.png", //Default BU logo with Rhett if no url is provided
     });
 
     console.log("Event created with ID: ", eventRef.id);

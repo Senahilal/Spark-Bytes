@@ -43,6 +43,9 @@ interface LocalEvent {
 
     // followers is an array of uids of users who are following the event, receiving notifications
     followers?: string[];
+
+    // imageURL is the URL of the image for the event
+    imageUrl?: string;
 }
 
 export default LocalEvent;  // Export the LocalEvent interface
