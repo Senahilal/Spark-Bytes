@@ -1,5 +1,5 @@
 "use client";
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { auth } from "@/app/firebase/config";
 import { UserOutlined, LogoutOutlined, MailOutlined } from "@ant-design/icons";
 import { useRouter } from "next/navigation";
@@ -29,8 +29,7 @@ const { Item } = Form;
 
 const CreateEventPage: React.FC = () => {
 
-  const router = useRouter();
-  // const [user] = useAuthState(auth);
+  const [user, loading] = useAuthState(auth);
   const [form] = Form.useForm();
   const [eventDate, setEventDate] = useState<dayjs.Dayjs>(dayjs());
   const [endDate, setEndDate] = useState<dayjs.Dayjs>(dayjs());
@@ -38,6 +37,14 @@ const CreateEventPage: React.FC = () => {
   const [currentFoodItem, setCurrentFoodItem] = useState("");
   const [selectedFoodType, setSelectedFoodType] = useState<string[]>([]);
 
+  const router = useRouter();
+
+  //redirect to login if not logged in
+  useEffect(() => {
+    if (!loading && !user) {
+      router.push("/login");
+    }
+  }, [user, loading, router]);
 
   const options = ['Halal', 'Vegetarian', 'Vegan', 'Gluten Free', 'Nut Free'];
 
@@ -49,7 +56,7 @@ const CreateEventPage: React.FC = () => {
         : [...prev, value]
     );
   };
-  
+
 
   const menu = (
     <Menu>
@@ -101,7 +108,7 @@ const CreateEventPage: React.FC = () => {
         created_at: new Date(),
         last_updated_by: user.uid,
       };
-      
+
       await createEvent(eventData);
 
 
@@ -232,7 +239,7 @@ const CreateEventPage: React.FC = () => {
           </Col>
 
           <Col span={12}>
-          {/* FOOD TYPE */}
+            {/* FOOD TYPE */}
             <Card title="Food Type" className={styles.card}>
               <div style={{ marginBottom: 16 }} />
               <Dropdown overlay={menu} trigger={['click']}>
