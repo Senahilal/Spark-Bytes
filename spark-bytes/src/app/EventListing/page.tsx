@@ -367,6 +367,7 @@ export default function FindPage() {
                 foodProvider={event.foodProvider}
                 followers={event.followers}
                 hasNotification={event.hasNotification}
+                imageUrl={event.imageURL}
               />
             );
           })}
