@@ -6,7 +6,7 @@ import { useRouter } from "next/navigation";
 import { useAuthState } from "react-firebase-hooks/auth";
 import styles from './CreateEventPage.module.css';
 
-import { Form, Input, DatePicker, Button, Card, Row, Col, List, Tag, Select, Menu, Checkbox, Dropdown } from 'antd';
+import { Form, Input, DatePicker, Button, Card, Row, Col, List, Tag, Select, Menu, Checkbox, Dropdown, Space } from 'antd';
 import { DownOutlined } from '@ant-design/icons';
 import type { DatePickerProps } from 'antd';
 import dayjs from 'dayjs';
@@ -15,6 +15,10 @@ import utc from 'dayjs/plugin/utc';
 import timezone from 'dayjs/plugin/timezone';
 import LocalEvent from "@/app/classes/LocalEvent";
 import { createEvent } from "@/app/firebase/repository";
+import Link from 'next/link';
+import Logo from '../components/logo';
+import AccountIcon from '../components/accounticon';
+import Footer from '../components/footer';
 
 import type { MenuInfo } from 'rc-menu/lib/interface';
 
@@ -144,140 +148,118 @@ const CreateEventPage: React.FC = () => {
 
   return (
     <>
-      <div className={styles.container} />
-      <div style={{ padding: '24px' }}>
-        <Row gutter={24}>
-          <Col span={12}>
-            <Card title="Event Details" className={styles.card}>
-              <Form form={form} onFinish={onFinish} layout="vertical">
-                <Item
-                  label="Title"
-                  name="title"
-                  rules={[{ required: true, message: 'Please input the event title!' }]}
-                >
+      {/* Header */}
+      <div style={{ backgroundColor: "#E3F4C9", padding: "24px" }}>
+        <div style={{
+          display: 'flex',
+          justifyContent: 'space-between',
+          alignItems: 'center',
+          maxWidth: '1200px',
+          margin: '0 auto'
+        }}>
+          <Link href="/">
+            <Logo />
+          </Link>
+          <Link href="/profile">
+            <AccountIcon />
+          </Link>
+        </div>
+        <div
+          style={{
+            maxWidth: "1024px",
+            margin: '80px auto 20px',
+            display: "flex",
+            justifyContent: "space-between",
+            alignItems: "center",
+          }}
+        >
+        </div>
+      </div>
+
+      <div style={{ padding: "40px 24px", maxWidth: "1200px", margin: "0 auto" }}>
+        <Form form={form} onFinish={onFinish} layout="vertical">
+          <Row gutter={[24, 24]}>
+            {/* Left column - Event Details */}
+            <Col xs={24} md={12}>
+              <Card title="Event Details" className={styles.card}>
+                <Form.Item label="Title" name="title" rules={[{ required: true, message: 'Please input the event title!' }]}>
                   <Input placeholder="Enter event title" />
-                </Item>
+                </Form.Item>
 
-                <Item
-                  label="Description"
-                  name="description"
-                  rules={[{ required: true, message: 'Please input the event description!' }]}
-                >
+                <Form.Item label="Description" name="description" rules={[{ required: true, message: 'Please input the event description!' }]}>
                   <Input placeholder="Enter description" />
-                </Item>
+                </Form.Item>
 
-                <Item
-                  label="Area"
-                  name="area"
-                  rules={[{ required: true, message: 'Please input the event area!' }]}
-                >
+                <Form.Item label="Area" name="area" rules={[{ required: true, message: 'Please input the event area!' }]}>
                   <Select placeholder="Select a campus">
                     <Select.Option value="West Campus">West Campus</Select.Option>
                     <Select.Option value="East Campus">East Campus</Select.Option>
                     <Select.Option value="Central Campus">Central Campus</Select.Option>
                   </Select>
-                </Item>
+                </Form.Item>
 
-                <Item
-                  label="Location"
-                  name="location"
-                  rules={[{ required: true, message: 'Please input the event location!' }]}
-                >
+                <Form.Item label="Location" name="location" rules={[{ required: true, message: 'Please input the event location!' }]}>
                   <Input placeholder="Enter event location" />
-                </Item>
+                </Form.Item>
 
                 <Row gutter={16}>
                   <Col span={12}>
-                    <Item
-                      label="Start Date"
-                      name="startDate"
-                      rules={[{ required: true, message: 'Please select the start date!' }]}
-                    >
+                    <Form.Item label="Start Date" name="startDate" rules={[{ required: true, message: 'Please select the start date!' }]}>
                       <DatePicker
-                        onChange={(date) => {
-                          if (date) {
-                            const easternDate = dayjs(date).tz(easternTimeZone);
-                            console.log('Start date in ET:', easternDate.format('YYYY-MM-DD hh:mm A'));
-                            setEventDate(easternDate);
-                          }
-                        }}
+                        onChange={(date) => date && setEventDate(dayjs(date).tz(easternTimeZone))}
                         style={{ width: '100%' }}
-                        showTime={{
-                          format: 'hh:mm A',
-                          use12Hours: true,
-                        }}
+                        showTime={{ format: 'hh:mm A', use12Hours: true }}
                         format="MMMM DD, YYYY hh:mm A"
                       />
-                    </Item>
+                    </Form.Item>
                   </Col>
                   <Col span={12}>
-                    <Item
-                      label="End Date"
-                      name="endDate"
-                      rules={[{ required: true, message: 'Please select the end date!' }]}
-                    >
+                    <Form.Item label="End Date" name="endDate" rules={[{ required: true, message: 'Please select the end date!' }]}>
                       <DatePicker
-                        onChange={(date) => {
-                          if (date) {
-                            const easternDate = dayjs(date).tz(easternTimeZone);
-                            console.log('End date in ET:', easternDate.format('YYYY-MM-DD hh:mm A'));
-                            setEndDate(easternDate);
-                          }
-                        }}
+                        onChange={(date) => date && setEndDate(dayjs(date).tz(easternTimeZone))}
                         style={{ width: '100%' }}
-                        showTime={{
-                          format: 'hh:mm A',
-                          use12Hours: true,
-                        }}
+                        showTime={{ format: 'hh:mm A', use12Hours: true }}
                         format="MMMM DD, YYYY hh:mm A"
                       />
-                    </Item>
+                    </Form.Item>
                   </Col>
                 </Row>
-              </Form>
-            </Card>
-          </Col>
+              </Card>
+            </Col>
 
-          <Col span={12}>
-            {/* FOOD TYPE */}
-            <Card title="Food Type" className={styles.card}>
-              <div style={{ marginBottom: 16 }} />
-              <Dropdown menu={{
-                items: options.map(option => ({
-                  key: option,
-                  label: (
-                    <Checkbox
-                      checked={selectedFoodType.includes(option)}
-                      onChange={() => handleMenuClick({ key: option } as MenuInfo)}
-                    >
-                      {option}
-                    </Checkbox>
-                  )
-                }))
-              }}>
-                <Button>
-                  {selectedFoodType.length > 0
-                    ? selectedFoodType.join(', ')
-                    : 'Select Food Type'} <DownOutlined />
-                </Button>
-              </Dropdown>
+            {/* Right column - Food Info */}
+            <Col xs={24} md={12}>
+              <Card title="Food Type" className={styles.card}>
+                <Dropdown
+                  menu={{
+                    items: options.map(option => ({
+                      key: option,
+                      label: (
+                        <Checkbox
+                          checked={selectedFoodType.includes(option)}
+                          onChange={() => handleMenuClick({ key: option } as MenuInfo)}
+                        >
+                          {option}
+                        </Checkbox>
+                      )
+                    }))
+                  }}
+                >
+                  <Button>
+                    {selectedFoodType.length > 0 ? selectedFoodType.join(', ') : 'Select Food Type'} <DownOutlined />
+                  </Button>
+                </Dropdown>
+              </Card>
 
-            </Card>
-
-            {/* FOOD PROVIDER */}
-            <Card>
-              <Item
-                label="Food Provider"
-                name="food_provider"
-                rules={[{ required: true, message: 'Please input at least one food provider!' }]}
-              >
-                <div>
+              <Card title="Food Provider">
+                {/* Label outside Form.Item */}
+                <Space.Compact style={{ width: '100%' }}>
                   <Input
                     placeholder="Enter provider and press Enter"
                     value={currentFoodItem}
                     onChange={(e) => setCurrentFoodItem(e.target.value)}
                     onPressEnter={handleAddFoodProvider}
-                    style={{ width: 'calc(100% - 80px)', marginRight: 8 }}
+                    style={{ flex: 1 }}
                   />
                   <Button
                     type="primary"
@@ -286,7 +268,9 @@ const CreateEventPage: React.FC = () => {
                   >
                     Add
                   </Button>
-                </div>
+                </Space.Compact>
+
+                {/* Tags below input */}
                 <div style={{ marginTop: 8 }}>
                   {foodItems.map((item, index) => (
                     <Tag
@@ -299,38 +283,25 @@ const CreateEventPage: React.FC = () => {
                     </Tag>
                   ))}
                 </div>
-              </Item>
-            </Card>
-          </Col>
-        </Row>
-        <div
-          style={{
-            marginTop: 24,
-            display: 'flex',
-            justifyContent: 'center',
-            gap: '16px'
-          }}
-        >
-          <Button
-            danger
-            size="large"
-            style={{ width: 140 }}
-            onClick={() => router.back()}
-          >
-            Cancel
-          </Button>
-          <Button
-            type="primary"
-            size="large"
-            onClick={handleFormSubmit}
-            style={{ width: 200 }}
-            className={styles.button}
-          >
-            POST EVENT
-          </Button>
-        </div>
+              </Card>
 
+            </Col>
+          </Row>
+
+          {/* Form buttons */}
+          <div style={{ marginTop: 32, display: 'flex', justifyContent: 'center', gap: '16px' }}>
+            <Button danger size="large" style={{ width: 200 }} onClick={() => router.back()}>
+              Cancel
+            </Button>
+            <Button type="primary" size="large" style={{ width: 200 }} onClick={handleFormSubmit}>
+              POST EVENT
+            </Button>
+          </div>
+
+        </Form>
       </div>
+
+      <Footer />
     </>
   );
 };
