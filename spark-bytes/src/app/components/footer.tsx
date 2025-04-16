@@ -4,7 +4,7 @@ const Footer: React.FC = () => {
   return (
     <footer style={{ 
       backgroundColor: '#DEEFB7', 
-      padding: '12px 0',
+      padding: '35px 0',
       textAlign: 'center'
     }}>
       <div style={{ 
