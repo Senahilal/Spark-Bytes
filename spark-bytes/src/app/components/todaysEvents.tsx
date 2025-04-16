@@ -54,7 +54,6 @@ const TodaysEvents = () => {
             flexWrap: 'wrap'
           }}>
             {events.map((event) => {
-              // Format dates and times from Firestore timestamps
               const start = event.start?.toDate?.();
               const end = event.end?.toDate?.();
               const formattedDate = start ? start.toLocaleDateString('en-US', { month: 'numeric', day: 'numeric' }) : 'Unknown';
