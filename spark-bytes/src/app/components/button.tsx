@@ -21,6 +21,7 @@ const Button: React.FC<ButtonProps> = ({
     borderRadius: '9999px', 
     padding: '12px 24px', 
     fontWeight: '500', 
+    fontSize: '17px',
     border: 'none',
     cursor: 'pointer',
     height: 'auto'
