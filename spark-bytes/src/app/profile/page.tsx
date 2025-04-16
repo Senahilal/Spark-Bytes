@@ -302,6 +302,7 @@ const ProfilePage = () => {
                                         foodProvider={event.foodProvider}
                                         followers={event.followers}
                                         hasNotification={event.hasNotification}
+                                        imageUrl={event.imageURL}
                                         currentUserId={user?.uid}
                                         onDelete={handleEventDelete}
                                     />
