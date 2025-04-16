@@ -196,6 +196,43 @@ export async function fetchAllEvents() {
   }
 }
 
+export async function fetchAllRequests(user: any) {
+  if(!user || user.admin == false)
+  {
+    console.error("User is not an admin.");
+    return null;
+  }
+
+  try {
+    const requestsCollection = collection(db, "requests");
+    const snapshot = await getDocs(requestsCollection);
+
+    const requestsList = snapshot.docs.map(doc => ({
+      id: doc.id,
+      ...doc.data()
+    }));
+    console.log("Requests:", requestsList);
+    return requestsList;
+
+  } catch (err) {
+    console.error("Error fetching requests:", err);
+    return null;
+  }
+}
+
+export async function deleteRequest(requestId: string) {
+
+  // takes an event Id and deletes that specific event from Firestore
+  try {
+    const requestRef = doc(db, "requests", requestId);
+    await deleteDoc(requestRef);
+
+    console.log("Request deleted with ID: ", requestId);
+  } catch (err) {
+    console.error("Error deleting request: ", err);
+}
+}
+
 
 // export async function fetchEvents(
 //   date?: string,
