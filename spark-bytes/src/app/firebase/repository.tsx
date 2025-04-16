@@ -1,5 +1,5 @@
 import { useAuthState } from "react-firebase-hooks/auth";
-import { doc, getDoc, updateDoc, collection, addDoc, getDocs, where, query, deleteDoc } from "firebase/firestore";
+import { doc, getDoc, updateDoc, collection, addDoc, getDocs, where, query, deleteDoc, Timestamp } from "firebase/firestore";
 import { db, auth } from "@/app/firebase/config";
 import LocalEvent from "../classes/LocalEvent";
 /** 
@@ -234,5 +234,38 @@ export async function deleteEvent(eventId: string) {
     console.log("Event deleted with ID: ", eventId);
   } catch (err) {
     console.error("Error deleting event: ", err);
+  }
+}
+
+// today's events - components/todaysEvents.tsx
+export async function fetchTodaysEvents() {
+  try {
+    const today = new Date();
+    today.setHours(0, 0);
+    
+    const endOfToday = new Date();
+    endOfToday.setHours(23, 59);
+    
+    const startTimestamp = Timestamp.fromDate(today);
+    const endTimestamp = Timestamp.fromDate(endOfToday);
+    
+    const eventsRef = collection(db, "events");
+    const q = query(
+      eventsRef,
+      where('start', '>=', startTimestamp),
+      where('start', '<=', endTimestamp)
+    );
+    
+    const snapshot = await getDocs(q);
+    const eventsList = snapshot.docs.map(doc => ({
+      id: doc.id,
+      ...doc.data()
+    }));
+    
+    console.log("Today's Events:", eventsList);
+    return eventsList;
+  } catch (err) {
+    console.error("Error fetching today's events:", err);
+    return null;
   }
 }
