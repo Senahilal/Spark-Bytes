@@ -5,9 +5,14 @@ import { MdNotifications, MdLocationOn, MdCalendarToday, MdRestaurant, MdClose, 
 import { Modal } from 'antd';
 import CloseButton from './closeButton'; // Note: The 'C' is capitalized here
 
+import { deleteDoc, doc } from "firebase/firestore";
+import { db } from "@/app/firebase/config";
+
+
 // interface - add more if needed
 interface EventCardProps {
   id: string;
+  user: string; //user id of the event organizer
   title: string;
   area: string;
   location: string;
@@ -21,10 +26,15 @@ interface EventCardProps {
   hasNotification?: boolean; // optional
   address?: string; // added for modal detail view
   imageUrl?: string; // added for modal detail view
+  currentUserId?: string; // optional - user id of currently logged in user
+  onDelete?: (id: string) => void; //optional - passing this prop from only profile page
 }
 
 const EventCard = ({
   id,
+  user, //event organizer
+  currentUserId,//logged in user
+  onDelete, //optional - passing this prop from only profile page
   title,
   area,
   location,
@@ -55,6 +65,21 @@ const EventCard = ({
     setIsNotified(!isNotified);
   };
 
+  const handleDelete = async (e: React.MouseEvent) => {
+    e.stopPropagation();
+    try {
+      await deleteDoc(doc(db, "events", id));
+      console.log("Event deleted successfully.");
+      setIsModalVisible(false);
+
+      //notify parent to refresh events
+      if (onDelete) onDelete(id);
+    } catch (error) {
+      console.error("Error deleting event:", error);
+    }
+  };
+
+
 
   return (
     <>
@@ -74,7 +99,7 @@ const EventCard = ({
           transition: 'transform 0.2s, box-shadow 0.2s',
         }}>
 
-          {/* Image */}
+        {/* Image */}
         {imageUrl && (
           <div style={{
             width: '100%',
@@ -100,7 +125,7 @@ const EventCard = ({
             />
           </div>
         )}
-      
+
         {/* title and notification icon */}
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
           <h3 style={{ fontSize: '1.25rem', fontWeight: 'bold', margin: '0' }}>{title}</h3>
@@ -318,6 +343,15 @@ const EventCard = ({
                 onClick={handleCancel}
                 label="Close"
               />
+
+              {currentUserId === user && (
+                <CloseButton
+                  onClick={handleDelete}
+                  label="Delete"
+                  style={{ backgroundColor: "#D32F2F", color: "white" }}
+                />
+              )}
+
             </div>
           </div>
         </div>

@@ -96,6 +96,10 @@ const ProfilePage = () => {
         }
     };
 
+    const handleEventDelete = (deletedEventId: string) => {
+        setUserEvents(prev => prev.filter(event => event.id !== deletedEventId));
+    };
+
 
     //update user data
     const handleSaveChanges = async () => {
@@ -287,6 +291,7 @@ const ProfilePage = () => {
                                     <EventCard
                                         key={event.id}
                                         id={event.id}
+                                        user={event.user}
                                         title={event.title}
                                         area={event.area}
                                         location={event.location}
@@ -298,6 +303,8 @@ const ProfilePage = () => {
                                         foodProvider={event.foodProvider}
                                         followers={event.followers}
                                         hasNotification={event.hasNotification}
+                                        currentUserId={user?.uid}
+                                        onDelete={handleEventDelete}
                                     />
                                 );
                             })}
