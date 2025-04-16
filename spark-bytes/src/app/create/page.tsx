@@ -303,7 +303,22 @@ const CreateEventPage: React.FC = () => {
             </Card>
           </Col>
         </Row>
-        <div style={{ marginTop: 24, textAlign: 'center' }}>
+        <div
+          style={{
+            marginTop: 24,
+            display: 'flex',
+            justifyContent: 'center',
+            gap: '16px'
+          }}
+        >
+          <Button
+            danger
+            size="large"
+            style={{ width: 140 }}
+            onClick={() => router.back()}
+          >
+            Cancel
+          </Button>
           <Button
             type="primary"
             size="large"
@@ -314,6 +329,7 @@ const CreateEventPage: React.FC = () => {
             POST EVENT
           </Button>
         </div>
+
       </div>
     </>
   );
