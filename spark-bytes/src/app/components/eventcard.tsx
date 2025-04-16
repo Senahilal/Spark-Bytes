@@ -72,8 +72,35 @@ const EventCard = ({
           gap: '13px',
           cursor: 'pointer',
           transition: 'transform 0.2s, box-shadow 0.2s',
-        }}
-      >
+        }}>
+
+          {/* Image */}
+        {imageUrl && (
+          <div style={{
+            width: '100%',
+            height: '160px',
+            overflow: 'hidden',
+            borderRadius: '8px',
+            marginBottom: '10px'
+          }}>
+            <img
+              src={imageUrl}
+              alt={`${foodType} at ${title}`}
+              style={{
+                width: '100%',
+                height: '100%',
+                objectFit: 'cover',
+                display: 'block'
+              }}
+              onError={(e) => {
+                const target = e.target as HTMLImageElement;
+                target.onerror = null;
+                target.src = '/logo.png'; // Fallback image
+              }}
+            />
+          </div>
+        )}
+      
         {/* title and notification icon */}
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
           <h3 style={{ fontSize: '1.25rem', fontWeight: 'bold', margin: '0' }}>{title}</h3>
