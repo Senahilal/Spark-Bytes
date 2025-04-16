@@ -355,6 +355,7 @@ export default function FindPage() {
               <EventCard
                 key={event.id}
                 id={event.id}
+                user={event.user}
                 title={event.title}
                 area={event.area}
                 location={event.location}

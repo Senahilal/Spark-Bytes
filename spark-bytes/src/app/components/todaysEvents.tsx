@@ -64,6 +64,7 @@ const TodaysEvents = () => {
                 <EventCard 
                   key={event.id}
                   id={event.id}
+                  user={event.user}
                   title={event.title || "Untitled Event"}
                   area={event.area || "Campus"}
                   location={event.location || "TBD"}
