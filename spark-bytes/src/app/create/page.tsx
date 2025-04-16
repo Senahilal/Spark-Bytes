@@ -1,5 +1,5 @@
 "use client";
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { auth } from "@/app/firebase/config";
 import { UserOutlined, LogoutOutlined, MailOutlined } from "@ant-design/icons";
 import { useRouter } from "next/navigation";
@@ -29,8 +29,6 @@ const { Item } = Form;
 
 const CreateEventPage: React.FC = () => {
 
-  const router = useRouter();
-  // const [user] = useAuthState(auth);
   const [form] = Form.useForm();
   const [eventDate, setEventDate] = useState<dayjs.Dayjs>(dayjs());
   const [endDate, setEndDate] = useState<dayjs.Dayjs>(dayjs());
@@ -38,6 +36,15 @@ const CreateEventPage: React.FC = () => {
   const [currentFoodItem, setCurrentFoodItem] = useState("");
   const [selectedFoodType, setSelectedFoodType] = useState<string[]>([]);
 
+  const [user, loading] = useAuthState(auth);
+  const router = useRouter();
+
+  //redirect to login if not logged in
+  useEffect(() => {
+    if (!loading && !user) {
+      router.push("/login");
+    }
+  }, [user, loading, router]);
 
   const options = ['Halal', 'Vegetarian', 'Vegan', 'Gluten Free', 'Nut Free'];
 
