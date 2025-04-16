@@ -28,7 +28,7 @@ export default function Login() {
     try {
       const res = await signInWithEmailAndPassword(email, password);
       console.log({res});
-      message.success("Logged in successfully!");
+      // message.success("Logged in successfully!");
       setEmail("");
       setPassword("");
       // Redirect to account page

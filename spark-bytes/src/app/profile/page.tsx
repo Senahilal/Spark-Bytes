@@ -59,7 +59,6 @@ const ProfilePage = () => {
         try {
             await signOut(auth); // 1. Firebase sign out
             localStorage.removeItem("user"); // clear local storage
-            message.success("Signed out successfully"); //Show confirmation
             router.push("/login"); // 4. Redirect to login
         } catch (error) {
             console.error("Sign out error:", error);

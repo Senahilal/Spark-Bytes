@@ -56,7 +56,7 @@ const CreateEventPage: React.FC = () => {
         : [...prev, value]
     );
   };
-  
+
 
   const menu = (
     <Menu>
@@ -108,7 +108,7 @@ const CreateEventPage: React.FC = () => {
         created_at: new Date(),
         last_updated_by: user.uid,
       };
-      
+
       await createEvent(eventData);
 
 
@@ -239,17 +239,29 @@ const CreateEventPage: React.FC = () => {
           </Col>
 
           <Col span={12}>
-          {/* FOOD TYPE */}
+            {/* FOOD TYPE */}
             <Card title="Food Type" className={styles.card}>
               <div style={{ marginBottom: 16 }} />
-              <Dropdown overlay={menu} trigger={['click']}>
+              <Dropdown menu={{
+                items: options.map(option => ({
+                  key: option,
+                  label: (
+                    <Checkbox
+                      checked={selectedFoodType.includes(option)}
+                      onChange={() => handleMenuClick({ key: option } as MenuInfo)}
+                    >
+                      {option}
+                    </Checkbox>
+                  )
+                }))
+              }}>
                 <Button>
                   {selectedFoodType.length > 0
                     ? selectedFoodType.join(', ')
-                    : 'Select Food Type'}{' '}
-                  <DownOutlined />
+                    : 'Select Food Type'} <DownOutlined />
                 </Button>
               </Dropdown>
+
             </Card>
 
             {/* FOOD PROVIDER */}
