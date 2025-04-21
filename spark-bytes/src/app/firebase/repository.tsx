@@ -205,7 +205,8 @@ export async function fetchAllRequests(user: any) {
 
   try {
     const requestsCollection = collection(db, "requests");
-    const snapshot = await getDocs(requestsCollection);
+    const pendingRequestsQuery = query(requestsCollection, where("status", "==", "pending"));
+    const snapshot = await getDocs(pendingRequestsQuery);
 
     const requestsList = snapshot.docs.map(doc => ({
       id: doc.id,
@@ -216,7 +217,7 @@ export async function fetchAllRequests(user: any) {
 
   } catch (err) {
     console.error("Error fetching requests:", err);
-    return null;
+    return [];
   }
 }
 

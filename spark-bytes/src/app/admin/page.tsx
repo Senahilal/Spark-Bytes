@@ -24,6 +24,7 @@ export default function FindPage() {
   const [user] = useAuthState(auth);
 
   const [requests, setRequests] = useState<any[]>([]);
+  const [refresh, setRefresh] = useState(false);
   const originalReqRef = useRef<any[]>([]);
 
 
@@ -42,30 +43,11 @@ export default function FindPage() {
       }
     };
     loadRequests();
-  }, [user]);
+  }, [refresh, user]);
 
-
-  // !! Placeholders - change these !!
-  const events_placeholder = [
-    {
-      id: '1',
-      title: 'Cookie O\' Clock',
-      location: 'BU Spark',
-      date: '3/19',
-      time: '3pm',
-      foodType: 'Cookies',
-      hasNotification: true
-    },
-    {
-      id: '2',
-      title: 'Cookie O\' Clock',
-      location: 'BU Spark',
-      date: '3/19',
-      time: '3pm',
-      foodType: 'Cookies',
-      hasNotification: false
-    }
-  ];
+  const handleRefresh = () => {
+    setRefresh((prev) => !prev); // Toggle the `refresh` state
+  };
 
   const handlePageChange = (page: number) => {
     setCurrentPage(page);
@@ -140,7 +122,8 @@ export default function FindPage() {
         ) : (
           <div style={{
             display: 'grid',
-            gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))',
+            gridTemplateColumns: "repeat(3, 1fr)", // 3 columns
+            gridTemplateRows: "repeat(2, auto)", // 2 rows
             gap: '24px',
             marginBottom: '40px'
           }}>
@@ -152,12 +135,15 @@ export default function FindPage() {
 
             return (
               <ReqCard
+                key={request.id}
                 id={request.id}
+                user_id={request.user_id}
                 user_name={request.user_name}
                 date={formattedDate}
                 time={formattedTime}
                 message={request.message}
                 status={request.status}
+                onRefresh={handleRefresh}
               />
             );
           })}
