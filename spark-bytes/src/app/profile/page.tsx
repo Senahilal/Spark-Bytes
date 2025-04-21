@@ -27,6 +27,7 @@ const ProfilePage = () => {
     const [firstName, setFirstName] = useState("");
     const [lastName, setLastName] = useState("");
     const [phoneNumber, setPhoneNumber] = useState("");
+    const [organizer, setOrganizer] = useState(false)
     const [email, setEmail] = useState("");
     const [smsNotifications, setSmsNotifications] = useState(false);
     const [emailNotifications, setEmailNotifications] = useState(true);
@@ -78,6 +79,7 @@ const ProfilePage = () => {
                 setLastName(userDoc.last_name || "");
                 setPhoneNumber(userDoc.phone || "");
                 setEmail(userDoc.email || "");
+                setOrganizer(userDoc.organizer || false);
                 setSmsNotifications(userDoc.phone_notification || false);
                 setEmailNotifications(userDoc.email_notification || false);
                 setRequestPending(userDoc.request_pending || false);
@@ -425,13 +427,16 @@ const ProfilePage = () => {
 
                     {/* Request to be Organizer */}
                     <div style={{ maxWidth: "1024px", margin: "48px auto 0 auto" }}>
-                        <Title level={4}>
-                            Want to be an Organizer?
-                        </Title>
+                        <Title level={4}>Organizer Status</Title>
 
-                        {requestPending ? (
-                            <Tag color="processing" style={{ marginLeft: "30px" }}>Pending Approval</Tag>
-
+                        {user && organizer ? (
+                            <Tag color="success" style={{ marginLeft: "30px", fontSize: "16px", padding: "5px 12px" }}>
+                                You are an Organizer
+                            </Tag>
+                        ) : requestPending ? (
+                            <Tag color="processing" style={{ marginLeft: "30px" }}>
+                                Pending Approval
+                            </Tag>
                         ) : !showRequestForm ? (
                             <Button
                                 type="dashed"
@@ -465,8 +470,8 @@ const ProfilePage = () => {
                                 </div>
                             </Form>
                         )}
-
                     </div>
+
 
                     {/* Sign Out */}
                     <div style={{ textAlign: "center", marginTop: "48px" }}>
