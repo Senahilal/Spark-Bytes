@@ -26,7 +26,7 @@ const ReqCard = ({
   time
 }: ReqCardProps) => {
   const [isModalVisible, setIsModalVisible] = useState(false);
-  const [currentStatus, setCurrentStatus] = useState(status);
+  const [currentStatus, setCurrentStatus] = useState(status || "pending");
 
   const handleDecision = async (decision: "accepted" | "rejected") => {
     try {
