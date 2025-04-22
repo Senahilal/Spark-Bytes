@@ -15,7 +15,7 @@ import { message, Tag } from "antd";
 import { fetchUserIdEvents } from "@/app/firebase/repository";
 import EventCard from '../components/eventcard';
 import Logo from '../components/logo';
-import dayjs, { Dayjs } from "dayjs";
+import dayjs from "dayjs";
 import ButtonComponent from "../components/button";
 import { EditFilled } from "@ant-design/icons";
 
@@ -28,29 +28,36 @@ import { uploadProfileImage, updateUserProfileImageUrl } from "../firebase/repos
 const { Title, Text } = Typography;
 
 const ProfilePage = () => {
+    const [user, loading] = useAuthState(auth);
+
+    //user information
     const [firstName, setFirstName] = useState("");
     const [lastName, setLastName] = useState("");
     const [phoneNumber, setPhoneNumber] = useState("");
     const [organizer, setOrganizer] = useState(false)
     const [email, setEmail] = useState("");
-    const [smsNotifications, setSmsNotifications] = useState(false);
+    const [profileImageUrl, setProfileImageUrl] = useState<string | null>(null);
+
+    //user status
+    const [isAdmin, setIsAdmin] = useState(false);
+    const [isOrganizer, setIsOrganizer] = useState(false);
+    const [requestPending, setRequestPending] = useState(false); //if user has pending request -> true
+    const [showRequestForm, setShowRequestForm] = useState(false); //if requestPending is false and isOrganizer is false showRequestForm-> true
+
+    //notification preferences
+    const [smsNotifications, setSmsNotifications] = useState(false); //wont be used for now
     const [emailNotifications, setEmailNotifications] = useState(true);
+
+
+    //editing form
     const [isEditing, setIsEditing] = useState(false);
-    const [requestPending, setRequestPending] = useState(false);
+    
 
-    const [user, loading] = useAuthState(auth);
-
+    //My events section
     const [showMyEvents, setShowMyEvents] = useState(false);
     const [userEvents, setUserEvents] = useState<any[]>([]);
 
-    const [showRequestForm, setShowRequestForm] = useState(false);
-
-    const [isAdmin, setIsAdmin] = useState(false);
-    const [isOrganizer, setIsOrganizer] = useState(false);
-
-    const [profileImageUrl, setProfileImageUrl] = useState<string | null>(null);
-
-
+    //upload profile pic modal
     const [showModal, setShowModal] = useState(false);
 
 
@@ -149,6 +156,7 @@ const ProfilePage = () => {
         }
     };
 
+    //handle event deletion
     const handleEventDelete = (deletedEventId: string) => {
         setUserEvents(prev => prev.filter(event => event.id !== deletedEventId));
     };
@@ -173,13 +181,16 @@ const ProfilePage = () => {
         }
     };
 
+    //////////////////////////////////////////
+    //wont be implemented for now
     //handle sms switch
-    const handleSMSToggle = async (checked: boolean) => {
-        setSmsNotifications(checked);
-        if (user) {
-            await updateUserData(user, { phone_notification: checked });
-        }
-    };
+    // const handleSMSToggle = async (checked: boolean) => {
+    //     setSmsNotifications(checked);
+    //     if (user) {
+    //         await updateUserData(user, { phone_notification: checked });
+    //     }
+    // };
+    //////////////////////////////////////////
 
     //handle email switch
     const handleEmailToggle = async (checked: boolean) => {
@@ -190,7 +201,7 @@ const ProfilePage = () => {
     };
 
 
-
+    //handle organizer request form submission
     const handleRequestSubmit = async (values: any) => {
         if (!user) return;
         try {
