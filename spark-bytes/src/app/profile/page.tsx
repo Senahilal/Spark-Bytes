@@ -22,6 +22,7 @@ import { EditFilled } from "@ant-design/icons";
 import { collection, addDoc } from "firebase/firestore";
 import { db } from "@/app/firebase/config";
 import ProfileImageUploadModal from '../components/ProfileImageUploadModal';
+import { uploadProfileImage, updateUserProfileImageUrl } from "../firebase/repository";
 
 
 const { Title, Text } = Typography;
@@ -47,12 +48,46 @@ const ProfilePage = () => {
     const [isAdmin, setIsAdmin] = useState(false);
     const [isOrganizer, setIsOrganizer] = useState(false);
 
+    const [profileImageUrl, setProfileImageUrl] = useState<string | null>(null);
+
 
     const [showModal, setShowModal] = useState(false);
-    const handleUpload = (file: File) => {
-        console.log("Upload file:", file);
-        setShowModal(false); // replace this with actual upload function
+
+
+    //handle profile picture upload and fetch new url
+    const handleUpload = async (file: File) => {
+
+        //check if user and file exist
+        if (!user || !file) {
+            message.error("Select a file and ensure you're logged in.");
+            return;
+        }
+
+        try {
+            //upload profile picture into firebase storage
+            const url = await uploadProfileImage(user.uid, file);
+
+            //if url doesnt exist show error message
+            if (!url) {
+                message.error("Upload failed. Please try again.");
+                return;
+            }
+
+            //update profileImageUrl field in user document in firebase database
+            await updateUserProfileImageUrl(user.uid, url);
+
+            //update url to display in profile page
+            setProfileImageUrl(url);
+            message.success("Profile image updated!");
+
+            //close modal after upload
+            setShowModal(false);
+        } catch (error) {
+            console.error("Upload error:", error);
+            message.error("An error occurred during upload. Please try again.");
+        }
     };
+
 
 
     const router = useRouter();
@@ -98,6 +133,8 @@ const ProfilePage = () => {
                 setRequestPending(userDoc.request_pending || false);
                 setIsAdmin(userDoc.admin || false);
                 setIsOrganizer(userDoc.organizer || false);
+                setProfileImageUrl(userDoc.profileImageUrl || null);
+                //console.log("User image url:", profileImageUrl);
             }
         } catch (err) {
             console.error("Error fetching user data:", err);
@@ -226,7 +263,7 @@ const ProfilePage = () => {
                     <Space size={25}>
                         <div style={{ position: "relative", width: 80, height: 80 }}>
                             <Image
-                                src={ProfileImagePlaceholder}
+                                src={profileImageUrl || ProfileImagePlaceholder}
                                 alt="Profile Picture"
                                 width={80}
                                 height={80}
