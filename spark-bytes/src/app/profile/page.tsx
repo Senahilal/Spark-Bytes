@@ -17,10 +17,12 @@ import EventCard from '../components/eventcard';
 import Logo from '../components/logo';
 import dayjs, { Dayjs } from "dayjs";
 import ButtonComponent from "../components/button";
-
+import { EditFilled } from "@ant-design/icons";
 
 import { collection, addDoc } from "firebase/firestore";
-import { db } from "@/app/firebase/config"; // make sure this import exists
+import { db } from "@/app/firebase/config";
+import ProfileImageUploadModal from '../components/ProfileImageUploadModal';
+
 
 const { Title, Text } = Typography;
 
@@ -45,6 +47,12 @@ const ProfilePage = () => {
     const [isAdmin, setIsAdmin] = useState(false);
     const [isOrganizer, setIsOrganizer] = useState(false);
 
+
+    const [showModal, setShowModal] = useState(false);
+    const handleUpload = (file: File) => {
+        console.log("Upload file:", file);
+        setShowModal(false); // replace this with actual upload function
+    };
 
 
     const router = useRouter();
@@ -215,14 +223,44 @@ const ProfilePage = () => {
                         alignItems: "center",
                     }}
                 >
-                    <Space>
-                        <Image
-                            src={ProfileImagePlaceholder}
-                            alt="Profile Picture"
-                            width={80}
-                            height={80}
-                            style={{ borderRadius: "50%" }}
-                        />
+                    <Space size={25}>
+                        <div style={{ position: "relative", width: 80, height: 80 }}>
+                            <Image
+                                src={ProfileImagePlaceholder}
+                                alt="Profile Picture"
+                                width={80}
+                                height={80}
+                                style={{ borderRadius: "50%", objectFit: "cover" }}
+                            />
+                            <button
+                                onClick={() => setShowModal(true)} // handle later
+                                style={{
+                                    position: "absolute",
+                                    bottom: -4,
+                                    right: -4,
+                                    width: 24,
+                                    height: 24,
+                                    borderRadius: "50%",
+                                    backgroundColor: "white",
+                                    border: "1px solid #ccc",
+                                    boxShadow: "0 1px 3px rgba(0,0,0,0.2)",
+                                    display: "flex",
+                                    alignItems: "center",
+                                    justifyContent: "center",
+                                    cursor: "pointer",
+                                    padding: 0,
+                                }}
+                            >
+                                <EditFilled style={{ fontSize: 14, color: "#333" }} />
+                            </button>
+
+                            <ProfileImageUploadModal
+                                isOpen={showModal}
+                                onClose={() => setShowModal(false)}
+                                onUpload={handleUpload}
+                            />
+                        </div>
+
                         <div>
                             <Text strong style={{ fontSize: "18px" }}>
                                 {firstName || "Name"} {lastName || "Last Name"}
