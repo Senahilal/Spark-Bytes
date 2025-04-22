@@ -16,6 +16,7 @@ import { fetchUserIdEvents } from "@/app/firebase/repository";
 import EventCard from '../components/eventcard';
 import Logo from '../components/logo';
 import dayjs, { Dayjs } from "dayjs";
+import ButtonComponent from "../components/button";
 
 
 import { collection, addDoc } from "firebase/firestore";
@@ -36,10 +37,14 @@ const ProfilePage = () => {
 
     const [user, loading] = useAuthState(auth);
 
-    const [showMyEvents, setShowMyEvents] = useState(true);
+    const [showMyEvents, setShowMyEvents] = useState(false);
     const [userEvents, setUserEvents] = useState<any[]>([]);
 
     const [showRequestForm, setShowRequestForm] = useState(false);
+
+    const [isAdmin, setIsAdmin] = useState(false);
+    const [isOrganizer, setIsOrganizer] = useState(false);
+
 
 
     const router = useRouter();
@@ -83,6 +88,8 @@ const ProfilePage = () => {
                 setSmsNotifications(userDoc.phone_notification || false);
                 setEmailNotifications(userDoc.email_notification || false);
                 setRequestPending(userDoc.request_pending || false);
+                setIsAdmin(userDoc.admin || false);
+                setIsOrganizer(userDoc.organizer || false);
             }
         } catch (err) {
             console.error("Error fetching user data:", err);
@@ -179,6 +186,25 @@ const ProfilePage = () => {
                     <Link href="/">
                         <Logo />
                     </Link>
+                    <div style={{
+                        display: 'flex',
+                        justifyContent: 'flex-end',
+                        alignItems: 'center',
+                        position: 'absolute',
+                        top: '16px',
+                        right: '16px',
+                        gap: '10px',
+                        padding: '10px',
+                    }}>
+
+
+                        {isAdmin && (
+                            <ButtonComponent href="/admin">
+                                Admin
+                            </ButtonComponent>
+                        )}
+
+                    </div>
                 </div>
                 <div
                     style={{
@@ -213,18 +239,18 @@ const ProfilePage = () => {
 
             <div style={{ display: 'flex', gap: '12px', marginTop: '20px', justifyContent: 'center' }}>
                 <Button
-                    type={showMyEvents ? "primary" : "default"}
-                    style={{ backgroundColor: showMyEvents ? "#2E7D32" : undefined }}
-                    onClick={() => setShowMyEvents(true)}
-                >
-                    My Events
-                </Button>
-                <Button
                     type={!showMyEvents ? "primary" : "default"}
                     style={{ backgroundColor: !showMyEvents ? "#2E7D32" : undefined }}
                     onClick={() => setShowMyEvents(false)}
                 >
                     Account Info
+                </Button>
+                <Button
+                    type={showMyEvents ? "primary" : "default"}
+                    style={{ backgroundColor: showMyEvents ? "#2E7D32" : undefined }}
+                    onClick={() => setShowMyEvents(true)}
+                >
+                    My Events
                 </Button>
             </div>
 
@@ -274,13 +300,15 @@ const ProfilePage = () => {
                                 minHeight: '60vh',
                             }}
                         >
-                            <Button
-                                type="primary"
-                                style={{ backgroundColor: "#2E7D32" }}
-                                onClick={() => router.push("/create")}
-                            >
-                                + Post Event
-                            </Button>
+                            {isOrganizer && (
+                                <Button
+                                    type="primary"
+                                    style={{ backgroundColor: "#2E7D32" }}
+                                    onClick={() => router.push("/create")}
+                                >
+                                    + Post Event
+                                </Button>
+                            )}
                             {userEvents.map(event => {
                                 const start = event.start?.toDate?.();
                                 const formattedDate = start ? dayjs(start).format("MM/DD/YYYY") : "Unknown Date";
