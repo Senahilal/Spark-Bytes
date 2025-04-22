@@ -2,6 +2,10 @@ import { useAuthState } from "react-firebase-hooks/auth";
 import { doc, getDoc, updateDoc, collection, addDoc, getDocs, where, query, deleteDoc, Timestamp } from "firebase/firestore";
 import { db, auth } from "@/app/firebase/config";
 import LocalEvent from "../classes/LocalEvent";
+import { getStorage, ref, uploadBytes, getDownloadURL, listAll, deleteObject } from "firebase/storage";
+import { v4 as uuidv4 } from "uuid";
+import { readAndCompressImage } from "browser-image-resizer";
+
 /** 
 export async function fetchUserData(user: any) {
   // Retrieves all data for a given user from Firestore
@@ -306,3 +310,76 @@ export async function fetchTodaysEvents() {
     return null;
   }
 }
+
+
+
+const storage = getStorage();
+
+const resizeConfig = {
+  quality: 0.8,
+  maxWidth: 512,
+  maxHeight: 512,
+  autoRotate: true,
+  debug: false,
+};
+
+export async function uploadProfileImage(userId: string, file: File): Promise<string | null> {
+  try {
+    // Resize the new image
+    const resizedImage = await readAndCompressImage(file, resizeConfig);
+
+    // Reference to the user's image folder
+    const userImagesRef = ref(storage, `profileImages/${userId}/`);
+
+    // List all images currently stored for this user
+    const existingImages = await listAll(userImagesRef);
+
+    // Delete each existing image
+    const deletePromises = existingImages.items.map((imageRef) => deleteObject(imageRef));
+    await Promise.all(deletePromises);
+
+    // Upload new image
+    const uniqueName = uuidv4();
+    const newImageRef = ref(storage, `profileImages/${userId}/${uniqueName}`);
+    await uploadBytes(newImageRef, resizedImage);
+
+    // Get URL of new image
+    const downloadURL = await getDownloadURL(newImageRef);
+
+    return downloadURL;
+
+  } catch (error) {
+    console.error("Error uploading/replacing profile image:", error);
+    return null;
+  }
+}
+
+export async function updateUserProfileImageUrl(userId: string, imageURL: string) {
+  try {
+    const userRef = doc(db, "users", userId);
+    await updateDoc(userRef, { profileImageUrl: imageURL });
+
+    console.log("User profile image URL updated.");
+  } catch (err) {
+    console.error("Error updating profile image URL:", err);
+  }
+}
+
+export async function fetchUserProfileImageUrl(userId: string): Promise<string | null> {
+  try {
+    const userRef = doc(db, "users", userId);
+    const userDoc = await getDoc(userRef);
+
+    if (userDoc.exists()) {
+      const data = userDoc.data();
+      return data?.profileImageUrl || null;
+    } else {
+      console.log("No such document!");
+      return null;
+    }
+  } catch (error) {
+    console.error("Error fetching profile image:", error);
+    return null;
+  }
+}
+
