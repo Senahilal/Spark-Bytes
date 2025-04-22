@@ -137,8 +137,8 @@ export default function FindPage() {
           }}>
             {isOrganizer && (
               <Button href="/create">
-              Post an Event
-            </Button>
+                Post an Event
+              </Button>
             )}
             
             {isAdmin && (
@@ -152,74 +152,71 @@ export default function FindPage() {
           </div>
         </div>
 
+        {/* Fixed heading and search container */}
         <div style={{
           maxWidth: '1200px',
-          margin: '40px auto 20px',
+          margin: '40px auto 0',
           display: 'flex',
           flexDirection: 'column',
           alignItems: 'flex-start'
-          // gap: '10px'
         }}>
-          <div style={{
-            display: 'flex',
-            alignItems: 'center',
-            gap: '10px',
-            marginBottom: '30px'
-          }}></div>
-          <span role="img" aria-label="food" style={{ fontSize: '24px' }}>🍽️</span>
-          <h1 style={{ fontSize: '28px', fontWeight: 'bold', margin: 0 }}>
-            Find Free Food on Campus!
-          </h1>
-        </div>
+          {/* Heading section */}
+          <div style={{ marginBottom: '20px' }}>
+            <span role="img" aria-label="food" style={{ fontSize: '32px', marginRight: '10px' }}>🍽️</span>
+            <h1 style={{ fontSize: '32px', fontWeight: 'bold', margin: '10px 0' }}>
+              Find Free Food on Campus!
+            </h1>
+          </div>
 
-        {/* Search bar */}
-        <div
-          style={{
-            display: 'flex',
-            alignItems: 'center',
-            borderRadius: '30px',
-            border: '1.5px solid #036D19',
-            backgroundColor: 'transparent',
-            padding: '2px 10px',
-            maxWidth: '500px',
-            width: '100%',
-          }}
-        >
-          <input
-            type="text"
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            placeholder="Type a location, food type, or keyword"
+          {/* Search bar - positioned directly below the heading */}
+          <div
             style={{
-              flex: 1,
-              border: 'none',
-              outline: 'none',
-              backgroundColor: 'transparent',
-              color: 'white',
-              fontSize: '13px',
-              padding: '4px 0',
-              marginRight: '6px',
-            }}
-          />
-          <button
-            onClick={() => handleSearch(searchQuery)}
-            style={{
-              backgroundColor: '#024e13',
-              color: 'white',
-              border: 'none',
-              borderRadius: '50%',
-              width: '24px',
-              height: '24px',
               display: 'flex',
               alignItems: 'center',
-              justifyContent: 'center',
-              fontSize: '12px',
-              cursor: 'pointer',
+              borderRadius: '30px',
+              border: '1.5px solid rgba(3, 109, 25, 0.9)',
+              backgroundColor: 'rgba(255, 255, 255, 0.5)',
+              padding: '2px 10px',
+              maxWidth: '500px',
+              width: '100%',
             }}
-            aria-label="Search"
           >
-            <SearchOutlined />
-          </button>
+            <input
+              type="text"
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              placeholder="  Type a location, food type, or keyword"
+              style={{
+                flex: 1,
+                border: 'none',
+                outline: 'none',
+                backgroundColor: 'transparent',
+                color: '#333',
+                fontSize: '16px',
+                padding: '8px 0',
+                marginRight: '6px',
+              }}
+            />
+            <button
+              onClick={() => handleSearch(searchQuery)}
+              style={{
+                backgroundColor: 'rgba(3, 109, 25, 0.9)',
+                color: 'white',
+                border: 'none',
+                borderRadius: '50%',
+                width: '30px',
+                height: '30px',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                fontSize: '14px',
+                cursor: 'pointer',
+              }}
+              aria-label="Search"
+            >
+              <SearchOutlined />
+            </button>
+          </div>
         </div>
       </div>
 
@@ -235,7 +232,7 @@ export default function FindPage() {
               token: {
                 colorPrimary: "#036D19",
                 colorBorder: "#E3F4C9",
-                colorBgContainer: "#E3F4C9",
+                colorBgContainer: "transparent",
               },
               components: {
                 DatePicker: {
@@ -263,17 +260,17 @@ export default function FindPage() {
             theme={{
               components: {
                 Select: {
-                  selectorBg: "#E3F4C9",              // Background color
-                  multipleItemBg: "#E3F4C9",          // Tags in multi-select
-                  optionSelectedBg: "#E3F4C9",        // Background color when option is selected
-                  activeOutlineColor: "transparent",
+                  selectorBg: "transparent",              // background
+                  multipleItemBg: "rgba(227, 244, 201, 0.5)",  //  tags in multi-select
+                  optionSelectedBg: "rgba(227, 244, 201, 0.7)", // background when option is selected
+                  activeOutlineColor: "#E3F4C9",        
                   controlHeight: 45,
                   borderRadius: 8,
                 },
               },
               token: {
-                colorBorder: "#E3F4C9",
-                colorPrimary: "#036D19",
+                colorBorder: "#E3F4C9",             
+                colorPrimary: "#036D19",                  
               },
             }}
           >
@@ -283,8 +280,9 @@ export default function FindPage() {
               onChange={(value) => setSelectedLocation(value)}
               style={{
                 width: 350,
-                backgroundColor: "#E3F4C9",
-                boxShadow: "0 1px 3px rgba(0,0,0,0.2)",
+                backgroundColor: "transparent",          
+                border: "0.8px solid #E3F4C9",         
+                boxShadow: "0 1px 3px rgba(0,0,0,0.1)",  
                 borderRadius: "8px",
               }}
               allowClear
@@ -302,10 +300,10 @@ export default function FindPage() {
             theme={{
               components: {
                 Select: {
-                  selectorBg: "#E3F4C9",              // Background color
-                  multipleItemBg: "#E3F4C9",          // Tags in multi-select
-                  optionSelectedBg: "#E3F4C9",        // Background color when option is selected
-                  activeOutlineColor: "transparent",
+                  selectorBg: "#transparent",              // Background color
+                  multipleItemBg: "rgba(227, 244, 201, 0.5)",  //  tags in multi-select
+                  optionSelectedBg: "rgba(227, 244, 201, 0.7)",        // Background color when option is selected
+                  activeOutlineColor: "#E3F4C9", 
                   controlHeight: 45,
                   borderRadius: 8,
                 },
@@ -322,8 +320,9 @@ export default function FindPage() {
               onChange={(value) => setSelectedFoodType(value)}
               style={{
                 width: 350,
-                backgroundColor: "#E3F4C9",
-                boxShadow: "0 1px 3px rgba(0,0,0,0.2)",
+                backgroundColor: "transparent",          
+                border: "0.8px solid #E3F4C9",         
+                boxShadow: "0 1px 3px rgba(0,0,0,0.1)",  
                 borderRadius: "8px",
               }}
               allowClear
