@@ -5,7 +5,7 @@ import { MdNotifications, MdLocationOn, MdCalendarToday, MdRestaurant, MdPeople 
 import { Modal } from 'antd';
 import CloseButton from './closeButton'; // Note: The 'C' is capitalized here
 import ShareButton from './sharebutton';
-import { deleteDoc, doc } from "firebase/firestore";
+import { deleteDoc, doc, updateDoc, arrayUnion, arrayRemove } from "firebase/firestore";
 import { db } from "@/app/firebase/config";
 
 
@@ -49,7 +49,9 @@ const EventCard = ({
   imageUrl = "/insomnia_cookies.jpeg" // default value for demo
 }: EventCardProps) => {
   const [isModalVisible, setIsModalVisible] = useState(false);
-  const [isNotified, setIsNotified] = useState(hasNotification || false);
+  const [isFollowing, setIsFollowing] = useState(
+    currentUserId ? followers.includes(currentUserId) : false
+  );
 
   const showModal = () => {
     setIsModalVisible(true);
@@ -60,9 +62,35 @@ const EventCard = ({
     setIsModalVisible(false);
   };
 
-  const handleNotifyMe = (e: React.MouseEvent) => {
+  const handleNotifyMe = async (e: React.MouseEvent) => {
     e.stopPropagation();
-    setIsNotified(!isNotified);
+    
+    if (!currentUserId) {
+      // Handle case when user is not logged in
+      console.log("User must be logged in to follow events");
+      return;
+    }
+    
+    try {
+      const eventRef = doc(db, "events", id);
+      
+      if (isFollowing) {
+        // remove user from followers
+        await updateDoc(eventRef, {
+          followers: arrayRemove(currentUserId)
+        });
+      } else {
+        // Add user to followers
+        await updateDoc(eventRef, {
+          followers: arrayUnion(currentUserId)
+        });
+      }
+      
+      setIsFollowing(!isFollowing);
+      console.log(`User ${isFollowing ? 'unfollowed' : 'followed'} event successfully`);
+    } catch (error) {
+      console.error("Error updating event followers:", error);
+    }
   };
 
   const handleDelete = async (e: React.MouseEvent) => {
@@ -133,7 +161,7 @@ const EventCard = ({
         {/* title and notification icon */}
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
           <h3 style={{ fontSize: '1.25rem', fontWeight: 'bold', margin: '0' }}>{title}</h3>
-          {isNotified && (
+          {currentUserId && isFollowing && (
             <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
               <MdNotifications size={20} />
             </div>
@@ -184,7 +212,11 @@ const EventCard = ({
           }}>
             <h2 style={{ color: 'white', margin: 0, fontSize: '24px' }}>{title}</h2>
             <div style={{ display: 'flex', gap: '10px' }}>
-              {isNotified && <MdNotifications size={24} color="white" />}
+            {currentUserId && isFollowing && (
+              <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
+                <MdNotifications size={20} />
+              </div>
+            )}
               <ShareButton 
                 title={title}
                 text={getShareText()}
@@ -342,11 +374,13 @@ const EventCard = ({
             marginBottom: '20px'
           }}>
             <div style={{ width: '90%', display: 'flex', justifyContent: 'center', gap: '15px' }}>
+            {currentUserId && (
               <CloseButton
                 onClick={handleNotifyMe}
-                label={isNotified ? "Cancel Notification" : "Notify Me"}
-                style={isNotified ? { backgroundColor: '#888', cursor: 'pointer' } : {}}
+                label={isFollowing ? "Cancel Notification" : "Notify Me"}
+                style={isFollowing ? { backgroundColor: '#888', cursor: 'pointer' } : {}}
               />
+            )}
               <CloseButton
                 onClick={handleCancel}
                 label="Close"
