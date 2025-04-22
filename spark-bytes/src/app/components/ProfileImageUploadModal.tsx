@@ -45,14 +45,17 @@ const ProfileImageUploadModal: React.FC<Props> = ({ isOpen, onClose, onUpload })
                     borderRadius: "20px",
                 }
             }}
-            bodyStyle={{
-                paddingTop: 20,
-                borderRadius: '12px',
+            styles={{
+                body: {
+                    paddingTop: 20,
+                    borderRadius: '12px',
+                }
             }}
             style={{
                 borderRadius: '12px',
             }}
         >
+
             <div style={{ textAlign: 'center' }}>
                 <Upload
                     beforeUpload={(file) => {
