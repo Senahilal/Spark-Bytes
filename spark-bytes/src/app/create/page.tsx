@@ -1,15 +1,17 @@
 "use client";
 import React, { useState, useEffect } from "react";
-import { auth } from "@/app/firebase/config";
 import { UserOutlined, LogoutOutlined, MailOutlined } from "@ant-design/icons";
 import { useRouter } from "next/navigation";
 import { useAuthState } from "react-firebase-hooks/auth";
+import { auth, db } from "@/app/firebase/config";
+import { doc, getDoc } from "firebase/firestore";
 import styles from './CreateEventPage.module.css';
 
-import { Form, Input, DatePicker, Button, Card, Row, Col, List, Tag, Select, Menu, Checkbox, Dropdown, Space } from 'antd';
+import { Form, Input, DatePicker, Button, Card, Row, Col, List, Typography, Tag, Select, Menu, Checkbox, Dropdown, Space } from 'antd';
 import { DownOutlined } from '@ant-design/icons';
 import type { DatePickerProps } from 'antd';
 import dayjs from 'dayjs';
+
 
 import utc from 'dayjs/plugin/utc';
 import timezone from 'dayjs/plugin/timezone';
@@ -19,6 +21,7 @@ import Link from 'next/link';
 import Logo from '../components/logo';
 import AccountIcon from '../components/accounticon';
 import Footer from '../components/footer';
+import ButtonComponent from '../components/button';
 
 import type { MenuInfo } from 'rc-menu/lib/interface';
 
@@ -27,6 +30,7 @@ dayjs.extend(utc);
 dayjs.extend(timezone);
 
 const easternTimeZone = 'America/New_York';
+const { Title, Text } = Typography;
 
 
 const { Item } = Form;
@@ -41,12 +45,34 @@ const CreateEventPage: React.FC = () => {
   const [selectedFoodType, setSelectedFoodType] = useState<string[]>([]);
 
   const [user, loading] = useAuthState(auth);
+  const [isAdmin, setIsAdmin] = useState(false);
+  const [isOrganizer, setIsOrganizer] = useState(false);
+
   const router = useRouter();
 
   //redirect to login if not logged in
   useEffect(() => {
     if (!loading && !user) {
       router.push("/login");
+    }
+    else{
+      const checkUser = async () => {
+        if (user) {
+          const userDoc = await getDoc(doc(db, "users", user.uid));
+          if (userDoc.exists()) {
+            const userData = userDoc.data();
+
+            if (!userData.organizer) {
+              router.push("/profile");
+            }
+
+            setIsAdmin(userData.admin === true);
+            setIsOrganizer(userData.organizer === true);
+          }
+        }
+      };
+  
+      checkUser();
     }
   }, [user, loading, router]);
 
@@ -160,9 +186,24 @@ const CreateEventPage: React.FC = () => {
           <Link href="/">
             <Logo />
           </Link>
-          <Link href="/profile">
-            <AccountIcon />
-          </Link>
+          <div style={{
+            display: 'flex',
+            justifyContent: 'flex-end',
+            alignItems: 'center',
+            position: 'absolute',
+            top: '16px',
+            right: '16px',
+            gap: '10px'
+          }}>
+            {isAdmin && (
+              <ButtonComponent href="/admin">
+                Admin
+              </ButtonComponent>
+            )}
+            <Link href="/profile">
+              <AccountIcon />
+            </Link>
+          </div>
         </div>
         <div
           style={{
@@ -173,6 +214,13 @@ const CreateEventPage: React.FC = () => {
             alignItems: "center",
           }}
         >
+          <Space>
+            <div>
+              <Text strong style={{ fontSize: "28px" }}>
+                Create a New Event
+              </Text>
+            </div>
+          </Space>
         </div>
       </div>
 
