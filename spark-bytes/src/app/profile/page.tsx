@@ -16,6 +16,7 @@ import { fetchUserIdEvents } from "@/app/firebase/repository";
 import EventCard from '../components/eventcard';
 import Logo from '../components/logo';
 import dayjs, { Dayjs } from "dayjs";
+import ButtonComponent from "../components/button";
 
 
 import { collection, addDoc } from "firebase/firestore";
@@ -27,6 +28,7 @@ const ProfilePage = () => {
     const [firstName, setFirstName] = useState("");
     const [lastName, setLastName] = useState("");
     const [phoneNumber, setPhoneNumber] = useState("");
+    const [organizer, setOrganizer] = useState(false)
     const [email, setEmail] = useState("");
     const [smsNotifications, setSmsNotifications] = useState(false);
     const [emailNotifications, setEmailNotifications] = useState(true);
@@ -35,10 +37,14 @@ const ProfilePage = () => {
 
     const [user, loading] = useAuthState(auth);
 
-    const [showMyEvents, setShowMyEvents] = useState(true);
+    const [showMyEvents, setShowMyEvents] = useState(false);
     const [userEvents, setUserEvents] = useState<any[]>([]);
 
     const [showRequestForm, setShowRequestForm] = useState(false);
+
+    const [isAdmin, setIsAdmin] = useState(false);
+    const [isOrganizer, setIsOrganizer] = useState(false);
+
 
 
     const router = useRouter();
@@ -78,9 +84,12 @@ const ProfilePage = () => {
                 setLastName(userDoc.last_name || "");
                 setPhoneNumber(userDoc.phone || "");
                 setEmail(userDoc.email || "");
+                setOrganizer(userDoc.organizer || false);
                 setSmsNotifications(userDoc.phone_notification || false);
                 setEmailNotifications(userDoc.email_notification || false);
                 setRequestPending(userDoc.request_pending || false);
+                setIsAdmin(userDoc.admin || false);
+                setIsOrganizer(userDoc.organizer || false);
             }
         } catch (err) {
             console.error("Error fetching user data:", err);
@@ -177,6 +186,25 @@ const ProfilePage = () => {
                     <Link href="/">
                         <Logo />
                     </Link>
+                    <div style={{
+                        display: 'flex',
+                        justifyContent: 'flex-end',
+                        alignItems: 'center',
+                        position: 'absolute',
+                        top: '16px',
+                        right: '16px',
+                        gap: '10px',
+                        padding: '10px',
+                    }}>
+
+
+                        {isAdmin && (
+                            <ButtonComponent href="/admin">
+                                Admin
+                            </ButtonComponent>
+                        )}
+
+                    </div>
                 </div>
                 <div
                     style={{
@@ -211,18 +239,18 @@ const ProfilePage = () => {
 
             <div style={{ display: 'flex', gap: '12px', marginTop: '20px', justifyContent: 'center' }}>
                 <Button
-                    type={showMyEvents ? "primary" : "default"}
-                    style={{ backgroundColor: showMyEvents ? "#2E7D32" : undefined }}
-                    onClick={() => setShowMyEvents(true)}
-                >
-                    My Events
-                </Button>
-                <Button
                     type={!showMyEvents ? "primary" : "default"}
                     style={{ backgroundColor: !showMyEvents ? "#2E7D32" : undefined }}
                     onClick={() => setShowMyEvents(false)}
                 >
                     Account Info
+                </Button>
+                <Button
+                    type={showMyEvents ? "primary" : "default"}
+                    style={{ backgroundColor: showMyEvents ? "#2E7D32" : undefined }}
+                    onClick={() => setShowMyEvents(true)}
+                >
+                    My Events
                 </Button>
             </div>
 
@@ -272,13 +300,15 @@ const ProfilePage = () => {
                                 minHeight: '60vh',
                             }}
                         >
-                            <Button
-                                type="primary"
-                                style={{ backgroundColor: "#2E7D32" }}
-                                onClick={() => router.push("/create")}
-                            >
-                                + Post Event
-                            </Button>
+                            {isOrganizer && (
+                                <Button
+                                    type="primary"
+                                    style={{ backgroundColor: "#2E7D32" }}
+                                    onClick={() => router.push("/create")}
+                                >
+                                    + Post Event
+                                </Button>
+                            )}
                             {userEvents.map(event => {
                                 const start = event.start?.toDate?.();
                                 const formattedDate = start ? dayjs(start).format("MM/DD/YYYY") : "Unknown Date";
@@ -425,13 +455,16 @@ const ProfilePage = () => {
 
                     {/* Request to be Organizer */}
                     <div style={{ maxWidth: "1024px", margin: "48px auto 0 auto" }}>
-                        <Title level={4}>
-                            Want to be an Organizer?
-                        </Title>
+                        <Title level={4}>Organizer Status</Title>
 
-                        {requestPending ? (
-                            <Tag color="processing" style={{ marginLeft: "30px" }}>Pending Approval</Tag>
-
+                        {user && organizer ? (
+                            <Tag color="success" style={{ marginLeft: "30px", fontSize: "16px", padding: "5px 12px" }}>
+                                You are an Organizer
+                            </Tag>
+                        ) : requestPending ? (
+                            <Tag color="processing" style={{ marginLeft: "30px" }}>
+                                Pending Approval
+                            </Tag>
                         ) : !showRequestForm ? (
                             <Button
                                 type="dashed"
@@ -465,8 +498,8 @@ const ProfilePage = () => {
                                 </div>
                             </Form>
                         )}
-
                     </div>
+
 
                     {/* Sign Out */}
                     <div style={{ textAlign: "center", marginTop: "48px" }}>

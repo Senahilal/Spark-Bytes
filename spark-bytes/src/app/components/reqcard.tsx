@@ -1,67 +1,122 @@
 "use client"
 
 import React, { useState } from 'react';
-import { MdNotifications, MdLocationOn, MdCalendarToday, MdRestaurant, MdClose, MdShare, MdPeople } from 'react-icons/md';
-import { Modal } from 'antd';
-import CloseButton from './closeButton'; // Note: The 'C' is capitalized here
+import { MdCalendarToday } from 'react-icons/md';
+import { Button, Tag, Modal } from 'antd';
+import { doc, updateDoc } from "firebase/firestore";
+import { db } from "@/app/firebase/config";
 
-// interface - add more if needed
 interface ReqCardProps {
   id: string;
+  user_id: string;
   user_name: string;
   message: string;
   status: string;
-    date: string;
-    time: string;
+  date: string;
+  time: string;
 }
 
 const ReqCard = ({
-    id,
-    user_name,
-    message,
-    status,
-    date,
-    time
+  id,
+  user_id,
+  user_name,
+  message,
+  status,
+  date,
+  time
 }: ReqCardProps) => {
+  const [isModalVisible, setIsModalVisible] = useState(false);
+  const [currentStatus, setCurrentStatus] = useState(status || "pending");
 
+  const handleDecision = async (decision: "accepted" | "rejected") => {
+    try {
+      await updateDoc(doc(db, "requests", id), {
+        status: decision
+      });
+
+      if (decision === "accepted") {
+        await updateDoc(doc(db, "users", user_id), {
+          organizer: true
+        });
+      }
+
+      await updateDoc(doc(db, "users", user_id), {
+        request_pending: false
+      });
+
+      setCurrentStatus(decision);
+      setIsModalVisible(false);
+    } catch (err) {
+      console.error("Failed to update request:", err);
+    }
+  };
 
   return (
     <>
-      {/* card container */}
+      {/* Summary Card */}
       <div
+        onClick={() => setIsModalVisible(true)}
         style={{
-          width: '280px',
+          width: '100%',
           borderRadius: '12px',
           boxShadow: '0 4px 12px rgba(0,0,0,0.08)',
           backgroundColor: 'white',
-          padding: '25px',
+          padding: '20px',
           display: 'flex',
           flexDirection: 'column',
-          gap: '13px',
+          gap: '10px',
           cursor: 'pointer',
           transition: 'transform 0.2s, box-shadow 0.2s',
         }}
       >
-        {/* User Name */}
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-          <h3 style={{ fontSize: '1.25rem', fontWeight: 'bold', margin: '0' }}>{user_name}</h3>
+          <h3 style={{ margin: 0 }}>Request from {user_name}</h3>
+          <Tag color={
+            currentStatus === "accepted" ? "success" :
+              currentStatus === "rejected" ? "error" : "processing"
+          }>
+            {currentStatus.charAt(0).toUpperCase() + currentStatus.slice(1)}
+          </Tag>
         </div>
 
-        {/* message */}
-        <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-          <span style={{ fontSize: '0.9rem' }}>{message}</span>
-        </div>
-
-        {/* date */}
         <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
           <MdCalendarToday size={16} />
-          <span style={{ fontSize: '0.9rem' }}>{date} @{time}</span>
+          <span>{date} @ {time}</span>
         </div>
-
       </div>
+
+      {/* Modal for request details - showing accept/reject buttons*/}
+      <Modal
+        title={`Organizer Request - ${user_name}`}
+        open={isModalVisible}
+        onCancel={() => setIsModalVisible(false)}
+        footer={[
+          <Button
+            key="reject" 
+            danger 
+            onClick={() => handleDecision("rejected")}
+            disabled={status === "accepted" || status === "rejected"}>
+            Reject
+          </Button>,
+          <Button
+            key="accept"
+            type="primary"
+            style={{ backgroundColor: "#2E7D32" }}
+            onClick={() => handleDecision("accepted")}
+            disabled={status === "accepted" || status === "rejected"}
+          >
+            Accept
+          </Button>,
+        ]}
+      >
+        <p style={{ fontWeight: 500, marginBottom: 4 }}>Submitted on:</p>
+        <p style={{ marginBottom: 16 }}>{date} at {time}</p>
+
+        <p style={{ fontWeight: 500, marginBottom: 4 }}>Message:</p>
+        <p>{message}</p>
+      </Modal>
     </>
   );
 };
 
 export default ReqCard;
-

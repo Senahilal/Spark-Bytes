@@ -11,16 +11,41 @@ import Footer from '../components/footer';
 import Button from '../components/button';
 import dayjs, { Dayjs } from "dayjs";
 import { fetchAllEvents } from '../firebase/repository';
+import { useAuthState } from "react-firebase-hooks/auth";
+import { auth, db } from "@/app/firebase/config";
+import { doc, getDoc } from "firebase/firestore";
+
 
 const { Search } = Input;
 const { Option } = Select;
 
 export default function FindPage() {
+
+  const [user] = useAuthState(auth);
+  const [isAdmin, setIsAdmin] = useState(false);
+  const [isOrganizer, setIsOrganizer] = useState(false);
+
   const [searchQuery, setSearchQuery] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
 
   const [events, setEvents] = useState<any[]>([]);
   const originalEventsRef = useRef<any[]>([]);
+
+  useEffect(() => {
+    const checkUser = async () => {
+      if (user) {
+        const userDoc = await getDoc(doc(db, "users", user.uid));
+        if (userDoc.exists()) {
+          const userData = userDoc.data();
+          setIsAdmin(userData.admin === true);
+          setIsOrganizer(userData.organizer === true);
+        }
+      }
+    };
+
+    checkUser();
+  }, [user]);
+
 
 
   //fetching all events
@@ -75,31 +100,6 @@ export default function FindPage() {
     applyFilters();
   }, [selectedDate, selectedLocation, selectedFoodType]);
 
-
-
-
-  // !! Placeholders - change these !!
-  const events_placeholder = [
-    {
-      id: '1',
-      title: 'Cookie O\' Clock',
-      location: 'BU Spark',
-      date: '3/19',
-      time: '3pm',
-      foodType: 'Cookies',
-      hasNotification: true
-    },
-    {
-      id: '2',
-      title: 'Cookie O\' Clock',
-      location: 'BU Spark',
-      date: '3/19',
-      time: '3pm',
-      foodType: 'Cookies',
-      hasNotification: false
-    }
-  ];
-
   const handleSearch = (value: string) => {
     setSearchQuery(value);
     setCurrentPage(1);
@@ -130,12 +130,22 @@ export default function FindPage() {
             display: 'flex',
             justifyContent: 'flex-end',
             alignItems: 'center',
+            position: 'absolute',
+            top: '16px',
+            right: '16px',
             gap: '10px'
           }}>
-            <Button href="/create">
+            {isOrganizer && (
+              <Button href="/create">
               Post an Event
             </Button>
-
+            )}
+            
+            {isAdmin && (
+              <Button href="/admin">
+                Admin
+              </Button>
+            )}
             <Link href="/profile">
               <AccountIcon />
             </Link>
@@ -345,32 +355,32 @@ export default function FindPage() {
           }}>
             {events.map(event => {
 
-            const start = event.start?.toDate?.();
-            const formattedDate = start ? dayjs(start).format("MM/DD/YYYY") : "Unknown Date";
-            const formattedTime = start ? dayjs(start).format("h:mm A") : "Unknown Time";
-            const end = event.end?.toDate?.();
-            const formattedEndTime = start ? dayjs(end).format("h:mm A") : "Unknown Time";
+              const start = event.start?.toDate?.();
+              const formattedDate = start ? dayjs(start).format("MM/DD/YYYY") : "Unknown Date";
+              const formattedTime = start ? dayjs(start).format("h:mm A") : "Unknown Time";
+              const end = event.end?.toDate?.();
+              const formattedEndTime = start ? dayjs(end).format("h:mm A") : "Unknown Time";
 
-            return (
-              <EventCard
-                key={event.id}
-                id={event.id}
-                user={event.user}
-                title={event.title}
-                area={event.area}
-                location={event.location}
-                date={formattedDate}
-                time={formattedTime}
-                description={event.description}
-                endTime={formattedEndTime}
-                foodType={event.foodType || event.food_type?.join(", ")}
-                foodProvider={event.foodProvider}
-                followers={event.followers}
-                hasNotification={event.hasNotification}
-                imageUrl={event.imageURL}
-              />
-            );
-          })}
+              return (
+                <EventCard
+                  key={event.id}
+                  id={event.id}
+                  user={event.user}
+                  title={event.title}
+                  area={event.area}
+                  location={event.location}
+                  date={formattedDate}
+                  time={formattedTime}
+                  description={event.description}
+                  endTime={formattedEndTime}
+                  foodType={event.foodType || event.food_type?.join(", ")}
+                  foodProvider={event.foodProvider}
+                  followers={event.followers}
+                  hasNotification={event.hasNotification}
+                  imageUrl={event.imageURL}
+                />
+              );
+            })}
 
           </div>
         )}
