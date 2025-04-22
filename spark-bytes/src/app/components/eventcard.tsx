@@ -1,10 +1,10 @@
 "use client"
 
 import React, { useState } from 'react';
-import { MdNotifications, MdLocationOn, MdCalendarToday, MdRestaurant, MdClose, MdShare, MdPeople } from 'react-icons/md';
+import { MdNotifications, MdLocationOn, MdCalendarToday, MdRestaurant, MdPeople } from 'react-icons/md';
 import { Modal } from 'antd';
 import CloseButton from './closeButton'; // Note: The 'C' is capitalized here
-
+import ShareButton from './sharebutton';
 import { deleteDoc, doc } from "firebase/firestore";
 import { db } from "@/app/firebase/config";
 
@@ -77,6 +77,10 @@ const EventCard = ({
     } catch (error) {
       console.error("Error deleting event:", error);
     }
+  };
+
+  const getShareText = () => {
+    return `Check out this event: ${title} - ${foodType} at ${location} on ${date} at ${time}`;
   };
 
 
@@ -181,7 +185,11 @@ const EventCard = ({
             <h2 style={{ color: 'white', margin: 0, fontSize: '24px' }}>{title}</h2>
             <div style={{ display: 'flex', gap: '10px' }}>
               {isNotified && <MdNotifications size={24} color="white" />}
-              <MdShare size={24} color="white" />
+              <ShareButton 
+                title={title}
+                text={getShareText()}
+                url={`${window.location.origin}/events/${id}`} // Adjust the URL structure as needed
+              />
             </div>
           </div>
 
