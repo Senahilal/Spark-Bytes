@@ -1,6 +1,6 @@
 "use client";
 import React, { useState, useEffect } from "react";
-import { UserOutlined, LogoutOutlined, MailOutlined } from "@ant-design/icons";
+import { UserOutlined, LogoutOutlined, MailOutlined, DownOutlined } from "@ant-design/icons";
 import { useRouter } from "next/navigation";
 import { useAuthState } from "react-firebase-hooks/auth";
 import { auth, db } from "@/app/firebase/config";
@@ -8,10 +8,8 @@ import { doc, getDoc } from "firebase/firestore";
 import styles from './CreateEventPage.module.css';
 
 import { Form, Input, DatePicker, Button, Card, Row, Col, List, Typography, Tag, Select, Menu, Checkbox, Dropdown, Space } from 'antd';
-import { DownOutlined } from '@ant-design/icons';
 import type { DatePickerProps } from 'antd';
 import dayjs from 'dayjs';
-
 
 import utc from 'dayjs/plugin/utc';
 import timezone from 'dayjs/plugin/timezone';
@@ -22,21 +20,18 @@ import Logo from '../components/logo';
 import AccountIcon from '../components/accounticon';
 import Footer from '../components/footer';
 import ButtonComponent from '../components/button';
+import ImageSearch from '../components/ImageSearch';  // Import ImageSearch component
 
 import type { MenuInfo } from 'rc-menu/lib/interface';
-
 
 dayjs.extend(utc);
 dayjs.extend(timezone);
 
 const easternTimeZone = 'America/New_York';
 const { Title, Text } = Typography;
-
-
 const { Item } = Form;
 
 const CreateEventPage: React.FC = () => {
-
   const [form] = Form.useForm();
   const [eventDate, setEventDate] = useState<dayjs.Dayjs>(dayjs());
   const [endDate, setEndDate] = useState<dayjs.Dayjs>(dayjs());
@@ -48,30 +43,30 @@ const CreateEventPage: React.FC = () => {
   const [isAdmin, setIsAdmin] = useState(false);
   const [isOrganizer, setIsOrganizer] = useState(false);
 
+  // State for image selection
+  const [selectedImageUrl, setSelectedImageUrl] = useState<string>("");  // URL of selected image (if any)
+  const [showImageSearch, setShowImageSearch] = useState<boolean>(false); // Controls display of ImageSearch modal
+
   const router = useRouter();
 
-  //redirect to login if not logged in
+  // Redirect to login if not logged in, or to profile if not an organizer
   useEffect(() => {
     if (!loading && !user) {
       router.push("/login");
-    }
-    else{
+    } else {
       const checkUser = async () => {
         if (user) {
           const userDoc = await getDoc(doc(db, "users", user.uid));
           if (userDoc.exists()) {
             const userData = userDoc.data();
-
             if (!userData.organizer) {
               router.push("/profile");
             }
-
             setIsAdmin(userData.admin === true);
             setIsOrganizer(userData.organizer === true);
           }
         }
       };
-  
       checkUser();
     }
   }, [user, loading, router]);
@@ -87,7 +82,6 @@ const CreateEventPage: React.FC = () => {
     );
   };
 
-
   const menu = (
     <Menu>
       {options.map((item) => (
@@ -98,31 +92,15 @@ const CreateEventPage: React.FC = () => {
     </Menu>
   );
 
-  //Used coPilot to help with the form submission
+  // Handle form submission to create a new event
   const handleFormSubmit = async () => {
     try {
-      const user = auth.currentUser;
-      if (!user) {
+      const currentUser = auth.currentUser;
+      if (!currentUser) {
         console.error("No user is signed in.");
         return;
       }
-
       const values = form.getFieldsValue();
-      /** 
-      const eventData = {
-        title: values.title,
-        location: values.location,
-        area: values.area,
-        start: eventDate ? eventDate.toDate() : null,
-        end: values.endDate ? dayjs(values.endDate).toDate() : null,
-        food_type: selectedFoodType,
-        user: user.uid,
-        createdAt: new Date(),
-        description: values.description,
-  
-      };
-      */
-
       const eventData: LocalEvent = {
         title: values.title,
         location: values.location,
@@ -130,18 +108,16 @@ const CreateEventPage: React.FC = () => {
         start: eventDate.toDate(),
         end: endDate.toDate(),
         food_type: selectedFoodType,
-        user: user.uid,
+        user: currentUser.uid,
         date: new Date(),
         description: values.description,
         food_provider: foodItems,
-        followers: [user.uid],
+        followers: [currentUser.uid],
         created_at: new Date(),
-        last_updated_by: user.uid,
+        last_updated_by: currentUser.uid,
+        imageUrl: selectedImageUrl  // Include selected image URL (or default will be used if empty)
       };
-
       await createEvent(eventData);
-
-
       router.push("/"); // Navigate to dashboard after successful submission
     } catch (error) {
       console.error("Error adding document: ", error);
@@ -161,16 +137,35 @@ const CreateEventPage: React.FC = () => {
     setFoodItems(newItems);
   };
 
+  // Handlers for image selection
+  const handleImageSelect = (imageUrl: string) => {
+    // When an image is chosen from ImageSearch
+    setSelectedImageUrl(imageUrl);
+    setShowImageSearch(false);  // close the image search modal
+  };
+
+  const handleRemoveImage = () => {
+    // Remove the selected image
+    setSelectedImageUrl("");
+    setShowImageSearch(false);
+  };
+
+  const handleUpdateImage = () => {
+    // Reopen the image search to choose a new image
+    setSelectedImageUrl("");
+    setShowImageSearch(true);
+  };
+
   const onFinish = (values: any) => {
+    // (Not used for submission in current flow, but kept for potential future use)
     const eventData = {
       ...values,
       date: eventDate ? eventDate.toISOString() : null,
       foodItems: foodItems,
     };
     console.log('Event data:', eventData);
-    // Handle form submission here
+    // Handle form submission via onFinish if needed
   };
-
 
   return (
     <>
@@ -272,6 +267,31 @@ const CreateEventPage: React.FC = () => {
                     </Form.Item>
                   </Col>
                 </Row>
+
+                {/* Image selection field */}
+                <Form.Item label="Image">
+                  {selectedImageUrl ? (
+                    // If an image is selected, show a thumbnail preview with Update/Remove options
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                      <img 
+                        src={selectedImageUrl} 
+                        alt="Event image" 
+                        style={{ width: 80, height: 80, objectFit: 'cover', borderRadius: 4 }} 
+                      />
+                      <Space>
+                        <Button size="small" onClick={handleUpdateImage}>Update Image</Button>
+                        <Button size="small" danger onClick={handleRemoveImage}>Remove</Button>
+                      </Space>
+                    </div>
+                  ) : (
+                    // If no image selected, show button to add an image or the image search component if activated
+                    !showImageSearch ? (
+                      <Button onClick={() => setShowImageSearch(true)}>Add Image</Button>
+                    ) : (
+                      <ImageSearch onImageSelect={handleImageSelect} />
+                    )
+                  )}
+                </Form.Item>
               </Card>
             </Col>
 
@@ -299,8 +319,8 @@ const CreateEventPage: React.FC = () => {
                 </Dropdown>
               </Card>
 
-              <Card title="Food Provider">
-                {/* Label outside Form.Item */}
+              <Card title="Food Provider" className={styles.card}>
+                {/* Food provider input and list */}
                 <Space.Compact style={{ width: '100%' }}>
                   <Input
                     placeholder="Enter provider and press Enter"
@@ -318,7 +338,7 @@ const CreateEventPage: React.FC = () => {
                   </Button>
                 </Space.Compact>
 
-                {/* Tags below input */}
+                {/* Display added food providers as tags */}
                 <div style={{ marginTop: 8 }}>
                   {foodItems.map((item, index) => (
                     <Tag
@@ -332,11 +352,10 @@ const CreateEventPage: React.FC = () => {
                   ))}
                 </div>
               </Card>
-
             </Col>
           </Row>
 
-          {/* Form buttons */}
+          {/* Form action buttons */}
           <div style={{ marginTop: 32, display: 'flex', justifyContent: 'center', gap: '16px' }}>
             <Button danger size="large" style={{ width: 200 }} onClick={() => router.back()}>
               Cancel
@@ -345,7 +364,6 @@ const CreateEventPage: React.FC = () => {
               POST EVENT
             </Button>
           </div>
-
         </Form>
       </div>
 
@@ -355,5 +373,3 @@ const CreateEventPage: React.FC = () => {
 };
 
 export default CreateEventPage;
-
-
