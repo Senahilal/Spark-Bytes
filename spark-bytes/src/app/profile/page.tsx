@@ -15,35 +15,85 @@ import { message, Tag } from "antd";
 import { fetchUserIdEvents } from "@/app/firebase/repository";
 import EventCard from '../components/eventcard';
 import Logo from '../components/logo';
-import dayjs, { Dayjs } from "dayjs";
+import dayjs from "dayjs";
 import ButtonComponent from "../components/button";
-
+import { EditFilled } from "@ant-design/icons";
 
 import { collection, addDoc } from "firebase/firestore";
-import { db } from "@/app/firebase/config"; // make sure this import exists
+import { db } from "@/app/firebase/config";
+import ProfileImageUploadModal from '../components/ProfileImageUploadModal';
+import { uploadProfileImage, updateUserProfileImageUrl } from "../firebase/repository";
+
 
 const { Title, Text } = Typography;
 
 const ProfilePage = () => {
+    const [user, loading] = useAuthState(auth);
+
+    //user information
     const [firstName, setFirstName] = useState("");
     const [lastName, setLastName] = useState("");
     const [phoneNumber, setPhoneNumber] = useState("");
     const [organizer, setOrganizer] = useState(false)
     const [email, setEmail] = useState("");
-    const [smsNotifications, setSmsNotifications] = useState(false);
+    const [profileImageUrl, setProfileImageUrl] = useState<string | null>(null);
+
+    //user status
+    const [isAdmin, setIsAdmin] = useState(false);
+    const [isOrganizer, setIsOrganizer] = useState(false);
+    const [requestPending, setRequestPending] = useState(false); //if user has pending request -> true
+    const [showRequestForm, setShowRequestForm] = useState(false); //if requestPending is false and isOrganizer is false showRequestForm-> true
+
+    //notification preferences
+    const [smsNotifications, setSmsNotifications] = useState(false); //wont be used for now
     const [emailNotifications, setEmailNotifications] = useState(true);
+
+
+    //editing form
     const [isEditing, setIsEditing] = useState(false);
-    const [requestPending, setRequestPending] = useState(false);
+    
 
-    const [user, loading] = useAuthState(auth);
-
+    //My events section
     const [showMyEvents, setShowMyEvents] = useState(false);
     const [userEvents, setUserEvents] = useState<any[]>([]);
 
-    const [showRequestForm, setShowRequestForm] = useState(false);
+    //upload profile pic modal
+    const [showModal, setShowModal] = useState(false);
 
-    const [isAdmin, setIsAdmin] = useState(false);
-    const [isOrganizer, setIsOrganizer] = useState(false);
+
+    //handle profile picture upload and fetch new url
+    const handleUpload = async (file: File) => {
+
+        //check if user and file exist
+        if (!user || !file) {
+            message.error("Select a file and ensure you're logged in.");
+            return;
+        }
+
+        try {
+            //upload profile picture into firebase storage
+            const url = await uploadProfileImage(user.uid, file);
+
+            //if url doesnt exist show error message
+            if (!url) {
+                message.error("Upload failed. Please try again.");
+                return;
+            }
+
+            //update profileImageUrl field in user document in firebase database
+            await updateUserProfileImageUrl(user.uid, url);
+
+            //update url to display in profile page
+            setProfileImageUrl(url);
+            message.success("Profile image updated!");
+
+            //close modal after upload
+            setShowModal(false);
+        } catch (error) {
+            console.error("Upload error:", error);
+            message.error("An error occurred during upload. Please try again.");
+        }
+    };
 
 
 
@@ -90,6 +140,8 @@ const ProfilePage = () => {
                 setRequestPending(userDoc.request_pending || false);
                 setIsAdmin(userDoc.admin || false);
                 setIsOrganizer(userDoc.organizer || false);
+                setProfileImageUrl(userDoc.profileImageUrl || null);
+                //console.log("User image url:", profileImageUrl);
             }
         } catch (err) {
             console.error("Error fetching user data:", err);
@@ -104,6 +156,7 @@ const ProfilePage = () => {
         }
     };
 
+    //handle event deletion
     const handleEventDelete = (deletedEventId: string) => {
         setUserEvents(prev => prev.filter(event => event.id !== deletedEventId));
     };
@@ -128,13 +181,16 @@ const ProfilePage = () => {
         }
     };
 
+    //////////////////////////////////////////
+    //wont be implemented for now
     //handle sms switch
-    const handleSMSToggle = async (checked: boolean) => {
-        setSmsNotifications(checked);
-        if (user) {
-            await updateUserData(user, { phone_notification: checked });
-        }
-    };
+    // const handleSMSToggle = async (checked: boolean) => {
+    //     setSmsNotifications(checked);
+    //     if (user) {
+    //         await updateUserData(user, { phone_notification: checked });
+    //     }
+    // };
+    //////////////////////////////////////////
 
     //handle email switch
     const handleEmailToggle = async (checked: boolean) => {
@@ -145,7 +201,7 @@ const ProfilePage = () => {
     };
 
 
-
+    //handle organizer request form submission
     const handleRequestSubmit = async (values: any) => {
         if (!user) return;
         try {
@@ -215,14 +271,44 @@ const ProfilePage = () => {
                         alignItems: "center",
                     }}
                 >
-                    <Space>
-                        <Image
-                            src={ProfileImagePlaceholder}
-                            alt="Profile Picture"
-                            width={80}
-                            height={80}
-                            style={{ borderRadius: "50%" }}
-                        />
+                    <Space size={25}>
+                        <div style={{ position: "relative", width: 80, height: 80 }}>
+                            <Image
+                                src={profileImageUrl || ProfileImagePlaceholder}
+                                alt="Profile Picture"
+                                width={80}
+                                height={80}
+                                style={{ borderRadius: "50%", objectFit: "cover" }}
+                            />
+                            <button
+                                onClick={() => setShowModal(true)} // handle later
+                                style={{
+                                    position: "absolute",
+                                    bottom: -4,
+                                    right: -4,
+                                    width: 24,
+                                    height: 24,
+                                    borderRadius: "50%",
+                                    backgroundColor: "white",
+                                    border: "1px solid #ccc",
+                                    boxShadow: "0 1px 3px rgba(0,0,0,0.2)",
+                                    display: "flex",
+                                    alignItems: "center",
+                                    justifyContent: "center",
+                                    cursor: "pointer",
+                                    padding: 0,
+                                }}
+                            >
+                                <EditFilled style={{ fontSize: 14, color: "#333" }} />
+                            </button>
+
+                            <ProfileImageUploadModal
+                                isOpen={showModal}
+                                onClose={() => setShowModal(false)}
+                                onUpload={handleUpload}
+                            />
+                        </div>
+
                         <div>
                             <Text strong style={{ fontSize: "18px" }}>
                                 {firstName || "Name"} {lastName || "Last Name"}

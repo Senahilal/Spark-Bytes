@@ -84,7 +84,7 @@ export default function Login() {
                 >
                   Remember me
                 </Checkbox>
-                <a href="/forgot-password" style={{ fontSize: 14 }}>
+                <a href="/forgot-password" style={{ fontSize: 14, color: "#036D19" }}>
                   Forgot password?
                 </a>
               </div>
@@ -94,6 +94,7 @@ export default function Login() {
                 block
                 onClick={handleLogin}
                 loading={loading}
+                style={{ backgroundColor: "#036D19", borderColor: "#036D19" }}
               >
                 Log In
               </Button>
@@ -108,7 +109,7 @@ export default function Login() {
           
           <div style={{ textAlign: "center" }}>
             <Text>
-              Don't have an account? <a href="/signup">Sign up</a>
+              Don't have an account? <a href="/signup" style={{color: "#036D19"}}>Sign up</a>
             </Text>
           </div>
         </Card>
