@@ -1,8 +1,9 @@
 'use client';
 // app/admin/page.tsx
-import AdminClient from './AdminClient';
-import React from 'react';
+import dynamic from 'next/dynamic'
+
+const AdminClient = dynamic(() => import('./AdminClient'), { ssr: false })
 
 export default function Page() {
-  return <AdminClient />;
+  return <AdminClient />
 }
