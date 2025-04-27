@@ -3,7 +3,7 @@
 import React, { useState } from 'react';
 import { MdNotifications, MdLocationOn, MdCalendarToday, MdRestaurant, MdPeople } from 'react-icons/md';
 import { Modal } from 'antd';
-import CloseButton from './closeButton'; // Note: The 'C' is capitalized here
+import CloseButton from './closeButton';
 import ShareButton from './sharebutton';
 import { deleteDoc, doc, updateDoc, arrayUnion, arrayRemove } from "firebase/firestore";
 import { db } from "@/app/firebase/config";
@@ -14,27 +14,27 @@ interface EventCardProps {
   id: string;
   user: string; //user id of the event organizer
   title: string;
-  area: string;
+  area?: string;
   location: string;
   date: string;
   time: string;
-  endTime: string;
-  description: string;
+  endTime?: string;
+  description?: string;
   foodType: string;
-  foodProvider: string;
+  foodProvider?: string;
   followers: string[];
-  hasNotification?: boolean; // optional
-  address?: string; // added for modal detail view
-  imageUrl?: string; // added for modal detail view
-  currentUserId?: string; // optional - user id of currently logged in user
-  onDelete?: (id: string) => void; //optional - passing this prop from only profile page
+  hasNotification?: boolean;
+  address?: string;
+  imageUrl?: string; 
+  currentUserId?: string;
+  onDelete?: (id: string) => void; 
 }
 
 const EventCard = ({
   id,
   user, //event organizer
   currentUserId,//logged in user
-  onDelete, //optional - passing this prop from only profile page
+  onDelete, 
   title,
   area,
   location,
@@ -46,7 +46,7 @@ const EventCard = ({
   followers,
   hasNotification,
   // address = "665 Commonwealth Ave", // default value for demo
-  imageUrl = "/insomnia_cookies.jpeg" // default value for demo
+  imageUrl = "/insomnia_cookies.jpeg"
 }: EventCardProps) => {
   const [isModalVisible, setIsModalVisible] = useState(false);
   const [isFollowing, setIsFollowing] = useState(
