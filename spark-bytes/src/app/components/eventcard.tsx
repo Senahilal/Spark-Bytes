@@ -50,8 +50,9 @@ const EventCard = ({
 }: EventCardProps) => {
   const [isModalVisible, setIsModalVisible] = useState(false);
   const [isFollowing, setIsFollowing] = useState(
-    currentUserId ? followers.includes(currentUserId) : false
+    currentUserId && Array.isArray(followers) ? followers.includes(currentUserId) : false
   );
+  
 
   const showModal = () => {
     setIsModalVisible(true);

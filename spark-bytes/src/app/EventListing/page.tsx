@@ -370,13 +370,14 @@ export default function FindPage() {
                   location={event.location}
                   date={formattedDate}
                   time={formattedTime}
-                  description={event.description}
                   endTime={formattedEndTime}
+                  description={event.description}
                   foodType={event.foodType || event.food_type?.join(", ")}
                   foodProvider={event.foodProvider}
                   followers={event.followers}
                   hasNotification={event.hasNotification}
                   imageUrl={event.imageURL}
+                  currentUserId={user?.uid}
                 />
               );
             })}
