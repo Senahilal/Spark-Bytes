@@ -1,3 +1,4 @@
+'use client';
 // app/EventListing/page.tsx
 import dynamic from 'next/dynamic';
 import React from 'react';
