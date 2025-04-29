@@ -60,6 +60,19 @@ const ProfilePage = () => {
     //upload profile pic modal
     const [showModal, setShowModal] = useState(false);
 
+    const router = useRouter();
+
+    //redirect to login if not logged in
+    //if logged in fetch user data and display
+    useEffect(() => {
+        if (!loading && !user) {
+            router.push("/login");
+        } else if (user) {
+            fetchData(user);
+            fetchUserEvents(user.uid);
+        }
+    }, [user, loading, router]);
+
 
     //handle profile picture upload and fetch new url
     const handleUpload = async (file: File) => {
@@ -95,34 +108,16 @@ const ProfilePage = () => {
         }
     };
 
-
-
-    const router = useRouter();
-
-    //redirect to login if not logged in
-    //if logged in fetch user data and display
-    useEffect(() => {
-        if (!loading && !user) {
-            router.push("/login");
-        } else if (user) {
-            fetchData(user);
-            fetchUserEvents(user.uid);
-        }
-    }, [user, loading, router]);
-
-
     const handleSignOut = async () => {
         try {
             await signOut(auth); // 1. Firebase sign out
             localStorage.removeItem("user"); // clear local storage
-            router.push("/login"); // 4. Redirect to login
+            router.push("/"); // 4. Redirect to home page
         } catch (error) {
             console.error("Sign out error:", error);
             message.error("Failed to sign out");
         }
     };
-
-
 
 
     //fetch user data
