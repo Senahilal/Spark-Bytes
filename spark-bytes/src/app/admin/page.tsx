@@ -2,13 +2,12 @@
 
 import React, { useState, useEffect, useRef } from 'react';
 import Link from 'next/link';
-import { Input, Dropdown, Space, Typography, Pagination, DatePicker, Select, ConfigProvider } from 'antd';
+import { Input, Dropdown, Button, Space, Typography, Pagination, DatePicker, Select, ConfigProvider } from 'antd';
 import { SearchOutlined, DownOutlined } from '@ant-design/icons';
 import Logo from '../components/logo';
 import AccountIcon from '../components/accounticon';
 import ReqCard from '../components/reqcard';
 import Footer from '../components/footer';
-import Button from '../components/button';
 import dayjs from "dayjs";
 import { fetchAllRequests } from '../firebase/repository';
 import { useAuthState } from "react-firebase-hooks/auth";
@@ -23,6 +22,8 @@ export default function FindPage() {
 
   const [requests, setRequests] = useState<any[]>([]);
   const originalReqRef = useRef<any[]>([]);
+
+  const [selectedStatus, setSelectedStatus] = useState("all");
 
 
   //fetching all events
@@ -40,6 +41,11 @@ export default function FindPage() {
     };
     loadRequests();
   }, [user]);
+
+  const filteredRequests = selectedStatus === "all"
+    ? requests
+    : requests.filter((req) => req.status === selectedStatus);
+
 
 
   return (
@@ -73,9 +79,9 @@ export default function FindPage() {
 
             <div>
               <Text strong style={{ fontSize: "28px" }}>
-              Organizer Requests
+                Organizer Requests
               </Text>
-              </div>
+            </div>
           </Space>
         </div>
       </div>
@@ -86,6 +92,23 @@ export default function FindPage() {
         {/*FILTER*/}
         <Space size="middle" style={{ marginBottom: 24 }}>
         </Space>
+
+        <div style={{ marginBottom: 24, display: 'flex', gap: '12px' }}>
+          {["all", "pending", "accepted", "rejected"].map((status) => (
+            <Button
+              key={status}
+              type={selectedStatus === status ? "primary" : "default"}
+              style={{
+                backgroundColor: selectedStatus === status ? "#2E7D32" : undefined,
+                borderRadius: "20px"
+              }}
+              onClick={() => setSelectedStatus(status)}
+            >
+              {status.charAt(0).toUpperCase() + status.slice(1)}
+            </Button>
+          ))}
+        </div>
+
         {/* FILTER ENDS HERE */}
 
         {/* Event cards grid */}
@@ -96,11 +119,12 @@ export default function FindPage() {
         ) : (
           <div style={{
             display: 'grid',
+            minHeight: '50%',
             gridTemplateColumns: 'repeat(auto-fill, minmax(900px, 1fr))',
             gap: '24px',
             marginBottom: '40px'
           }}>
-            {requests.map(request => {
+            {filteredRequests.map(request => {
 
               const start = request.created_at?.toDate?.();
               const formattedDate = start ? dayjs(start).format("MM/DD/YYYY") : "Unknown Date";
