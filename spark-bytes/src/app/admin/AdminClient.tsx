@@ -69,7 +69,7 @@ export default function AdminClient() {
             </Link>
           </div>
         </div>
-        
+
         <div
           style={{
             maxWidth: "1024px",
@@ -90,7 +90,7 @@ export default function AdminClient() {
       </div>
 
       {/* Main content */}
-      <div style={{ padding: '20px', maxWidth: '1200px', margin: '0 auto', flex: 1 }}>
+      <div style={{ padding: '20px', maxWidth: '1200px', minHeight: '60vh', margin: '0 auto', flex: 1 }}>
 
         {/* FILTER BUTTONS (always rendered) */}
         <div style={{ textAlign: "center", marginBottom: 24, display: 'flex', justifyContent: 'center', gap: '12px' }}>
@@ -117,7 +117,6 @@ export default function AdminClient() {
         ) : (
           <div style={{
             display: 'grid',
-            minHeight: '50%',
             gridTemplateColumns: 'repeat(auto-fill, minmax(900px, 1fr))',
             gap: '24px',
             marginBottom: '40px'
