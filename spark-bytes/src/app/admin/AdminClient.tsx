@@ -54,10 +54,22 @@ export default function AdminClient() {
           <Link href="/">
             <Logo />
           </Link>
-          <Link href="/profile">
-            <AccountIcon />
-          </Link>
+
+          <div style={{
+            display: 'flex',
+            justifyContent: 'flex-end',
+            alignItems: 'center',
+            position: 'absolute',
+            top: '16px',
+            right: '16px',
+            gap: '10px'
+          }}>
+            <Link href="/profile">
+              <AccountIcon />
+            </Link>
+          </div>
         </div>
+        
         <div
           style={{
             maxWidth: "1024px",
