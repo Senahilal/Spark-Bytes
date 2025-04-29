@@ -4,11 +4,11 @@
 import dynamic from 'next/dynamic'
 
 // Dynamically import with no SSR
-const ProfilePage = dynamic(() => import('./ProfilePage'), { 
-  ssr: false,
-  loading: () => <div>Loading...</div>
+const ProfilePage = dynamic(() => import('./ProfilePage'), {
+    ssr: false,
+    loading: () => <div>Loading...</div>
 })
 
 export default function Page() {
-  return <ProfilePage />
+    return <ProfilePage />
 }
