@@ -1,39 +1,40 @@
-// app/EventListing/EventClient.tsx
 'use client';
 
 import React, { useState, useEffect, useRef } from 'react';
 import Link from 'next/link';
-import { Input, Space, Pagination, DatePicker, Select, ConfigProvider } from 'antd';
-import { SearchOutlined } from '@ant-design/icons';
+import { Input, Dropdown, Space, Pagination, DatePicker, Select, ConfigProvider } from 'antd';
+import { SearchOutlined, DownOutlined } from '@ant-design/icons';
 import Logo from '../components/logo';
 import AccountIcon from '../components/accounticon';
 import EventCard from '../components/eventcard';
 import Footer from '../components/footer';
 import Button from '../components/button';
-import dayjs, { Dayjs } from 'dayjs';
+import dayjs, { Dayjs } from "dayjs";
 import { fetchAllEvents } from '../firebase/repository';
-import { useAuthState } from 'react-firebase-hooks/auth';
-import { auth, db } from '@/app/firebase/config';
-import { doc, getDoc } from 'firebase/firestore';
+import { useAuthState } from "react-firebase-hooks/auth";
+import { auth, db } from "@/app/firebase/config";
+import { doc, getDoc } from "firebase/firestore";
 
+
+const { Search } = Input;
 const { Option } = Select;
 
 export default function EventClient() {
+
   const [user] = useAuthState(auth);
   const [isAdmin, setIsAdmin] = useState(false);
   const [isOrganizer, setIsOrganizer] = useState(false);
 
-  const [searchQuery, setSearchQuery] = useState('');
+  const [searchQuery, setSearchQuery] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
 
   const [events, setEvents] = useState<any[]>([]);
   const originalEventsRef = useRef<any[]>([]);
 
-  // Check user roles
   useEffect(() => {
     const checkUser = async () => {
       if (user) {
-        const userDoc = await getDoc(doc(db, 'users', user.uid));
+        const userDoc = await getDoc(doc(db, "users", user.uid));
         if (userDoc.exists()) {
           const userData = userDoc.data();
           setIsAdmin(userData.admin === true);
@@ -41,10 +42,13 @@ export default function EventClient() {
         }
       }
     };
+
     checkUser();
   }, [user]);
 
-  // Fetch events
+
+
+  //fetching all events
   useEffect(() => {
     const loadEvents = async () => {
       const fetchedEvents = await fetchAllEvents();
@@ -56,83 +60,124 @@ export default function EventClient() {
     loadEvents();
   }, []);
 
-  // Filters
+
+  //Filtering
   const [selectedDate, setSelectedDate] = useState<Dayjs | null>(null);
   const [selectedLocation, setSelectedLocation] = useState<string[]>([]);
   const [selectedFoodType, setSelectedFoodType] = useState<string[]>([]);
 
   useEffect(() => {
-    let filtered = originalEventsRef.current;
+    const applyFilters = () => {
+      let filtered = originalEventsRef.current;
 
-    if (selectedDate) {
-      const sel = selectedDate.format('MM/DD/YYYY');
-      filtered = filtered.filter(
-        (e) => e.start && dayjs(e.start.toDate()).format('MM/DD/YYYY') === sel
-      );
-    }
+      if (selectedDate) {
+        const selected = selectedDate.format("MM/DD/YYYY");
 
-    if (selectedLocation.length) {
-      filtered = filtered.filter((e) => selectedLocation.includes(e.area));
-    }
+        filtered = filtered.filter((event) => {
+          // Skip if start is missing
+          if (!event.start) return false;
 
-    if (selectedFoodType.length) {
-      filtered = filtered.filter((e) =>
-        e.food_type?.some((t: string) => selectedFoodType.includes(t))
-      );
-    }
+          const eventDate = dayjs(event.start.toDate()).format("MM/DD/YYYY");
+          return eventDate === selected;
+        });
+      }
 
-    setEvents(filtered);
+      if (selectedLocation.length > 0) {
+        filtered = filtered.filter((event) =>
+          selectedLocation.includes(event.area)
+        );
+      }
+
+      if (selectedFoodType.length > 0) {
+        filtered = filtered.filter((event) =>
+          event.food_type?.some((type: string) => selectedFoodType.includes(type))
+        );
+      }
+
+      setEvents(filtered);
+    };
+
+    applyFilters();
   }, [selectedDate, selectedLocation, selectedFoodType]);
 
-  const handleSearch = (val: string) => {
-    setSearchQuery(val);
+  const handleSearch = (value: string) => {
+    setSearchQuery(value);
     setCurrentPage(1);
   };
 
   const handlePageChange = (page: number) => {
     setCurrentPage(page);
-    window.scrollTo({ top: 0, behavior: 'smooth' });
+    window.scrollTo({ top: 0, behavior: "smooth" });
   };
 
   return (
     <div style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column' }}>
-      {/* Header */}
+      {/* header */}
       <div style={{ backgroundColor: '#DEEFB7', padding: '60px' }}>
-        <div
-          style={{
-            display: 'flex',
-            justifyContent: 'space-between',
-            alignItems: 'center',
-            maxWidth: '1200px',
-            margin: '0 auto',
-          }}
-        >
+        <div style={{
+          display: 'flex',
+          justifyContent: 'space-between',
+          alignItems: 'center',
+          maxWidth: '1200px',
+          margin: '0 auto'
+        }}>
           <Link href="/">
             <Logo />
           </Link>
-          <div style={{ position: 'absolute', top: '16px', right: '16px', display: 'flex', gap: 10 }}>
-            {isOrganizer && <Button href="/create">Post an Event</Button>}
-            {isAdmin && <Button href="/admin">Admin</Button>}
+
+          {/* post an event button */}
+          <div style={{
+            display: 'flex',
+            justifyContent: 'flex-end',
+            alignItems: 'center',
+            position: 'absolute',
+            top: '16px',
+            right: '16px',
+            gap: '10px'
+          }}>
+            {isOrganizer && (
+              <Button href="/create">
+                Post an Event
+              </Button>
+            )}
+            
+            {isAdmin && (
+              <Button href="/admin">
+                Admin
+              </Button>
+            )}
             <Link href="/profile">
               <AccountIcon />
             </Link>
           </div>
         </div>
-        <div style={{ maxWidth: 1200, margin: '40px auto 0', display: 'flex', flexDirection: 'column' }}>
-          <span role="img" aria-label="food" style={{ fontSize: 32 }}>
-            🍽️
-          </span>
-          <h1 style={{ fontSize: 32, fontWeight: 'bold', margin: '10px 0' }}>
-            Find Free Food on Campus!
-          </h1>
+
+        {/* Fixed heading and search container */}
+        <div style={{
+          maxWidth: '1200px',
+          margin: '40px auto 0',
+          display: 'flex',
+          flexDirection: 'column',
+          alignItems: 'flex-start'
+        }}>
+          {/* Heading section */}
+          <div style={{ marginBottom: '20px' }}>
+            <span role="img" aria-label="food" style={{ fontSize: '32px', marginRight: '10px' }}>🍽️</span>
+            <h1 style={{ fontSize: '32px', fontWeight: 'bold', margin: '10px 0' }}>
+              Find Free Food on Campus!
+            </h1>
+          </div>
+
+          {/* Search bar - positioned directly below the heading */}
           <div
             style={{
               display: 'flex',
               alignItems: 'center',
-              borderRadius: 30,
-              border: '1.5px solid rgba(3,109,25,0.9)',
+              borderRadius: '30px',
+              border: '1.5px solid rgba(3, 109, 25, 0.9)',
+              backgroundColor: 'rgba(255, 255, 255, 0.5)',
               padding: '2px 10px',
-              maxWidth: 500,
+              maxWidth: '500px',
               width: '100%',
             }}
           >
@@ -140,23 +185,34 @@ export default function EventClient() {
               type="text"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              placeholder="Type a location, food type, or keyword"
-              style={{ flex: 1, border: 'none', outline: 'none', background: 'transparent', padding: '8px 0' }}
+              placeholder="  Type a location, food type, or keyword"
+              style={{
+                flex: 1,
+                border: 'none',
+                outline: 'none',
+                backgroundColor: 'transparent',
+                color: '#333',
+                fontSize: '16px',
+                padding: '8px 0',
+                marginRight: '6px',
+              }}
             />
             <button
               onClick={() => handleSearch(searchQuery)}
               style={{
-                background: 'rgba(3,109,25,0.9)',
-                color: '#fff',
+                backgroundColor: 'rgba(3, 109, 25, 0.9)',
+                color: 'white',
                 border: 'none',
                 borderRadius: '50%',
-                width: 30,
-                height: 30,
+                width: '30px',
+                height: '30px',
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
+                fontSize: '14px',
                 cursor: 'pointer',
               }}
+              aria-label="Search"
             >
               <SearchOutlined />
             </button>
@@ -164,71 +220,146 @@ export default function EventClient() {
         </div>
       </div>
 
-      {/* Filters */}
-      <div style={{ padding: 20, maxWidth: 1200, margin: '0 auto', flex: 1 }}>
+      {/* Main content */}
+      <div style={{ padding: '20px', maxWidth: '1200px', margin: '0 auto', flex: 1 }}>
+
+        {/*FILTER*/}
         <Space size="middle" style={{ marginBottom: 24 }}>
+
+          {/* Date Picker */}
           <ConfigProvider
             theme={{
-              token: { colorPrimary: '#036D19' },
-              components: { DatePicker: { borderRadius: 8, controlHeight: 45 } },
+              token: {
+                colorPrimary: "#036D19",
+                colorBorder: "#E3F4C9",
+                colorBgContainer: "transparent",
+              },
+              components: {
+                DatePicker: {
+                  borderRadius: 8,
+                  controlHeight: 45,
+                },
+              },
             }}
           >
             <DatePicker
               format="MM/DD/YYYY"
-              onChange={setSelectedDate}
+              onChange={(date) => setSelectedDate(date)}
               placeholder="Event Date"
-              style={{ width: 350 }}
+              style={{
+                width: 350,
+                boxShadow: "0 1px 3px rgba(0,0,0,0.2)",
+              }}
               popupStyle={{ zIndex: 2000 }}
             />
           </ConfigProvider>
-          <ConfigProvider theme={{ token: { colorPrimary: '#036D19' } }}>
+
+
+          {/* Location Select */}
+          <ConfigProvider
+            theme={{
+              components: {
+                Select: {
+                  selectorBg: "transparent",              // background
+                  multipleItemBg: "rgba(227, 244, 201, 0.5)",  //  tags in multi-select
+                  optionSelectedBg: "rgba(227, 244, 201, 0.7)", // background when option is selected
+                  activeOutlineColor: "#E3F4C9",        
+                  controlHeight: 45,
+                  borderRadius: 8,
+                },
+              },
+              token: {
+                colorBorder: "#E3F4C9",             
+                colorPrimary: "#036D19",                  
+              },
+            }}
+          >
             <Select
               mode="multiple"
               placeholder="Location"
-              onChange={setSelectedLocation}
-              style={{ width: 350 }}
+              onChange={(value) => setSelectedLocation(value)}
+              style={{
+                width: 350,
+                backgroundColor: "transparent",          
+                border: "0.8px solid #E3F4C9",         
+                boxShadow: "0 1px 3px rgba(0,0,0,0.1)",  
+                borderRadius: "8px",
+              }}
               allowClear
               maxTagCount={2}
             >
               <Option value="East Campus">East Campus</Option>
               <Option value="Central Campus">Central Campus</Option>
               <Option value="West Campus">West Campus</Option>
+              <Option value="Test Location">Test Location</Option>
             </Select>
           </ConfigProvider>
-          <ConfigProvider theme={{ token: { colorPrimary: '#036D19' } }}>
+
+          {/* Food Type Select */}
+          <ConfigProvider
+            theme={{
+              components: {
+                Select: {
+                  selectorBg: "#transparent",              // Background color
+                  multipleItemBg: "rgba(227, 244, 201, 0.5)",  //  tags in multi-select
+                  optionSelectedBg: "rgba(227, 244, 201, 0.7)",        // Background color when option is selected
+                  activeOutlineColor: "#E3F4C9", 
+                  controlHeight: 45,
+                  borderRadius: 8,
+                },
+              },
+              token: {
+                colorBorder: "#E3F4C9",
+                colorPrimary: "#036D19",
+              },
+            }}
+          >
             <Select
               mode="multiple"
               placeholder="Food Type"
-              onChange={setSelectedFoodType}
-              style={{ width: 350 }}
+              onChange={(value) => setSelectedFoodType(value)}
+              style={{
+                width: 350,
+                backgroundColor: "transparent",          
+                border: "0.8px solid #E3F4C9",         
+                boxShadow: "0 1px 3px rgba(0,0,0,0.1)",  
+                borderRadius: "8px",
+              }}
               allowClear
               maxTagCount={2}
             >
               <Option value="Vegan">Vegan</Option>
               <Option value="Vegetarian">Vegetarian</Option>
               <Option value="Halal">Halal</Option>
+              <Option value="Test Food Type">Test Food Type</Option>
             </Select>
           </ConfigProvider>
-        </Space>
 
-        {/* Event Grid */}
-        {events.length === 0 ? (
-          <div style={{ textAlign: 'center', marginTop: 40 }}>No events found matching your criteria.</div>
+        </Space>
+        {/* FILTER ENDS HERE */}
+
+
+
+        {/* Event cards grid */}
+        {events && events.length === 0 ? (
+          <div style={{ textAlign: "center", marginTop: "40px", fontSize: "18px", color: "#666", margin: "30px", }}>
+            No events found matching your criteria.
+          </div>
         ) : (
-          <div
-            style={{
-              display: 'grid',
-              gridTemplateColumns: 'repeat(auto-fill, minmax(280px,1fr))',
-              gap: 24,
-              marginBottom: 40,
-            }}
-          >
-            {events.map((event) => {
+          <div style={{
+            display: 'grid',
+            gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))',
+            gap: '24px',
+            marginBottom: '40px'
+          }}>
+            {events.map(event => {
+
               const start = event.start?.toDate?.();
-              const date = start ? dayjs(start).format('MM/DD/YYYY') : 'Unknown Date';
-              const time = start ? dayjs(start).format('h:mm A') : 'Unknown Time';
+              const formattedDate = start ? dayjs(start).format("MM/DD/YYYY") : "Unknown Date";
+              const formattedTime = start ? dayjs(start).format("h:mm A") : "Unknown Time";
               const end = event.end?.toDate?.();
-              const endTime = end ? dayjs(end).format('h:mm A') : 'Unknown';
+              const formattedEndTime = start ? dayjs(end).format("h:mm A") : "Unknown Time";
+
               return (
                 <EventCard
                   key={event.id}
@@ -237,23 +368,31 @@ export default function EventClient() {
                   title={event.title}
                   area={event.area}
                   location={event.location}
-                  date={date}
-                  time={time}
+                  date={formattedDate}
+                  time={formattedTime}
+                  endTime={formattedEndTime}
                   description={event.description}
-                  endTime={endTime}
-                  foodType={event.foodType || event.food_type?.join(', ')}
+                  foodType={event.foodType || event.food_type?.join(", ")}
                   foodProvider={event.foodProvider}
                   followers={event.followers}
                   hasNotification={event.hasNotification}
                   imageUrl={event.imageURL}
+                  currentUserId={user?.uid}
                 />
               );
             })}
+
           </div>
         )}
 
-        <div style={{ display: 'flex', justifyContent: 'center', marginTop: 20 }}>
-          <Pagination current={currentPage} total={events.length} onChange={handlePageChange} pageSize={4} />
+        {/* Pagination */}
+        <div style={{ marginTop: '20px', display: 'flex', justifyContent: 'center' }}>
+          <Pagination
+            current={currentPage}
+            total={12}
+            onChange={handlePageChange}
+            pageSize={4}
+          />
         </div>
       </div>
 
