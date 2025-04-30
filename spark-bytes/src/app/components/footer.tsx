@@ -13,7 +13,13 @@ const Footer: React.FC = () => {
         padding: '0 16px'
       }}>
         <p style={{ color: '#4b5563', margin: 0 }}>
-          Spark!Bytes 
+        <strong>
+         🍎 Reducing food waste. 🍽️ Sharing what's available.
+         </strong>
+         <br />
+         <br />
+         © Spark!Bytes | Team 8 - 4-Bit Bandits
+
         </p>
       </div>
     </footer>

@@ -5,8 +5,8 @@ const Logo = () => {
   return (
 <div style={{ 
       position: 'absolute',
-      top: '16px',
-      left: '16px',
+      top: '12px',
+      left: '9px',
       zIndex: 10
     }}>
       <Image 
