@@ -21,9 +21,16 @@ export default function SignUp() {
 
   const router = useRouter();
 
+  const [manualError, setManualError] = useState<String>("");
+
   async function handleSignUp() {
     if (!email || !password) {
-      message.error("Please provide both email and password");
+      setManualError("Please provide both email and password");
+      return;
+    }
+    // prevent non @bu.edu emails
+    if (!email.endsWith("@bu.edu")) {
+      setManualError("Please use a @bu.edu email address");
       return;
     }
     
@@ -44,6 +51,7 @@ export default function SignUp() {
         organizer: false,
         admin: false,
       });
+      
 
       message.success("Account created successfully!");
       setEmail("");
@@ -108,6 +116,12 @@ export default function SignUp() {
           {error && (
             <div style={{ color: "#ff4d4f", textAlign: "center", marginBottom: 16 }}>
               {error.message}
+            </div>
+          )}
+
+          {manualError && (
+            <div style={{ color: "#ff4d4f", textAlign: "center", marginBottom: 16 }}>
+              {manualError}
             </div>
           )}
           
