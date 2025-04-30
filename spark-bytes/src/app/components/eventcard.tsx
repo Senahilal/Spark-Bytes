@@ -314,34 +314,18 @@ const EventCard = ({
                   display: 'flex',
                   alignItems: 'center',
                   gap: '5px',
-                  color: 'red',
+                  color: 'black',
                   fontWeight: 'bold'
                 }}>
                   <MdPeople size={18} />
-                  <span>Availability</span>
-                </div>
-                <div style={{
-                  marginTop: '8px',
-                  display: 'flex',
-                  gap: '4px'
-                }}>
-                    <div style={{
+                  Availability: 
+                  {availability === 'high' ? 'Available' : availability === 'medium' ? 'Few' : availability === 'none' ? 'None' : 'Unknown'}
+                  <div style={{
+                    
                     width: '10px',
                     height: '10px',
                     borderRadius: '50%',
-                    backgroundColor: availability === 'high' ? 'green' : 'transparent'
-                    }}></div>
-                    <div style={{
-                    width: '10px',
-                    height: '10px',
-                    borderRadius: '50%',
-                    backgroundColor: availability === 'medium' ? 'yellow' : 'transparent'
-                    }}></div>
-                    <div style={{
-                    width: '10px',
-                    height: '10px',
-                    borderRadius: '50%',
-                    backgroundColor: availability === 'none' ? 'red' : 'transparent'
+                    backgroundColor: availability === 'high' ? 'green' : availability === 'medium' ? 'orange' : availability === 'none' ? 'red' : 'transparent'
                     }}></div>
                 </div>
               </div>

@@ -22,6 +22,7 @@ const EventEditPage: React.FC = () => {
   const [selectedFoodType, setSelectedFoodType] = useState<string[]>([]);
   const [selectedImageUrl, setSelectedImageUrl] = useState<string>("");
   const [loadingEvent, setLoadingEvent] = useState(true);
+  const [availability, setAvailability] = useState<string>("Available"); 
 
   const [user, loadingUser] = useAuthState(auth);
   const router = useRouter();
@@ -99,6 +100,7 @@ const EventEditPage: React.FC = () => {
         food_provider: foodItems,
         food_type: selectedFoodType,
         imageUrl: selectedImageUrl,
+        availability: availability,
         last_updated_by: user?.uid,
         updated_at: new Date(),
       });
@@ -201,6 +203,31 @@ const EventEditPage: React.FC = () => {
                   </Tag>
                 ))}
               </div>
+            </Card>
+            <Card title="Availability" style={{ marginBottom: 20 }}>
+            <div style={{ display: "flex", justifyContent: "space-between", gap: "10px" }}>
+                <Button
+                type={availability === "Available" ? "primary" : "default"}
+                onClick={() => setAvailability("high")}
+                style={{ backgroundColor: "green" }}
+                >
+                Available
+                </Button>
+                <Button
+                type={availability === "Few" ? "primary" : "default"}
+                onClick={() => setAvailability("medium")}
+                style={{ backgroundColor: "orange" }}
+                >
+                Few
+                </Button>
+                <Button
+                type={availability === "None" ? "primary" : "default"}
+                onClick={() => setAvailability("none")}
+                style={{ backgroundColor: "red" }}
+                >
+                None
+                </Button>
+            </div>
             </Card>
           </Col>
         </Row>

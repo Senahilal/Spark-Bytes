@@ -420,6 +420,7 @@ const ProfilePage = () => {
                                         imageUrl={event.imageURL}
                                         currentUserId={user?.uid}
                                         onDelete={handleEventDelete}
+                                        availability={event.availability}
                                     />
                                 );
                             })}
