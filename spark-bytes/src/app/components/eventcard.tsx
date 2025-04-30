@@ -7,6 +7,7 @@ import CloseButton from './closeButton';
 import ShareButton from './sharebutton';
 import { deleteDoc, doc, updateDoc, arrayUnion, arrayRemove } from "firebase/firestore";
 import { db } from "@/app/firebase/config";
+import { useRouter } from 'next/navigation';
 
 
 // interface - add more if needed
@@ -49,11 +50,12 @@ const EventCard = ({
   imageUrl = "/insomnia_cookies.jpeg"
 }: EventCardProps) => {
   const [isModalVisible, setIsModalVisible] = useState(false);
+  const [isEditModalVisible, setIsEditModalVisible] = useState(false);
   const [isFollowing, setIsFollowing] = useState(
     currentUserId && followers && Array.isArray(followers) ? 
       followers.includes(currentUserId) : false
   );
-
+  const router = useRouter(); // Initialize the router
 
   const showModal = () => {
     setIsModalVisible(true);
@@ -107,6 +109,12 @@ const EventCard = ({
       console.error("Error deleting event:", error);
     }
   };
+
+  const handleEdit = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    router.push(`/eventEdit?id=${id}`); // Redirect to the EventEdit page with the event ID
+  };
+
 
   const getShareText = () => {
     return `Check out this event: ${title} - ${foodType} at ${location} on ${date} at ${time}`;
@@ -372,12 +380,12 @@ const EventCard = ({
           }}>
             <div style={{ width: '90%', display: 'flex', justifyContent: 'center', gap: '15px' }}>
             {currentUserId ? (
-          <CloseButton
-            onClick={handleNotifyMe}
-            label={isFollowing ? "Cancel Notification" : "Notify Me"}
-            style={isFollowing ? { backgroundColor: '#888', cursor: 'pointer', whiteSpace: 'nowrap' } : { backgroundColor: '#036D19' } }
-          />
-        ) : null}
+              <CloseButton
+                onClick={handleNotifyMe}
+                label={isFollowing ? "Cancel Notification" : "Notify Me"}
+                style={isFollowing ? { backgroundColor: '#888', cursor: 'pointer', whiteSpace: 'nowrap' } : { backgroundColor: '#036D19' } }
+              />
+                ) : null}
               <CloseButton
                 onClick={handleCancel}
                 label="Close"
@@ -387,6 +395,15 @@ const EventCard = ({
                 <CloseButton
                   onClick={handleDelete}
                   label="Delete"
+                  style={{ backgroundColor: "#036D19 ", color: "white" }}
+                />
+              )}
+
+              {/* EDIT button for organization */}
+              {currentUserId === user && (
+                <CloseButton
+                  onClick={handleEdit}
+                  label="Edit"
                   style={{ backgroundColor: "#036D19 ", color: "white" }}
                 />
               )}
