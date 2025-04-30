@@ -79,6 +79,18 @@ const Hero = () => {
 
         
       `}</style>
+
+      {/* Gradient Background Bar */}
+      <div style={{
+        position: 'absolute',
+        top: 0,
+        left: 0,
+        width: '100%',
+        height: '115px',
+        background: 'linear-gradient(to bottom, rgba(255,255,255,0.85), rgba(255,255,255,0))',
+        zIndex: 5,
+      }} />
+
       {/* Logo and Account Icon */}
       <Logo />
 
@@ -103,7 +115,7 @@ const Hero = () => {
       </div>
 
       {/* Background image */}
-      <div style={{ position: 'relative', width: '100%', height: '400px', overflow: 'hidden' }}>
+      <div style={{ position: 'relative', width: '100%', height: '460px', overflow: 'hidden' }}>
         <div style={{ width: '100%', height: '100%', position: 'relative' }}>
           <Image
             src={images[currentImageIndex]}
