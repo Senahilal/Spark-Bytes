@@ -1,6 +1,6 @@
 "use client";
 import React from "react";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useSignInWithEmailAndPassword } from "react-firebase-hooks/auth";
 import { auth } from "@/app/firebase/config";
 import { Input, Button, Card, Typography, Layout, Form, message, Divider, Checkbox } from "antd";
@@ -31,13 +31,23 @@ export default function Login() {
       // message.success("Logged in successfully!");
       setEmail("");
       setPassword("");
-      // Redirect to account page
-      router.push("/profile");
+      // if user is not found, show error
+      if (user != null) {
+        // Redirect to account page
+        router.push("/profile");
+      };
+
+      
     } catch (err) {
       console.log(err);
       message.error("Failed to log in");
     }
   }
+
+  // if rememberMe is checked, save email to local storage
+  if (rememberMe) {
+    localStorage.setItem("email", email);
+  };
   
   return (
     <Layout style={{ minHeight: "100vh", background: "#f0f2f5" }}>
@@ -103,7 +113,7 @@ export default function Login() {
           
           {error && (
             <div style={{ color: "#ff4d4f", textAlign: "center", marginBottom: 16 }}>
-              {error.message}
+              {"Invalid email or password"}
             </div>
           )}
           
