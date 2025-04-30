@@ -56,7 +56,10 @@ export default function SignUp() {
       message.success("Account created successfully!");
       setEmail("");
       setPassword("");
-      router.push("/profile");
+      if (user != null) {
+        // Redirect to account page
+        router.push("/profile");
+      };
     } catch (err) {
       console.log(err);
       message.error("Failed to create account");
@@ -115,7 +118,7 @@ export default function SignUp() {
           
           {error && (
             <div style={{ color: "#ff4d4f", textAlign: "center", marginBottom: 16 }}>
-              {error.message}
+              {"Invalid email or password"}
             </div>
           )}
 
