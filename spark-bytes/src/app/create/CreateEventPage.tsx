@@ -272,10 +272,10 @@ const CreateEventPage: React.FC = () => {
                   {selectedImageUrl ? (
                     // If an image is selected, show a thumbnail preview with Update/Remove options
                     <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-                      <img 
-                        src={selectedImageUrl} 
-                        alt="Event image" 
-                        style={{ width: 80, height: 80, objectFit: 'cover', borderRadius: 4 }} 
+                      <img
+                        src={selectedImageUrl}
+                        alt="Event image"
+                        style={{ width: 80, height: 80, objectFit: 'cover', borderRadius: 4 }}
                       />
                       <Space>
                         <Button size="small" onClick={handleUpdateImage}>Update Image</Button>
@@ -359,7 +359,14 @@ const CreateEventPage: React.FC = () => {
             <Button danger size="large" style={{ width: 200 }} onClick={() => router.back()}>
               Cancel
             </Button>
-            <Button type="primary" size="large" style={{ width: 200 }} onClick={handleFormSubmit}>
+            <Button type="primary" size="large" style={{ width: 200 }} onClick={() => {
+              form
+                .validateFields()
+                .then(handleFormSubmit)
+                .catch((errorInfo) => {
+                  console.log("Validation Failed:", errorInfo);
+                });
+            }}>
               POST EVENT
             </Button>
           </div>
