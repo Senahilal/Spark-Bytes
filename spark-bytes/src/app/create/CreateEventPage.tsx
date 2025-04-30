@@ -5,7 +5,6 @@ import { useRouter } from "next/navigation";
 import { useAuthState } from "react-firebase-hooks/auth";
 import { auth, db } from "@/app/firebase/config";
 import { doc, getDoc } from "firebase/firestore";
-import styles from './CreateEventPage.module.css';
 
 import { Form, Input, DatePicker, Button, Card, Row, Col, List, Typography, Tag, Select, Menu, Checkbox, Dropdown, Space } from 'antd';
 import type { DatePickerProps } from 'antd';
@@ -224,7 +223,7 @@ const CreateEventPage: React.FC = () => {
           <Row gutter={[24, 24]}>
             {/* Left column - Event Details */}
             <Col xs={24} md={12}>
-              <Card title="Event Details" className={styles.card}>
+              <Card title="Event Details" style={{ marginBottom: 20 }}>
                 <Form.Item label="Title" name="title" rules={[{ required: true, message: 'Please input the event title!' }]}>
                   <Input placeholder="Enter event title" />
                 </Form.Item>
@@ -297,7 +296,7 @@ const CreateEventPage: React.FC = () => {
 
             {/* Right column - Food Info */}
             <Col xs={24} md={12}>
-              <Card title="Food Type" className={styles.card}>
+              <Card title="Food Type" style={{ marginBottom: 20 }}>
                 <Dropdown
                   menu={{
                     items: options.map(option => ({
@@ -319,7 +318,7 @@ const CreateEventPage: React.FC = () => {
                 </Dropdown>
               </Card>
 
-              <Card title="Food Provider" className={styles.card}>
+              <Card title="Food Provider" style={{ marginBottom: 20 }}>
                 {/* Food provider input and list */}
                 <Space.Compact style={{ width: '100%' }}>
                   <Input
