@@ -51,7 +51,7 @@ const ProfilePage = () => {
 
     //editing form
     const [isEditing, setIsEditing] = useState(false);
-    
+
 
     //My events section
     const [showMyEvents, setShowMyEvents] = useState(false);
@@ -200,10 +200,14 @@ const ProfilePage = () => {
     const handleRequestSubmit = async (values: any) => {
         if (!user) return;
         try {
+
+            const full_name = [firstName, lastName].filter(Boolean).join(" ");
+
             //saves the document into requests collection
             await addDoc(collection(db, "requests"), {
                 user_id: user.uid,
-                user_name: `${firstName} ${lastName}`,
+                user_name: full_name,
+                user_email: email,
                 message: values.requestMessage,
                 status: "pending",
                 created_at: new Date(),
