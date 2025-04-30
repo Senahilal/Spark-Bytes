@@ -1,8 +1,12 @@
 import type { Metadata } from 'next';
 
+
 export const metadata: Metadata = {
   title: 'Spark Bytes - Free Food, Zero Waste',
   description: 'Find, Share, and Enjoy Extra Food on Boston University Campus',
+  icons: {
+    icon: '/logo.png', //set the favicon
+  },
 };
 
 export default function RootLayout({
