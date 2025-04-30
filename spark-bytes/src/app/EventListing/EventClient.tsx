@@ -31,6 +31,19 @@ export default function EventClient() {
   const [events, setEvents] = useState<any[]>([]);
   const originalEventsRef = useRef<any[]>([]);
 
+  const getPagedEvents = () => {
+
+    const sortedEvents = [...events].sort((a, b) => {
+      const dateA = a.start?.toDate?.() || new Date(0);
+      const dateB = b.start?.toDate?.() || new Date(0);
+      return dateB - dateA; // newest first
+    });
+
+    const startIndex = (currentPage - 1) * 6;
+    const endIndex = startIndex + 6;
+    return sortedEvents.slice(startIndex, endIndex);
+  };
+
   useEffect(() => {
     const checkUser = async () => {
       if (user) {
@@ -352,7 +365,7 @@ export default function EventClient() {
             gap: '24px',
             marginBottom: '40px'
           }}>
-            {events.map(event => {
+            {getPagedEvents().map(event => {
 
               const start = event.start?.toDate?.();
               const formattedDate = start ? dayjs(start).format("MM/DD/YYYY") : "Unknown Date";
@@ -386,13 +399,39 @@ export default function EventClient() {
         )}
 
         {/* Pagination */}
-        <div style={{ marginTop: '20px', display: 'flex', justifyContent: 'center' }}>
+
+      {/* Pagination */}
+      <div style={{ 
+          marginTop: '50px', 
+          marginBottom: '30px',
+          display: 'flex', 
+          justifyContent: 'center',
+          width: '100%' 
+        }}>
+          <ConfigProvider
+    theme={{
+      token: {
+        colorPrimary: "#036D19",
+        colorBorder: "#E3F4C9",
+      },
+      components: {
+        Pagination: {
+          itemActiveBg: "rgba(3, 109, 25, 0.1)",
+        }
+      }
+    }}>
           <Pagination
             current={currentPage}
-            total={12}
+            total={events.length}
             onChange={handlePageChange}
-            pageSize={4}
+            pageSize={6}
+            style={{ 
+              textAlign: 'center',
+              margin: '0 auto'
+            }}
+        
           />
+          </ConfigProvider>
         </div>
       </div>
 
