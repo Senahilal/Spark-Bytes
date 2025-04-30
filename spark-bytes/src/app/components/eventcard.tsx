@@ -29,6 +29,7 @@ interface EventCardProps {
   imageUrl?: string; 
   currentUserId?: string;
   onDelete?: (id: string) => void; 
+  availability: string;
 }
 
 const EventCard = ({
@@ -46,6 +47,7 @@ const EventCard = ({
   foodProvider,
   followers,
   hasNotification,
+  availability,
   // address = "665 Commonwealth Ave", // default value for demo
   imageUrl = "/insomnia_cookies.jpeg"
 }: EventCardProps) => {
@@ -323,24 +325,24 @@ const EventCard = ({
                   display: 'flex',
                   gap: '4px'
                 }}>
-                  <div style={{
+                    <div style={{
                     width: '10px',
                     height: '10px',
                     borderRadius: '50%',
-                    backgroundColor: 'red'
-                  }}></div>
-                  <div style={{
+                    backgroundColor: availability === 'high' ? 'green' : 'transparent'
+                    }}></div>
+                    <div style={{
                     width: '10px',
                     height: '10px',
                     borderRadius: '50%',
-                    backgroundColor: '#ddd'
-                  }}></div>
-                  <div style={{
+                    backgroundColor: availability === 'medium' ? 'yellow' : 'transparent'
+                    }}></div>
+                    <div style={{
                     width: '10px',
                     height: '10px',
                     borderRadius: '50%',
-                    backgroundColor: '#ddd'
-                  }}></div>
+                    backgroundColor: availability === 'none' ? 'red' : 'transparent'
+                    }}></div>
                 </div>
               </div>
             </div>
