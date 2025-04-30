@@ -10,6 +10,7 @@ interface ReqCardProps {
   id: string;
   user_id: string;
   user_name: string;
+  user_email: string;
   message: string;
   status: string;
   date: string;
@@ -20,6 +21,7 @@ const ReqCard = ({
   id,
   user_id,
   user_name,
+  user_email,
   message,
   status,
   date,
@@ -70,7 +72,7 @@ const ReqCard = ({
         }}
       >
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-          <h3 style={{ margin: 0 }}>Request from {user_name}</h3>
+          <h3 style={{ margin: 0 }}>Request from {user_name || user_email}</h3>
           <Tag color={
             currentStatus === "accepted" ? "success" :
               currentStatus === "rejected" ? "error" : "processing"
@@ -87,7 +89,7 @@ const ReqCard = ({
 
       {/* Modal for request details - showing accept/reject buttons*/}
       <Modal
-        title={`Organizer Request - ${user_name}`}
+        title={`Organizer Request - ${user_name || user_email}`}
         open={isModalVisible}
         onCancel={() => setIsModalVisible(false)}
         footer={[
