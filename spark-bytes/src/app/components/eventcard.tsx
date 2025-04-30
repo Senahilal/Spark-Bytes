@@ -50,9 +50,10 @@ const EventCard = ({
 }: EventCardProps) => {
   const [isModalVisible, setIsModalVisible] = useState(false);
   const [isFollowing, setIsFollowing] = useState(
-    currentUserId && Array.isArray(followers) ? followers.includes(currentUserId) : false
+    currentUserId && followers && Array.isArray(followers) ? 
+      followers.includes(currentUserId) : false
   );
-  
+
 
   const showModal = () => {
     setIsModalVisible(true);
@@ -88,7 +89,6 @@ const EventCard = ({
       }
       
       setIsFollowing(!isFollowing);
-      console.log(`User ${isFollowing ? 'unfollowed' : 'followed'} event successfully`);
     } catch (error) {
       console.error("Error updating event followers:", error);
     }
@@ -213,11 +213,7 @@ const EventCard = ({
           }}>
             <h2 style={{ color: 'white', margin: 0, fontSize: '24px' }}>{title}</h2>
             <div style={{ display: 'flex', gap: '10px' }}>
-            {currentUserId && isFollowing && (
-              <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
-                <MdNotifications size={20} />
-              </div>
-            )}
+              {currentUserId && isFollowing && <MdNotifications size={24} color="white" />}
               <ShareButton 
                 title={title}
                 text={getShareText()}
@@ -375,13 +371,13 @@ const EventCard = ({
             marginBottom: '20px'
           }}>
             <div style={{ width: '90%', display: 'flex', justifyContent: 'center', gap: '15px' }}>
-            {currentUserId && (
-              <CloseButton
-                onClick={handleNotifyMe}
-                label={isFollowing ? "Cancel Notification" : "Notify Me"}
-                style={isFollowing ? { backgroundColor: '#888', cursor: 'pointer' } : {}}
-              />
-            )}
+            {currentUserId ? (
+          <CloseButton
+            onClick={handleNotifyMe}
+            label={isFollowing ? "Cancel Notification" : "Notify Me"}
+            style={isFollowing ? { backgroundColor: '#888', cursor: 'pointer', whiteSpace: 'nowrap' } : { backgroundColor: '#036D19' } }
+          />
+        ) : null}
               <CloseButton
                 onClick={handleCancel}
                 label="Close"
@@ -391,7 +387,7 @@ const EventCard = ({
                 <CloseButton
                   onClick={handleDelete}
                   label="Delete"
-                  style={{ backgroundColor: "#D32F2F", color: "white" }}
+                  style={{ backgroundColor: "#036D19 ", color: "white" }}
                 />
               )}
 

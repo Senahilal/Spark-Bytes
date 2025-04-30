@@ -4,10 +4,22 @@ import React, { useState, useEffect } from 'react';
 import EventCard from './eventcard';
 import { fetchTodaysEvents } from '../firebase/repository';
 
+import { useAuthState } from "react-firebase-hooks/auth";
+import { auth } from "@/app/firebase/config";
+
 const TodaysEvents = () => {
 
+  const [currentUserId, setCurrentUserId] = useState<string | null>(null);
   const [events, setEvents] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const unsubscribe = auth.onAuthStateChanged((user) => {
+      setCurrentUserId(user ? user.uid : null);
+    });
+    
+    return () => unsubscribe(); // Clean up the listener on unmount
+  }, []);
 
   useEffect(() => {
     const loadTodaysEvents = async () => {
@@ -77,6 +89,7 @@ const TodaysEvents = () => {
                   followers={event.followers || []}
                   hasNotification={event.hasNotification || false}
                   imageUrl={event.imageURL || event.imageUrl}
+                  currentUserId={currentUserId || undefined}
                 />
               );
             })}
