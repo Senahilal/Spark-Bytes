@@ -5,6 +5,7 @@ import LocalEvent from "../classes/LocalEvent";
 import { getStorage, ref, uploadBytes, getDownloadURL, listAll, deleteObject } from "firebase/storage";
 import { v4 as uuidv4 } from "uuid";
 import { readAndCompressImage } from "browser-image-resizer";
+import { availableMemory } from "process";
 
 /** 
 export async function fetchUserData(user: any) {
@@ -86,6 +87,7 @@ export async function createEvent(event: LocalEvent) {
       followers: event.followers,
       reminder_sent: false,
       imageURL: event.imageUrl ? event.imageUrl : "https://a.espncdn.com/combiner/i?img=/i/teamlogos/ncaa/500/104.png", //Default BU logo with Rhett if no url is provided
+      availability: event.availability ? event.availability : "high", //Default to high availability if not provided
     });
 
     console.log("Event created with ID: ", eventRef.id);
@@ -382,4 +384,25 @@ export async function fetchUserProfileImageUrl(userId: string): Promise<string |
     return null;
   }
 }
+
+// Updates a specific event in Firestore
+export async function updateEvent(eventId: string, updatedData: Partial<LocalEvent>) {
+  try {
+    const eventRef = doc(db, "events", eventId);
+    await updateDoc(eventRef, updatedData);
+    console.log("Event updated with ID: ", eventId);
+  } catch (err) {
+    console.error("Error updating event: ", err);
+  }
+}
+// EXAMPLE CALL TO UPDATE EVENT
+// async function updateExistingEvent() {
+//   const eventId = "event-123"; // Replace with the actual event ID
+//   const updatedData = {
+//     title: "Updated Event Title",
+//     description: "Updated event description"
+//    };
+//   await updateEvent(eventId, updatedData);
+// }
+// updateExistingEvent();
 

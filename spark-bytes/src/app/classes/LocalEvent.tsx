@@ -46,6 +46,9 @@ interface LocalEvent {
 
     // imageURL is the URL of the image for the event
     imageUrl?: string;
+
+    // availability is a string that shows the availability of the event, options: "low", "medium", "high"
+    availability?: string;
 }
 
 export default LocalEvent;  // Export the LocalEvent interface
