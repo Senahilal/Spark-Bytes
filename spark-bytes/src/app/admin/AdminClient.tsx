@@ -132,6 +132,7 @@ export default function AdminClient() {
                   key={request.id}
                   user_id={request.user_id}
                   user_name={request.user_name}
+                  user_email={request.user_email}
                   date={formattedDate}
                   time={formattedTime}
                   message={request.message}
