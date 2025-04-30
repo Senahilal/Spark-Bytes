@@ -23,12 +23,15 @@ import { collection, addDoc } from "firebase/firestore";
 import { db } from "@/app/firebase/config";
 import ProfileImageUploadModal from '../components/ProfileImageUploadModal';
 import { uploadProfileImage, updateUserProfileImageUrl } from "../firebase/repository";
+import { sign } from "crypto";
 
 
 const { Title, Text } = Typography;
 
 const ProfilePage = () => {
     const [user, loading] = useAuthState(auth);
+
+    const[signOutCalled, setSignOutCalled] = useState(false);
 
     //user information
     const [firstName, setFirstName] = useState("");
@@ -66,6 +69,11 @@ const ProfilePage = () => {
     //if logged in fetch user data and display
     useEffect(() => {
         if (!loading && !user) {
+            if (signOutCalled) {
+                router.push("/");
+                return;
+            };
+
             router.push("/login");
         } else if (user) {
             fetchData(user);
@@ -111,6 +119,7 @@ const ProfilePage = () => {
     const handleSignOut = async () => {
         try {
             await signOut(auth); // 1. Firebase sign out
+            setSignOutCalled(true);
             localStorage.removeItem("user"); // clear local storage
             router.push("/"); // 4. Redirect to home page
         } catch (error) {
