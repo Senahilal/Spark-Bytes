@@ -70,6 +70,7 @@ const EventEditPage: React.FC = () => {
           setFoodItems(eventData.food_provider || []);
           setSelectedFoodType(eventData.food_type || []);
           setSelectedImageUrl(eventData.imageUrl || "");
+          setAvailability(eventData.availability || "Available"); // Default to "Available" if not set
         } else {
           console.error("Event not found.");
           router.push("/profile");
@@ -204,31 +205,42 @@ const EventEditPage: React.FC = () => {
                 ))}
               </div>
             </Card>
-            <Card title="Availability" style={{ marginBottom: 20 }}>
-            <div style={{ display: "flex", justifyContent: "space-between", gap: "10px" }}>
-                <Button
-                type={availability === "Available" ? "primary" : "default"}
-                onClick={() => setAvailability("high")}
-                style={{ backgroundColor: "green" }}
-                >
-                Available
-                </Button>
-                <Button
-                type={availability === "Few" ? "primary" : "default"}
-                onClick={() => setAvailability("medium")}
-                style={{ backgroundColor: "orange" }}
-                >
-                Few
-                </Button>
-                <Button
-                type={availability === "None" ? "primary" : "default"}
-                onClick={() => setAvailability("none")}
-                style={{ backgroundColor: "red" }}
-                >
-                None
-                </Button>
-            </div>
-            </Card>
+            <Form.Item name="availability" initialValue={availability}>
+                <Card title="Availability" style={{ marginBottom: 20 }}>
+                    <div style={{ display: "flex", justifyContent: "space-between", gap: "10px" }}>
+                    <Button
+                        type={availability === "high" ? "primary" : "default"}
+                        onClick={() => {
+                            setAvailability("high");
+                            form.setFieldsValue({ availability: "high" });
+                        }}
+                        style={{ backgroundColor: "green" }}
+                        >
+                        Available
+                        </Button>
+                        <Button
+                        type={availability === "medium" ? "primary" : "default"}
+                        onClick={() => {
+                            setAvailability("medium");
+                            form.setFieldsValue({ availability: "medium" });
+                        }}
+                        style={{ backgroundColor: "orange" }}
+                        >
+                        Few
+                        </Button>
+                        <Button
+                        type={availability === "none" ? "primary" : "default"}
+                        onClick={() => {
+                            setAvailability("none");
+                            form.setFieldsValue({ availability: "none" });
+                        }}
+                        style={{ backgroundColor: "red" }}
+                        >
+                        None
+                        </Button>
+                    </div>
+                </Card>
+                </Form.Item>
           </Col>
         </Row>
 
