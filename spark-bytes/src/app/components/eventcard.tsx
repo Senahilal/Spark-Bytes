@@ -425,7 +425,7 @@ useEffect(() => {
                         availability === 'low' ? 'red' : '#888'
                 }}>
                   <MdPeople size={18} />
-                  <span>{isEventPassed ? 'Attendance' : 'Food Availability'}</span>
+                  <span>{isEventPassed ? 'Food Availability':'Food Availability'}</span>
                 </div>
                 <div style={{
                   marginTop: '8px',
