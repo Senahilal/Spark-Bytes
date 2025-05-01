@@ -31,7 +31,7 @@ const { Title, Text } = Typography;
 const ProfilePage = () => {
     const [user, loading] = useAuthState(auth);
 
-    const[signOutCalled, setSignOutCalled] = useState(false);
+    const [signOutCalled, setSignOutCalled] = useState(false);
 
     //user information
     const [firstName, setFirstName] = useState("");
@@ -164,6 +164,17 @@ const ProfilePage = () => {
     const handleEventDelete = (deletedEventId: string) => {
         setUserEvents(prev => prev.filter(event => event.id !== deletedEventId));
     };
+
+    const handleEventUpdate = (updatedEvent: any) => {
+        setUserEvents(prev =>
+            prev.map(event =>
+                event.id === updatedEvent.id ? updatedEvent : event
+            )
+        );
+    };
+
+
+
 
 
     //update user data
@@ -429,12 +440,13 @@ const ProfilePage = () => {
                                         imageUrl={event.imageURL}
                                         currentUserId={user?.uid}
                                         onDelete={handleEventDelete}
+                                        onUpdate={handleEventUpdate}
                                         availability={event.availability}
+                                        showOwnerControls={true}
                                     />
                                 );
                             })}
                         </div>
-
                     )}
                 </div>
             ) : (
@@ -608,8 +620,6 @@ const ProfilePage = () => {
                         </Button>
                     </div>
                 </div>
-
-
             )}
 
             <Footer />
