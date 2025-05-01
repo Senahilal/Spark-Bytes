@@ -405,13 +405,15 @@ const EventCard = ({
             marginBottom: '20px'
           }}>
             <div style={{ width: '90%', display: 'flex', justifyContent: 'center', gap: '15px' }}>
-              {currentUserId ? (
+              
+              {currentUserId && currentUserId != user && (
                 <CloseButton
                   onClick={handleNotifyMe}
                   label={isFollowing ? "Cancel Notification" : "Notify Me"}
                   style={isFollowing ? { backgroundColor: '#888', cursor: 'pointer', whiteSpace: 'nowrap' } : { backgroundColor: '#036D19' }}
                 />
-              ) : null}
+              )}
+
               <CloseButton
                 onClick={handleCancel}
                 label="Close"
