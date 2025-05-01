@@ -112,6 +112,7 @@ export default function SignUp() {
                 block
                 onClick={handleSignUp}
                 loading={loading}
+                style={{ backgroundColor: "#036D19", borderColor: "#036D19" }}
               >
                 Sign Up
               </Button>
@@ -133,7 +134,7 @@ export default function SignUp() {
           
           <div style={{ textAlign: "center" }}>
             <Text>
-              Already have an account? <a href="/login">Log in</a>
+              Already have an account? <a href="/login" style={{color: "#036D19"}}>Log in</a>
             </Text>
           </div>
         </Card>
