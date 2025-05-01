@@ -83,6 +83,19 @@ export default function EventClient() {
     const applyFilters = () => {
       let filtered = originalEventsRef.current;
 
+      if (searchQuery.trim() !== "") { 
+        const query = searchQuery.toLowerCase(); 
+        filtered = filtered.filter((event) => 
+          event.title?.toLowerCase().includes(query) || 
+          event.description?.toLowerCase().includes(query) ||
+          event.location?.toLowerCase().includes(query) || 
+          event.area?.toLowerCase().includes(query) ||
+          (event.food_type && event.food_type.some((type: string) => 
+            type.toLowerCase().includes(query) 
+          )) 
+        ); 
+      } 
+
       if (selectedDate) {
         const selected = selectedDate.format("MM/DD/YYYY");
 
@@ -95,12 +108,6 @@ export default function EventClient() {
         });
       }
 
-      if (selectedLocation.length > 0) {
-        filtered = filtered.filter((event) =>
-          selectedLocation.includes(event.area)
-        );
-      }
-
       if (selectedFoodType.length > 0) {
         filtered = filtered.filter((event) =>
           event.food_type?.some((type: string) => selectedFoodType.includes(type))
@@ -111,7 +118,7 @@ export default function EventClient() {
     };
 
     applyFilters();
-  }, [selectedDate, selectedLocation, selectedFoodType]);
+  }, [selectedDate, selectedLocation, selectedFoodType, searchQuery]);
 
   const handleSearch = (value: string) => {
     setSearchQuery(value);
