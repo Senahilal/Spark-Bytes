@@ -17,7 +17,7 @@ interface EditEventModalProps {
     eventId: string;
     visible: boolean;
     onClose: () => void;
-    onEventUpdated?: () => void; // notify parent to refresh
+    onEventUpdated?: (updatedEvent: any) => void; // <- notify parent to update the specific card
 }
 
 const EditEventModal: React.FC<EditEventModalProps> = ({ eventId, visible, onClose, onEventUpdated }) => {
@@ -55,28 +55,42 @@ const EditEventModal: React.FC<EditEventModalProps> = ({ eventId, visible, onClo
         try {
             const values = await form.validateFields();
             const currentUser = auth.currentUser;
-            if (!currentUser) {
-                console.error("User not signed in.");
-                return;
-            }
+            if (!currentUser) return;
 
+            // Save updated fields
             await updateEvent(eventId, {
                 title: values.title,
                 description: values.description,
-                location: values.location,
                 area: values.area,
+                location: values.location,
                 start: values.startDate.toDate(),
                 end: values.endDate.toDate(),
                 food_provider: foodItems,
                 availability: values.availability,
                 last_updated_by: currentUser.uid,
-                last_updated_at: new Date(),
+                last_updated_at: new Date()
             });
 
+            // Refetch updated event
+            const updatedDoc = await getDoc(doc(db, "events", eventId));
+            if (!updatedDoc.exists()) {
+                console.error("Updated event not found.");
+                return;
+            }
+
+            const updatedEvent = {
+                id: eventId,
+                ...updatedDoc.data()
+            };
+
+            // Notify parent to update this event in state
+            if (onEventUpdated) {
+                onEventUpdated(updatedEvent);
+            }
+
             onClose(); // Close modal
-            onEventUpdated?.(); // Notify parent to refresh
-        } catch (err) {
-            console.error("Error saving event:", err);
+        } catch (error) {
+            console.error("Error updating event:", error);
         }
     };
 

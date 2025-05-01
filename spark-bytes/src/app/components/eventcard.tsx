@@ -27,9 +27,11 @@ interface EventCardProps {
   hasNotification?: boolean;
   address?: string;
   imageUrl?: string;
-  currentUserId?: string; // optional - user id of currently logged in user
-  onDelete?: (id: string) => void; //optional - passing this prop from only profile page - can be delted only from profile page 
+  currentUserId?: string;
+  onDelete?: (id: string) => void; //optional - passing this prop from only profile page - can be delted only from profile page of owner
+  onUpdate?: (updatedEvent: any) => void; //optional - passing this prop from only profile page - can be edited only from profile page of owner
   availability: string;
+  showOwnerControls?: boolean;
 }
 
 
@@ -38,6 +40,7 @@ const EventCard = ({
   user, //event organizer
   currentUserId,//logged in user
   onDelete, //optional - passing this prop from only profile page
+  onUpdate, //optional - passing this prop from only profile page
   title,
   area,
   location,
@@ -49,7 +52,8 @@ const EventCard = ({
   followers,
   // address = "665 Commonwealth Ave", // default value for demo
   imageUrl = "/insomnia_cookies.jpeg",
-  availability
+  availability,
+  showOwnerControls
 }: EventCardProps) => {
 
   const [isModalVisible, setIsModalVisible] = useState(false); //card modal
@@ -300,7 +304,7 @@ const EventCard = ({
                 </div>
               </div>
 
-              {/* Availability */}
+              {/* Availability: High-Medium-Low-None */}
               <div style={{
                 display: 'flex',
                 flexDirection: 'column',
@@ -414,7 +418,7 @@ const EventCard = ({
               />
 
               {/* DELETE BUTTON - Only shown in profile page of its owner */}
-              {currentUserId === user && (
+              {currentUserId === user && showOwnerControls && (
                 <CloseButton
                   onClick={handleDelete}
                   label="Delete"
@@ -422,7 +426,7 @@ const EventCard = ({
                 />
               )}
 
-              {currentUserId === user && (
+              {currentUserId === user && showOwnerControls && (
                 <CloseButton
                   onClick={() => setShowEditModal(true)}
                   label="Edit"
@@ -440,11 +444,14 @@ const EventCard = ({
         eventId={id}
         visible={showEditModal}
         onClose={() => setShowEditModal(false)}
-        onEventUpdated={() => {
-          // Option 1: refetch all events
-          // Option 2: update this card’s props locally (if you store them in state)
+        onEventUpdated={(updated) => {
+          onUpdate?.(updated); // notify profile page
+          setShowEditModal(false);
+          setIsModalVisible(false); // close both modals
         }}
       />
+
+
     </>
   );
 };
