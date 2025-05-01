@@ -115,11 +115,11 @@ const EditEventModal: React.FC<EditEventModalProps> = ({ eventId, visible, onClo
             open={visible}
             onCancel={onClose}
             footer={null}
-            width={650}
+            width={720}
             centered
             closeIcon={null}
             styles={{
-                body: { padding: 0, borderRadius: '12px', overflow: 'hidden' }
+                body: { padding: 0, borderRadius: '12px', overflow: 'hidden', minHeight: '90vh', }
             }}
             style={{ borderRadius: '12px', overflow: 'hidden' }}
         >
@@ -127,7 +127,7 @@ const EditEventModal: React.FC<EditEventModalProps> = ({ eventId, visible, onClo
                 <h2 style={{ color: 'white', fontSize: '24px', margin: 0 }}>Edit Event</h2>
             </div>
 
-            <div style={{ padding: '32px 28px' }}>
+            <div style={{ padding: '40px 28px' }}>
                 <Form form={form} layout="vertical">
                     <Row gutter={24}>
                         {/* Left column */}
@@ -155,26 +155,22 @@ const EditEventModal: React.FC<EditEventModalProps> = ({ eventId, visible, onClo
 
                         {/* Right column */}
                         <Col xs={24} md={12}>
-                            <Row gutter={12}>
-                                <Col span={12}>
-                                    <Form.Item label="Start Date" name="startDate" rules={[{ required: true }]}>
-                                        <DatePicker
-                                            showTime={{ format: "hh:mm A", use12Hours: true }}
-                                            format="MMMM DD, YYYY hh:mm A"
-                                            style={{ width: '100%' }}
-                                        />
-                                    </Form.Item>
-                                </Col>
-                                <Col span={12}>
-                                    <Form.Item label="End Date" name="endDate" rules={[{ required: true }]}>
-                                        <DatePicker
-                                            showTime={{ format: "hh:mm A", use12Hours: true }}
-                                            format="MMMM DD, YYYY hh:mm A"
-                                            style={{ width: '100%' }}
-                                        />
-                                    </Form.Item>
-                                </Col>
-                            </Row>
+
+                            <Form.Item label="Start Date" name="startDate" rules={[{ required: true }]}>
+                                <DatePicker
+                                    showTime={{ format: "hh:mm A", use12Hours: true }}
+                                    format="MMMM DD, YYYY hh:mm A"
+                                    style={{ width: '100%' }}
+                                />
+                            </Form.Item>
+                            <Form.Item label="End Date" name="endDate" rules={[{ required: true }]}>
+                                <DatePicker
+                                    showTime={{ format: "hh:mm A", use12Hours: true }}
+                                    format="MMMM DD, YYYY hh:mm A"
+                                    style={{ width: '100%' }}
+                                />
+                            </Form.Item>
+
 
                             <Form.Item label="Food Provider" name="foodProviderInput">
                                 <Input.Search
@@ -229,7 +225,7 @@ const EditEventModal: React.FC<EditEventModalProps> = ({ eventId, visible, onClo
                     </Row>
 
                     <div style={{
-                        marginTop: 32,
+                        marginTop: 40,
                         display: 'flex',
                         justifyContent: 'center',
                         gap: '16px'
