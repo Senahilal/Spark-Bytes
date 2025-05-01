@@ -1,7 +1,7 @@
 "use client"
 
 import React, { useState } from 'react';
-import { MdNotifications, MdLocationOn, MdCalendarToday, MdRestaurant, MdPeople } from 'react-icons/md';
+import { MdNotifications, MdLocationOn, MdCalendarToday, MdRestaurant, MdPeople, MdDescription } from 'react-icons/md';
 import { Modal } from 'antd';
 import CloseButton from './closeButton';
 import ShareButton from './sharebutton';
@@ -41,10 +41,9 @@ const EventCard = ({
   date,
   time,
   endTime,
+  description,
   foodType,
-  foodProvider,
   followers,
-  hasNotification,
   // address = "665 Commonwealth Ave", // default value for demo
   imageUrl = "/insomnia_cookies.jpeg"
 }: EventCardProps) => {
@@ -360,7 +359,22 @@ const EventCard = ({
               <MdRestaurant size={24} />
               <div>{foodType}</div>
             </div>
-          </div>
+          
+
+          {/* Description - Added for modal view */}
+          {description && (
+              <div style={{ 
+                width: '90%', 
+                display: 'flex', 
+                alignItems: 'flex-start', 
+                gap: '10px', 
+                marginBottom: '15px' 
+              }}> 
+                <MdDescription size={28} /> 
+                <div style={{ fontSize: '14px', lineHeight: '1.5' }}>{description}</div>
+              </div> 
+            )} 
+            </div>
 
           {/* Buttons at the bottom */}
           <div style={{
