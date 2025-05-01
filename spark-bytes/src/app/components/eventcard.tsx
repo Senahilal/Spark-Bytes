@@ -2,12 +2,20 @@
 
 import React, { useState } from 'react';
 import { MdNotifications, MdLocationOn, MdCalendarToday, MdRestaurant, MdPeople } from 'react-icons/md';
-import { Modal } from 'antd';
+import { Modal, Form, Row, Col, Card, Input, Select, DatePicker, Button, Space, Tag } from 'antd';
 import CloseButton from './closeButton';
 import ShareButton from './sharebutton';
-import { deleteDoc, doc, updateDoc, arrayUnion, arrayRemove } from "firebase/firestore";
-import { db } from "@/app/firebase/config";
+import { deleteDoc, doc, updateDoc, arrayUnion, arrayRemove, getDoc } from "firebase/firestore";
+import { auth, db } from "@/app/firebase/config";
 import { useRouter } from 'next/navigation';
+import dayjs from "dayjs";
+import utc from "dayjs/plugin/utc";
+import timezone from "dayjs/plugin/timezone";
+
+dayjs.extend(utc);
+dayjs.extend(timezone);
+
+const easternTimeZone = "America/New_York";
 
 
 // interface - add more if needed
@@ -32,6 +40,7 @@ interface EventCardProps {
   availability: string;
 }
 
+
 const EventCard = ({
   id,
   user, //event organizer
@@ -53,14 +62,61 @@ const EventCard = ({
 }: EventCardProps) => {
   const [isModalVisible, setIsModalVisible] = useState(false);
   const [isEditModalVisible, setIsEditModalVisible] = useState(false);
+  const [available, setAvailability] = useState<string>("Available"); 
+  const [foodItems, setFoodItems] = useState<string[]>([]);
   const [isFollowing, setIsFollowing] = useState(
     currentUserId && followers && Array.isArray(followers) ? 
       followers.includes(currentUserId) : false
   );
   const router = useRouter(); // Initialize the router
+  const [form] = Form.useForm();
+  const [eventData, setEventData] = useState({
+    title: "",
+    description: "",
+    area: "",
+    location: "",
+    startDate: null,
+    endDate: null,
+    foodProvider: [],
+    availability: "Available",
+  });
 
+
+  const fetchEventData = async () => {
+    try {
+      const eventRef = doc(db, "events", id);
+      const eventDoc = await getDoc(eventRef);
+      const eventData = eventDoc.data();
+  
+      if (eventData) {
+        form.setFieldsValue({
+          title: eventData.title,
+          description: eventData.description,
+          location: eventData.location,
+          area: eventData.area,
+          startDate: dayjs(eventData.start.toDate()).tz(easternTimeZone),
+          endDate: dayjs(eventData.end.toDate()).tz(easternTimeZone), 
+        });
+      } else {
+        console.error("Event data is undefined.");
+      }
+    } catch (error) {
+      console.error("Error fetching event data:", error);
+    }
+  };
+  
+  const showEditModal = () => {
+    fetchEventData(); // Fetch event data before showing the modal
+    setIsEditModalVisible(true);
+  };
+  
   const showModal = () => {
     setIsModalVisible(true);
+  };
+
+  const handleEditCancel = (e: React.MouseEvent) => {
+    setIsEditModalVisible(false);
+    e.stopPropagation();
   };
 
   const handleCancel = (e: React.MouseEvent) => {
@@ -92,6 +148,7 @@ const EventCard = ({
         });
       }
       
+      
       setIsFollowing(!isFollowing);
     } catch (error) {
       console.error("Error updating event followers:", error);
@@ -122,7 +179,55 @@ const EventCard = ({
     return `Check out this event: ${title} - ${foodType} at ${location} on ${date} at ${time}`;
   };
 
+  const handleAddFoodProvider = () => {
+    const currentFoodItem = form.getFieldValue("foodProviderInput") || ""; // Default to an empty string
+    if (currentFoodItem.trim()) {
+      setFoodItems([...foodItems, currentFoodItem.trim()]);
+      form.setFieldsValue({ foodProviderInput: "" }); // Clear the input field
+    }
+  };
 
+  const handleRemoveFoodProvider = (index: number) => {
+    const newItems = [...foodItems];
+    newItems.splice(index, 1);
+    setFoodItems(newItems);
+  };
+
+  const handleSave = async () => {
+    try {
+      const values = await form.validateFields();
+      console.log("Form values:", values); // Log the form values
+      const { title, description, area, location, startDate, endDate } = values;
+  
+      // Validate dates
+      if (!startDate || !endDate) {
+        console.error("Start date or end date is missing.");
+        return;
+      }
+  
+      // Update the event in Firestore
+      const eventRef = doc(db, "events", id);
+      await updateDoc(eventRef, {
+        title,
+        description,
+        area,
+        location,
+        startDate: startDate.toISOString(),
+        endDate: endDate.toISOString(),
+        foodProvider: foodItems,
+        availability,
+      });
+  
+      console.log("Event updated successfully.");
+      setIsEditModalVisible(false);
+    } catch (error) {
+      if (error instanceof Error) {
+        console.error("Error updating event:", error.message);
+      } else {
+        console.error("Unknown error:", error);
+      }
+    }
+  };
 
   return (
     <>
@@ -388,7 +493,7 @@ const EventCard = ({
               {/* EDIT button for organization */}
               {currentUserId === user && (
                 <CloseButton
-                  onClick={handleEdit}
+                  onClick={showEditModal}
                   label="Edit"
                   style={{ backgroundColor: "#036D19 ", color: "white" }}
                 />
@@ -398,8 +503,164 @@ const EventCard = ({
           </div>
         </div>
       </Modal>
+
+      {/* Modal for EDITING event */}
+      <Modal
+        title="Edit Event"
+        open={isEditModalVisible}
+        onCancel={() => setIsEditModalVisible(false)}
+        footer={null}
+        width={600}
+        centered
+        closeIcon={null}
+        styles={{
+          body: { padding: 0, borderRadius: '12px', overflow: 'hidden' }
+        }}
+        style={{ borderRadius: '12px', overflow: 'hidden' }}
+      >
+        <div style={{ padding: "40px 24px", maxWidth: "1200px", margin: "0 auto" }}>
+        <Form form={form} layout="vertical">
+          <Row gutter={[24, 24]}>
+            {/* Left column - Event Details */}
+            <Col xs={24} md={12}>
+              <Card title="Event Details" style={{ marginBottom: 20 }}>
+                <Form.Item label="Title" name="title" rules={[{ required: true, message: "Please input the event title!" }]}>
+                <Input
+                  placeholder="Enter event title"
+                  value={eventData.title}
+                  onChange={(e) => setEventData({ ...eventData, title: e.target.value })}
+                />
+                </Form.Item>
+
+                <Form.Item label="Description" name="description" rules={[{ required: true, message: "Please input the event description!" }]}>
+                <Input
+                  placeholder="Enter description"
+                  value={eventData.description}
+                  onChange={(e) => setEventData({ ...eventData, description: e.target.value })}
+                />
+                </Form.Item>
+
+                <Form.Item label="Area" name="area" rules={[{ required: true, message: "Please input the event area!" }]}>
+                  <Select
+                    placeholder="Select a campus"
+                    value={eventData.area}
+                    onChange={(value) => setEventData({ ...eventData, area: value })}
+                  >
+                    <Select.Option value="West Campus">West Campus</Select.Option>
+                    <Select.Option value="East Campus">East Campus</Select.Option>
+                    <Select.Option value="Central Campus">Central Campus</Select.Option>
+                  </Select>
+                </Form.Item>
+
+                <Form.Item label="Location" name="location" rules={[{ required: true, message: "Please input the event location!" }]}>
+                <Input
+                  placeholder="Enter event location"
+                  value={eventData.location}
+                  onChange={(e) => setEventData({ ...eventData, location: e.target.value })}
+                />
+                </Form.Item>
+
+                <Row gutter={16}>
+                  <Col span={12}>
+                    <Form.Item label="Start Date" name="startDate" rules={[{ required: true, message: "Please select the start date!" }]}>
+                    <DatePicker
+                      style={{ width: "100%" }}
+                      showTime={{ format: "hh:mm A", use12Hours: true }}
+                      format="MMMM DD, YYYY hh:mm A"
+                      value={eventData.startDate}
+                      onChange={(date) => setEventData({ ...eventData, startDate: date })}
+                    />
+                    </Form.Item>
+                  </Col>
+                  <Col span={12}>
+                    <Form.Item label="End Date" name="endDate" rules={[{ required: true, message: "Please select the end date!" }]}>
+                    <DatePicker
+                      style={{ width: "100%" }}
+                      showTime={{ format: "hh:mm A", use12Hours: true }}
+                      format="MMMM DD, YYYY hh:mm A"
+                      value={eventData.endDate}
+                      onChange={(date) => setEventData({ ...eventData, endDate: date })}
+                    />
+                    </Form.Item>
+                  </Col>
+                </Row>
+              </Card>
+            </Col>
+
+            {/* Right column - Food Info */}
+            <Col xs={24} md={12}>
+              <Card title="Food Provider" style={{ marginBottom: 20 }}>
+                <Space.Compact style={{ width: "100%" }}>
+                <Form.Item name="foodProviderInput">
+                      <Input placeholder="Enter provider and press Enter" />
+                  </Form.Item>
+                  <Button type="primary" onClick={handleAddFoodProvider}>
+                    Add
+                  </Button>
+                </Space.Compact>
+
+                <div style={{ marginTop: 8 }}>
+                  {foodItems.map((item, index) => (
+                    <Tag key={index} closable onClose={() => handleRemoveFoodProvider(index)} color="green">
+                      {item}
+                    </Tag>
+                  ))}
+                </div>
+              </Card>
+              <Form.Item name="availability" initialValue={availability}>
+                  <Card title="Availability" style={{ marginBottom: 20 }}>
+                      <div style={{ display: "flex", justifyContent: "space-between", gap: "10px" }}>
+                      <Button
+                          type={availability === "high" ? "primary" : "default"}
+                          onClick={() => {
+                              setAvailability("high");
+                              form.setFieldsValue({ availability: "high" });
+                          }}
+                          style={{ backgroundColor: "green" }}
+                          >
+                          Available
+                          </Button>
+                          <Button
+                          type={availability === "medium" ? "primary" : "default"}
+                          onClick={() => {
+                              setAvailability("medium");
+                              form.setFieldsValue({ availability: "medium" });
+                          }}
+                          style={{ backgroundColor: "orange" }}
+                          >
+                          Few
+                          </Button>
+                          <Button
+                          type={availability === "none" ? "primary" : "default"}
+                          onClick={() => {
+                              setAvailability("none");
+                              form.setFieldsValue({ availability: "none" });
+                          }}
+                          style={{ backgroundColor: "red" }}
+                          >
+                          None
+                          </Button>
+                      </div>
+                  </Card>
+                  </Form.Item>
+            </Col>
+          </Row>
+
+          {/* Form action buttons */}
+          <div style={{ marginTop: 32, display: "flex", justifyContent: "center", gap: "16px" }}>
+            <Button danger size="large" style={{ width: 200 }} onClick={handleEditCancel}>
+              Cancel
+            </Button>
+            <Button type="primary" size="large" style={{ width: 200 }} onClick={handleSave}>
+              Save
+            </Button>
+          </div>
+        </Form>
+      </div>
+      </Modal>
     </>
   );
 };
 
 export default EventCard;
+
