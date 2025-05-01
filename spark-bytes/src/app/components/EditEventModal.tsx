@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { Modal, Form, Input, Select, DatePicker, Button, Space, Tag, Row, Col, Card } from 'antd';
-import dayjs from 'dayjs';
+import dayjs, { Dayjs } from 'dayjs';
 import utc from 'dayjs/plugin/utc';
 import timezone from 'dayjs/plugin/timezone';
 import { doc, getDoc } from 'firebase/firestore';
@@ -24,6 +24,27 @@ const EditEventModal: React.FC<EditEventModalProps> = ({ eventId, visible, onClo
     const [form] = Form.useForm();
     const [foodItems, setFoodItems] = useState<string[]>([]);
     const [availability, setAvailability] = useState<string>('high');
+    const [startDate, setStartDate] = useState<dayjs.Dayjs | null>(null);
+
+    // Disable dates before today
+    const disablePastDates = (current: Dayjs) => {
+        return current && current < dayjs().startOf('day');
+    };
+
+    // Disable end dates before selected start date
+    const disableInvalidEndDates = (current: Dayjs): boolean => {
+        const today = dayjs().startOf('day');
+        if (!current) return false;
+
+        // If no startDate selected, disable past dates only
+        if (!startDate) return current.isBefore(today);
+
+        // If startDate is selected, disable before either today or startDate (whichever is later)
+        const minDate = startDate.isAfter(today) ? startDate : today;
+        return current.isBefore(minDate);
+    };
+
+
 
     useEffect(() => {
         if (!eventId || !visible) return;
@@ -161,6 +182,8 @@ const EditEventModal: React.FC<EditEventModalProps> = ({ eventId, visible, onClo
                                     showTime={{ format: "hh:mm A", use12Hours: true }}
                                     format="MMMM DD, YYYY hh:mm A"
                                     style={{ width: '100%' }}
+                                    disabledDate={disablePastDates} // <- disable past dates
+                                    onChange={(date) => setStartDate(date)}// <- track selected start date
                                 />
                             </Form.Item>
                             <Form.Item label="End Date" name="endDate" rules={[{ required: true }]}>
@@ -168,6 +191,7 @@ const EditEventModal: React.FC<EditEventModalProps> = ({ eventId, visible, onClo
                                     showTime={{ format: "hh:mm A", use12Hours: true }}
                                     format="MMMM DD, YYYY hh:mm A"
                                     style={{ width: '100%' }}
+                                    disabledDate={disableInvalidEndDates}
                                 />
                             </Form.Item>
 

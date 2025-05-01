@@ -252,6 +252,7 @@ const CreateEventPage: React.FC = () => {
                         style={{ width: '100%' }}
                         showTime={{ format: 'hh:mm A', use12Hours: true }}
                         format="MMMM DD, YYYY hh:mm A"
+                        disabledDate={(current) => current && current < dayjs().startOf('day')}  // <- disable past dates
                       />
                     </Form.Item>
                   </Col>
@@ -262,7 +263,10 @@ const CreateEventPage: React.FC = () => {
                         style={{ width: '100%' }}
                         showTime={{ format: 'hh:mm A', use12Hours: true }}
                         format="MMMM DD, YYYY hh:mm A"
-                      />
+                        disabledDate={(current) =>
+                          current &&
+                          (current < dayjs().startOf('day') || current < eventDate.startOf('minute'))
+                        } />
                     </Form.Item>
                   </Col>
                 </Row>
