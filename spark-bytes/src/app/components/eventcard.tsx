@@ -405,7 +405,7 @@ const EventCard = ({
             marginBottom: '20px'
           }}>
             <div style={{ width: '90%', display: 'flex', justifyContent: 'center', gap: '15px' }}>
-              
+
               {currentUserId && currentUserId != user && (
                 <CloseButton
                   onClick={handleNotifyMe}
@@ -428,6 +428,7 @@ const EventCard = ({
                 />
               )}
 
+              {/* EDIT BUTTON - Only shown in profile page of its owner */}
               {currentUserId === user && showOwnerControls && (
                 <CloseButton
                   onClick={() => setShowEditModal(true)}
@@ -435,8 +436,6 @@ const EventCard = ({
                   style={{ backgroundColor: "#036D19", color: "white" }}
                 />
               )}
-
-
             </div>
           </div>
         </div>
