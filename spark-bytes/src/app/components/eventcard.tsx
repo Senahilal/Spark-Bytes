@@ -66,47 +66,50 @@ const EventCard = ({
 
   const [isEventPassed, setIsEventPassed] = useState(false);
 
-
-  useEffect(() => {
-    // Check if event has already passed
-    const checkIfEventPassed = () => {
-      if (!endTime) return false;
-      
-      // parse 
-      const [month, day, year] = date.split('/').map(part => parseInt(part));
-      
-      // extract hours and minutes
-      const timeRegex = /(\d+):(\d+)\s*(AM|PM)/i;
-      const endTimeMatch = endTime.match(timeRegex);
-      
-      if (!endTimeMatch) 
-        return false; 
-      
-      let hours = parseInt(endTimeMatch[1]); 
-      const minutes = parseInt(endTimeMatch[2]);
-      const ampm = endTimeMatch[3].toUpperCase(); 
-      
-      // convert to 24-hour format
-      if (ampm === 'PM' && hours < 12) hours += 12;
-      if (ampm === 'AM' && hours === 12) hours = 0; 
-      
-      // create a date object for the event end time
-      const eventEndTime = new Date(year, month - 1, day, hours, minutes);
-      
-      // compare with current time
-      const currentTime = new Date();
-      
-      return currentTime > eventEndTime;
-    };
+useEffect(() => {
+  // Check if event has already passed
+  const checkIfEventPassed = () => {
+    if (!endTime || endTime === 'Unknown') return false;
     
+    const now = new Date();
+    
+    try {
+      const timeStr = endTime.toLowerCase();
+      let eventEndTime = new Date();
+      
+      // Parse the time string
+      const timeMatch = timeStr.match(/(\d+):(\d+)\s*(am|pm)/i);
+      if (timeMatch) {
+        let hours = parseInt(timeMatch[1]);
+        const minutes = parseInt(timeMatch[2]);
+        const ampm = timeMatch[3].toLowerCase();
+        
+        // Convert to 24-hour format
+        if (ampm === 'pm' && hours < 12) hours += 12;
+        if (ampm === 'am' && hours === 12) hours = 0;
+        
+        // Set the hours and minutes
+        eventEndTime.setHours(hours, minutes, 0, 0);
+        
+        // Compare with current time
+        return now > eventEndTime;
+      }
+      
+      return false;
+    } catch (error) {
+      console.error('Error checking if event passed:', error);
+      return false;
+    }
+  };
+  
+  setIsEventPassed(checkIfEventPassed());
+  
+  const intervalId = setInterval(() => {
     setIsEventPassed(checkIfEventPassed());
-
-    const intervalId = setInterval(() => {
-      setIsEventPassed(checkIfEventPassed());
-    }, 60000);
-    
-    return () => clearInterval(intervalId);
-  }, [date, endTime]);
+  }, 60000); // Check every minute
+  
+  return () => clearInterval(intervalId);
+}, [endTime]);
 
   const showModal = () => {
     setIsModalVisible(true);
