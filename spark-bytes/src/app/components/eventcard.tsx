@@ -7,6 +7,7 @@ import CloseButton from './closeButton';
 import ShareButton from './sharebutton';
 import { deleteDoc, doc, updateDoc, arrayUnion, arrayRemove } from "firebase/firestore";
 import { db } from "@/app/firebase/config";
+import EditEventModal from './EditEventModal';
 
 
 // interface - add more if needed
@@ -25,16 +26,18 @@ interface EventCardProps {
   followers: string[];
   hasNotification?: boolean;
   address?: string;
-  imageUrl?: string; 
-  currentUserId?: string;
-  onDelete?: (id: string) => void; 
+  imageUrl?: string;
+  currentUserId?: string; // optional - user id of currently logged in user
+  onDelete?: (id: string) => void; //optional - passing this prop from only profile page - can be delted only from profile page 
+  availability: string;
 }
+
 
 const EventCard = ({
   id,
   user, //event organizer
   currentUserId,//logged in user
-  onDelete, 
+  onDelete, //optional - passing this prop from only profile page
   title,
   area,
   location,
@@ -45,13 +48,17 @@ const EventCard = ({
   foodType,
   followers,
   // address = "665 Commonwealth Ave", // default value for demo
-  imageUrl = "/insomnia_cookies.jpeg"
+  imageUrl = "/insomnia_cookies.jpeg",
+  availability
 }: EventCardProps) => {
-  const [isModalVisible, setIsModalVisible] = useState(false);
+
+  const [isModalVisible, setIsModalVisible] = useState(false); //card modal
   const [isFollowing, setIsFollowing] = useState(
-    currentUserId && followers && Array.isArray(followers) ? 
+    currentUserId && followers && Array.isArray(followers) ?
       followers.includes(currentUserId) : false
   );
+
+  const [showEditModal, setShowEditModal] = useState(false);
 
 
   const showModal = () => {
@@ -65,16 +72,16 @@ const EventCard = ({
 
   const handleNotifyMe = async (e: React.MouseEvent) => {
     e.stopPropagation();
-    
+
     if (!currentUserId) {
       // Handle case when user is not logged in
       console.log("User must be logged in to follow events");
       return;
     }
-    
+
     try {
       const eventRef = doc(db, "events", id);
-      
+
       if (isFollowing) {
         // remove user from followers
         await updateDoc(eventRef, {
@@ -86,7 +93,7 @@ const EventCard = ({
           followers: arrayUnion(currentUserId)
         });
       }
-      
+
       setIsFollowing(!isFollowing);
     } catch (error) {
       console.error("Error updating event followers:", error);
@@ -213,7 +220,7 @@ const EventCard = ({
             <h2 style={{ color: 'white', margin: 0, fontSize: '24px' }}>{title}</h2>
             <div style={{ display: 'flex', gap: '10px' }}>
               {currentUserId && isFollowing && <MdNotifications size={24} color="white" />}
-              <ShareButton 
+              <ShareButton
                 title={title}
                 text={getShareText()}
                 url={`${window.location.origin}/events/${id}`} // Adjust the URL structure as needed
@@ -303,35 +310,44 @@ const EventCard = ({
                   display: 'flex',
                   alignItems: 'center',
                   gap: '5px',
-                  color: 'red',
-                  fontWeight: 'bold'
+                  fontWeight: 'bold',
+                  fontSize: '14px',
+                  color:
+                    availability === 'high' ? 'green' :
+                      availability === 'medium' ? 'orange' :
+                        availability === 'low' ? 'red' : '#888'
                 }}>
                   <MdPeople size={18} />
-                  <span>Availability</span>
+                  <span>Food Availability</span>
                 </div>
                 <div style={{
                   marginTop: '8px',
                   display: 'flex',
                   gap: '4px'
                 }}>
-                  <div style={{
-                    width: '10px',
-                    height: '10px',
-                    borderRadius: '50%',
-                    backgroundColor: 'red'
-                  }}></div>
-                  <div style={{
-                    width: '10px',
-                    height: '10px',
-                    borderRadius: '50%',
-                    backgroundColor: '#ddd'
-                  }}></div>
-                  <div style={{
-                    width: '10px',
-                    height: '10px',
-                    borderRadius: '50%',
-                    backgroundColor: '#ddd'
-                  }}></div>
+                  {[0, 1, 2].map((i) => {
+                    const activeCount =
+                      availability === 'high' ? 3 :
+                        availability === 'medium' ? 2 :
+                          availability === 'low' ? 1 : 0;
+
+                    const color =
+                      availability === 'high' ? 'green' :
+                        availability === 'medium' ? 'orange' :
+                          availability === 'low' ? 'red' : '#ddd';
+
+                    return (
+                      <div
+                        key={i}
+                        style={{
+                          width: '10px',
+                          height: '10px',
+                          borderRadius: '50%',
+                          backgroundColor: i < activeCount ? color : '#ddd'
+                        }}
+                      />
+                    );
+                  })}
                 </div>
               </div>
             </div>
@@ -359,22 +375,22 @@ const EventCard = ({
               <MdRestaurant size={24} />
               <div>{foodType}</div>
             </div>
-          
 
-          {/* Description - Added for modal view */}
-          {description && (
-              <div style={{ 
-                width: '90%', 
-                display: 'flex', 
-                alignItems: 'flex-start', 
-                gap: '10px', 
-                marginBottom: '15px' 
-              }}> 
-                <MdDescription size={28} /> 
+
+            {/* Description - Added for modal view */}
+            {description && (
+              <div style={{
+                width: '90%',
+                display: 'flex',
+                alignItems: 'flex-start',
+                gap: '10px',
+                marginBottom: '15px'
+              }}>
+                <MdDescription size={28} />
                 <div style={{ fontSize: '14px', lineHeight: '1.5' }}>{description}</div>
-              </div> 
-            )} 
-            </div>
+              </div>
+            )}
+          </div>
 
           {/* Buttons at the bottom */}
           <div style={{
@@ -385,30 +401,50 @@ const EventCard = ({
             marginBottom: '20px'
           }}>
             <div style={{ width: '90%', display: 'flex', justifyContent: 'center', gap: '15px' }}>
-            {currentUserId ? (
-          <CloseButton
-            onClick={handleNotifyMe}
-            label={isFollowing ? "Cancel Notification" : "Notify Me"}
-            style={isFollowing ? { backgroundColor: '#888', cursor: 'pointer', whiteSpace: 'nowrap' } : { backgroundColor: '#036D19' } }
-          />
-        ) : null}
+              {currentUserId ? (
+                <CloseButton
+                  onClick={handleNotifyMe}
+                  label={isFollowing ? "Cancel Notification" : "Notify Me"}
+                  style={isFollowing ? { backgroundColor: '#888', cursor: 'pointer', whiteSpace: 'nowrap' } : { backgroundColor: '#036D19' }}
+                />
+              ) : null}
               <CloseButton
                 onClick={handleCancel}
                 label="Close"
               />
 
+              {/* DELETE BUTTON - Only shown in profile page of its owner */}
               {currentUserId === user && (
                 <CloseButton
                   onClick={handleDelete}
                   label="Delete"
-                  style={{ backgroundColor: "#036D19 ", color: "white" }}
+                  style={{ backgroundColor: "#D32F2F", color: "white" }}
                 />
               )}
+
+              {currentUserId === user && (
+                <CloseButton
+                  onClick={() => setShowEditModal(true)}
+                  label="Edit"
+                  style={{ backgroundColor: "#036D19", color: "white" }}
+                />
+              )}
+
 
             </div>
           </div>
         </div>
       </Modal>
+
+      <EditEventModal
+        eventId={id}
+        visible={showEditModal}
+        onClose={() => setShowEditModal(false)}
+        onEventUpdated={() => {
+          // Option 1: refetch all events
+          // Option 2: update this card’s props locally (if you store them in state)
+        }}
+      />
     </>
   );
 };
