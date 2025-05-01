@@ -24,6 +24,7 @@ export default function SignUp() {
   const [manualError, setManualError] = useState<String>("");
 
   async function handleSignUp() {
+    setManualError("");
     if (!email || !password) {
       setManualError("Please provide both email and password");
       return;
@@ -56,9 +57,10 @@ export default function SignUp() {
       message.success("Account created successfully!");
       setEmail("");
       setPassword("");
-      if (user != null) {
+      if (user != null || res.user) {
         // Redirect to account page
         router.push("/profile");
+        return;
       };
     } catch (err) {
       console.log(err);
