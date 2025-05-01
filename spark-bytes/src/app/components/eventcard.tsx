@@ -1,6 +1,6 @@
 "use client"
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { MdNotifications, MdLocationOn, MdCalendarToday, MdRestaurant, MdPeople, MdDescription } from 'react-icons/md';
 import { Modal } from 'antd';
 import CloseButton from './closeButton';
@@ -64,6 +64,49 @@ const EventCard = ({
 
   const [showEditModal, setShowEditModal] = useState(false);
 
+  const [isEventPassed, setIsEventPassed] = useState(false);
+
+
+  useEffect(() => {
+    // Check if event has already passed
+    const checkIfEventPassed = () => {
+      if (!endTime) return false;
+      
+      // parse 
+      const [month, day, year] = date.split('/').map(part => parseInt(part));
+      
+      // extract hours and minutes
+      const timeRegex = /(\d+):(\d+)\s*(AM|PM)/i;
+      const endTimeMatch = endTime.match(timeRegex);
+      
+      if (!endTimeMatch) 
+        return false; 
+      
+      let hours = parseInt(endTimeMatch[1]); 
+      const minutes = parseInt(endTimeMatch[2]);
+      const ampm = endTimeMatch[3].toUpperCase(); 
+      
+      // convert to 24-hour format
+      if (ampm === 'PM' && hours < 12) hours += 12;
+      if (ampm === 'AM' && hours === 12) hours = 0; 
+      
+      // create a date object for the event end time
+      const eventEndTime = new Date(year, month - 1, day, hours, minutes);
+      
+      // compare with current time
+      const currentTime = new Date();
+      
+      return currentTime > eventEndTime;
+    };
+    
+    setIsEventPassed(checkIfEventPassed());
+
+    const intervalId = setInterval(() => {
+      setIsEventPassed(checkIfEventPassed());
+    }, 60000);
+    
+    return () => clearInterval(intervalId);
+  }, [date, endTime]);
 
   const showModal = () => {
     setIsModalVisible(true);
@@ -140,7 +183,36 @@ const EventCard = ({
           gap: '13px',
           cursor: 'pointer',
           transition: 'transform 0.2s, box-shadow 0.2s',
+          position: 'relative',
+          overflow: 'hidden',
         }}>
+
+        {isEventPassed && (
+          <div style={{
+            position: 'absolute',
+            top: 0, 
+            left: 0,
+            right: 0, 
+            bottom: 0, 
+            backgroundColor: 'rgba(0, 0, 0, 0.5)',
+            zIndex: 1, 
+            borderRadius: '12px',
+            display: 'flex', 
+            justifyContent: 'center', 
+            alignItems: 'center', 
+          }}>
+            <div style={{
+              backgroundColor: 'rgba(255, 255, 255, 0.9)', 
+              padding: '8px 16px', 
+              borderRadius: '20px', 
+              fontWeight: 'bold', 
+              color: '#666', 
+            }}>
+              Event Ended
+            </div>
+          </div>
+        )}
+
 
         {/* Image */}
         {imageUrl && (
@@ -149,7 +221,9 @@ const EventCard = ({
             height: '160px',
             overflow: 'hidden',
             borderRadius: '8px',
-            marginBottom: '10px'
+            marginBottom: '10px',
+            position: 'relative', 
+            zIndex: 0,
           }}>
             <img
               src={imageUrl}
@@ -170,7 +244,12 @@ const EventCard = ({
         )}
 
         {/* title and notification icon */}
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+        <div style={{ 
+          display: 'flex', 
+          justifyContent: 'space-between', 
+          alignItems: 'center',
+          position: 'relative',
+          zIndex: 0, }}>
           <h3 style={{ fontSize: '1.25rem', fontWeight: 'bold', margin: '0' }}>{title}</h3>
           {currentUserId && isFollowing && (
             <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
@@ -180,19 +259,25 @@ const EventCard = ({
         </div>
 
         {/* location */}
-        <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '8px',
+          position: 'relative', zIndex: 0,
+         }}>
           <MdLocationOn size={16} />
           <span style={{ fontSize: '0.9rem' }}>{location}</span>
         </div>
 
         {/* date */}
-        <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '8px',
+          position: 'relative', zIndex: 0,
+         }}>
           <MdCalendarToday size={16} />
           <span style={{ fontSize: '0.9rem' }}>{date} @{time}</span>
         </div>
 
         {/* food type */}
-        <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '8px',
+          position: 'relative', zIndex: 0,
+         }}>
           <MdRestaurant size={16} />
           <span style={{ fontSize: '0.9rem' }}>{foodType}</span>
         </div>
@@ -215,13 +300,14 @@ const EventCard = ({
         <div style={{ position: 'relative' }}>
           {/* Green header */}
           <div style={{
-            backgroundColor: '#036D19',
+            backgroundColor: isEventPassed ? '#888888' : '#036D19',
             padding: '20px',
             display: 'flex',
             justifyContent: 'space-between',
             alignItems: 'center'
           }}>
-            <h2 style={{ color: 'white', margin: 0, fontSize: '24px' }}>{title}</h2>
+            <h2 style={{ color: 'white', margin: 0, fontSize: '24px' }}>
+            {title} {isEventPassed && <span>(Ended)</span>}</h2>
             <div style={{ display: 'flex', gap: '10px' }}>
               {currentUserId && isFollowing && <MdNotifications size={24} color="white" />}
               <ShareButton
@@ -237,7 +323,8 @@ const EventCard = ({
             padding: '30px 20px 20px 20px',
             display: 'flex',
             justifyContent: 'center',
-            backgroundColor: 'white'
+            backgroundColor: 'white',
+            position: 'relative',
           }}>
             {imageUrl ? (
               <div style={{
@@ -245,7 +332,8 @@ const EventCard = ({
                 height: '300px',
                 overflow: 'hidden',
                 borderRadius: '8px',
-                boxShadow: '0 2px 10px rgba(0,0,0,0.1)'
+                boxShadow: '0 2px 10px rgba(0,0,0,0.1)',
+                position: 'relative',
               }}>
                 <img
                   src={imageUrl}
@@ -263,6 +351,17 @@ const EventCard = ({
                     console.log('Error loading image:', imageUrl);
                   }}
                 />
+                {isEventPassed && (
+                  <div style={{
+                    position: 'absolute', 
+                    top: 0, 
+                    left: 0, 
+                    right: 0,
+                    bottom: 0,
+                    backgroundColor: 'rgba(0, 0, 0, 0.2)', 
+                    borderRadius: '8px', 
+                  }} />
+                )}
               </div>
             ) : (
               <div style={{
@@ -317,12 +416,13 @@ const EventCard = ({
                   fontWeight: 'bold',
                   fontSize: '14px',
                   color:
+                  isEventPassed ? '#888' :
                     availability === 'high' ? 'green' :
                       availability === 'medium' ? 'orange' :
                         availability === 'low' ? 'red' : '#888'
                 }}>
                   <MdPeople size={18} />
-                  <span>Food Availability</span>
+                  <span>{isEventPassed ? 'Attendance' : 'Food Availability'}</span>
                 </div>
                 <div style={{
                   marginTop: '8px',
@@ -331,11 +431,13 @@ const EventCard = ({
                 }}>
                   {[0, 1, 2].map((i) => {
                     const activeCount =
+              
                       availability === 'high' ? 3 :
                         availability === 'medium' ? 2 :
                           availability === 'low' ? 1 : 0;
 
                     const color =
+                    isEventPassed ? '#888' :
                       availability === 'high' ? 'green' :
                         availability === 'medium' ? 'orange' :
                           availability === 'low' ? 'red' : '#ddd';
@@ -406,7 +508,7 @@ const EventCard = ({
           }}>
             <div style={{ width: '90%', display: 'flex', justifyContent: 'center', gap: '15px' }}>
 
-              {currentUserId && currentUserId != user && (
+              {currentUserId && currentUserId != user && !isEventPassed && (
                 <CloseButton
                   onClick={handleNotifyMe}
                   label={isFollowing ? "Cancel Notification" : "Notify Me"}
@@ -429,7 +531,7 @@ const EventCard = ({
               )}
 
               {/* EDIT BUTTON - Only shown in profile page of its owner */}
-              {currentUserId === user && showOwnerControls && (
+              {currentUserId === user && showOwnerControls && !isEventPassed && (
                 <CloseButton
                   onClick={() => setShowEditModal(true)}
                   label="Edit"
