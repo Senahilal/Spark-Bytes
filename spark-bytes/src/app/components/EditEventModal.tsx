@@ -157,7 +157,7 @@ const EditEventModal: React.FC<EditEventModalProps> = ({ eventId, visible, onClo
                                 <Input placeholder="Enter event title" />
                             </Form.Item>
 
-                            <Form.Item label="Description" name="description" rules={[{ required: true }]}>
+                            <Form.Item label="Description" name="description">
                                 <Input placeholder="Enter description" />
                             </Form.Item>
 
