@@ -90,6 +90,7 @@ const TodaysEvents = () => {
                   hasNotification={event.hasNotification || false}
                   imageUrl={event.imageURL || event.imageUrl}
                   currentUserId={currentUserId || undefined}
+                  availability={event.availability}
                 />
               );
             })}

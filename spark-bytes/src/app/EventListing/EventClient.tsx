@@ -396,6 +396,7 @@ export default function EventClient() {
                   hasNotification={event.hasNotification}
                   imageUrl={event.imageURL}
                   currentUserId={user?.uid}
+                  availability={event.availability}
                 />
               );
             })}

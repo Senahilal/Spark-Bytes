@@ -228,7 +228,7 @@ const CreateEventPage: React.FC = () => {
                   <Input placeholder="Enter event title" />
                 </Form.Item>
 
-                <Form.Item label="Description" name="description" rules={[{ required: true, message: 'Please input the event description!' }]}>
+                <Form.Item label="Description" name="description">
                   <Input placeholder="Enter description" />
                 </Form.Item>
 
@@ -241,7 +241,7 @@ const CreateEventPage: React.FC = () => {
                 </Form.Item>
 
                 <Form.Item label="Location" name="location" rules={[{ required: true, message: 'Please input the event location!' }]}>
-                  <Input placeholder="Enter event location" />
+                  <Input placeholder="Enter event location (e.g., GSU Backcourt)" />
                 </Form.Item>
 
                 <Row gutter={16}>
@@ -252,6 +252,7 @@ const CreateEventPage: React.FC = () => {
                         style={{ width: '100%' }}
                         showTime={{ format: 'hh:mm A', use12Hours: true }}
                         format="MMMM DD, YYYY hh:mm A"
+                        disabledDate={(current) => current && current < dayjs().startOf('day')}  // <- disable past dates
                       />
                     </Form.Item>
                   </Col>
@@ -262,7 +263,10 @@ const CreateEventPage: React.FC = () => {
                         style={{ width: '100%' }}
                         showTime={{ format: 'hh:mm A', use12Hours: true }}
                         format="MMMM DD, YYYY hh:mm A"
-                      />
+                        disabledDate={(current) =>
+                          current &&
+                          (current < dayjs().startOf('day') || current < eventDate.startOf('minute'))
+                        } />
                     </Form.Item>
                   </Col>
                 </Row>
