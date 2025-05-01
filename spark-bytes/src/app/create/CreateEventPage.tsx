@@ -170,6 +170,25 @@ const CreateEventPage: React.FC = () => {
     console.log('Event data:', eventData);
     // Handle form submission via onFinish if needed
   };
+  
+  const getDisabledEndTime = (current: dayjs.Dayjs | null) => {
+    if (!eventDate || !current || !current.isSame(eventDate, 'day')) return {};
+  
+    const startHour = eventDate.hour();
+    const startMinute = eventDate.minute();
+  
+    return {
+      disabledHours: () =>
+        Array.from({ length: 24 }, (_, h) => h).filter((h) => h < startHour),
+  
+      disabledMinutes: (selectedHour: number) =>
+        selectedHour === startHour
+          ? Array.from({ length: 60 }, (_, m) => m).filter((m) => m < startMinute)
+          : [],
+    };
+  };
+  
+  
 
   return (
     <>
@@ -276,8 +295,10 @@ const CreateEventPage: React.FC = () => {
                         format="MMMM DD, YYYY hh:mm A"
                         disabledDate={(current) =>
                           current &&
-                          (current < dayjs().startOf('day') || current < eventDate.startOf('minute'))
-                        } />
+                          (current < dayjs().startOf('day') || current < eventDate.startOf('day'))
+                        }
+                        disabledTime={getDisabledEndTime}
+                        />
                     </Form.Item>
                   </Col>
                 </Row>
