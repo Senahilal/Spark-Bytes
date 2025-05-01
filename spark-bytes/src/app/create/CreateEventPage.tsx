@@ -49,6 +49,7 @@ const CreateEventPage: React.FC = () => {
   const router = useRouter();
 
   // Redirect to login if not logged in, or to profile if not an organizer
+  //Checks to see the status of the user and whether they are an organizer
   useEffect(() => {
     if (!loading && !user) {
       router.push("/login");
@@ -70,8 +71,10 @@ const CreateEventPage: React.FC = () => {
     }
   }, [user, loading, router]);
 
+  //Options of food types
   const options = ['Halal', 'Vegetarian', 'Vegan', 'Gluten Free', 'Nut Free'];
 
+  //Interact with the options of food types
   const handleMenuClick = (e: MenuInfo) => {
     const value = e.key;
     setSelectedFoodType((prev) =>
@@ -123,6 +126,7 @@ const CreateEventPage: React.FC = () => {
     }
   };
 
+  // Handlers for food provider input
   const handleAddFoodProvider = () => {
     if (currentFoodItem.trim()) {
       setFoodItems([...foodItems, currentFoodItem.trim()]);
@@ -130,6 +134,7 @@ const CreateEventPage: React.FC = () => {
     }
   };
 
+  // Remove food provider from the list
   const handleRemoveFoodProvider = (index: number) => {
     const newItems = [...foodItems];
     newItems.splice(index, 1); // Remove the item at the specified index
@@ -219,8 +224,10 @@ const CreateEventPage: React.FC = () => {
       </div>
 
       <div style={{ padding: "40px 24px", maxWidth: "1200px", margin: "0 auto" }}>
+        {/* Form for creating a new event. This organizes all the field values into one "form", which can then be posted into firebase */}
         <Form form={form} onFinish={onFinish} layout="vertical">
           <Row gutter={[24, 24]}>
+
             {/* Left column - Event Details */}
             <Col xs={24} md={12}>
               <Card title="Event Details" style={{ marginBottom: 20 }}>
@@ -228,10 +235,12 @@ const CreateEventPage: React.FC = () => {
                   <Input placeholder="Enter event title" />
                 </Form.Item>
 
+                {/* Description field */}
                 <Form.Item label="Description" name="description">
                   <Input placeholder="Enter description" />
                 </Form.Item>
 
+                {/* Area and Location fields */}
                 <Form.Item label="Area" name="area" rules={[{ required: true, message: 'Please input the event area!' }]}>
                   <Select placeholder="Select a campus">
                     <Select.Option value="West Campus">West Campus</Select.Option>
@@ -240,6 +249,7 @@ const CreateEventPage: React.FC = () => {
                   </Select>
                 </Form.Item>
 
+                {/* Location field */}
                 <Form.Item label="Location" name="location" rules={[{ required: true, message: 'Please input the event location!' }]}>
                   <Input placeholder="Enter event location (e.g., GSU Backcourt)" />
                 </Form.Item>
@@ -247,6 +257,7 @@ const CreateEventPage: React.FC = () => {
                 <Row gutter={16}>
                   <Col span={12}>
                     <Form.Item label="Start Date" name="startDate" rules={[{ required: true, message: 'Please select the start date!' }]}>
+                      {/* DatePicker for selecting start date */} 
                       <DatePicker
                         onChange={(date) => date && setEventDate(dayjs(date).tz(easternTimeZone))}
                         style={{ width: '100%' }}
@@ -281,6 +292,7 @@ const CreateEventPage: React.FC = () => {
                         alt="Event image"
                         style={{ width: 80, height: 80, objectFit: 'cover', borderRadius: 4 }}
                       />
+                      {/* Displaying images */}
                       <Space>
                         <Button size="small" onClick={handleUpdateImage}>Update Image</Button>
                         <Button size="small" danger onClick={handleRemoveImage}>Remove</Button>
@@ -332,6 +344,7 @@ const CreateEventPage: React.FC = () => {
                     onPressEnter={handleAddFoodProvider}
                     style={{ flex: 1 }}
                   />
+                  {/* Button to add food provider */}
                   <Button
                     type="primary"
                     onClick={handleAddFoodProvider}
@@ -363,6 +376,7 @@ const CreateEventPage: React.FC = () => {
             <Button danger size="large" style={{ width: 200 }} onClick={() => router.back()}>
               Cancel
             </Button>
+            {/* Submit button to create the event by calling handleFormSubmit */}
             <Button type="primary" size="large" style={{ width: 200 }} onClick={() => {
               form
                 .validateFields()
