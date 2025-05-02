@@ -1,36 +1,53 @@
+/**
+ * ProfilePage.tsx
+ *
+ * This component displays and manages a user's profile in the web app.
+ * 
+ * Main Features:
+ * - Displays user information (name, email, phone, profile picture)
+ * - Allows users to edit and save their account details
+ * - Displays user-created events with edit/delete controls
+ * - Lets users apply to become an organizer
+ * - Provides toggles for email notifications
+ * - Supports profile image upload
+ * - Supports sign-out functionality
+ *
+ * Admin and organizer status are conditionally shown based on user role.
+ * Data is fetched from Firebase (auth, Firestore, and storage).
+ */
+
 'use client';
 
 import React, { useState, useEffect } from "react";
+// Navigation and utility imports
 import Link from 'next/link';
 import Image from "next/image";
-import Footer from '../components/footer';
-import { Form, Input, Button, Row, Col, Typography, Switch, Space } from "antd";
-import ProfileImagePlaceholder from "../../../public/profile_placeholder.jpg";
 import { useRouter } from "next/navigation";
 import { useAuthState } from "react-firebase-hooks/auth";
-import { auth } from "@/app/firebase/config";
-import { fetchUserData, updateUserData } from "@/app/firebase/repository";
-import { signOut } from "firebase/auth";
-import { message, Tag } from "antd";
-import { fetchUserIdEvents } from "@/app/firebase/repository";
-import EventCard from '../components/eventcard';
-import Logo from '../components/logo';
 import dayjs from "dayjs";
-import ButtonComponent from "../components/button";
+
+// UI Components
+import { Form, Input, Button, Row, Col, Typography, Switch, Space, message, Tag } from "antd";
 import { EditFilled } from "@ant-design/icons";
-
-import { collection, addDoc } from "firebase/firestore";
-import { db } from "@/app/firebase/config";
+import Footer from '../components/footer';
+import Logo from '../components/logo';
+import ButtonComponent from "../components/button";
+import EventCard from '../components/eventcard';
 import ProfileImageUploadModal from '../components/ProfileImageUploadModal';
-import { uploadProfileImage, updateUserProfileImageUrl } from "../firebase/repository";
-import { sign } from "crypto";
+import ProfileImagePlaceholder from "../../../public/profile_placeholder.jpg";
 
+// Firebase config and utilities
+import { auth, db } from "@/app/firebase/config";
+import { signOut } from "firebase/auth";
+import { fetchUserData, updateUserData, uploadProfileImage, updateUserProfileImageUrl, fetchUserIdEvents } from "../firebase/repository";
+import { collection, addDoc } from "firebase/firestore";
 
 const { Title, Text } = Typography;
 
 const ProfilePage = () => {
-    const [user, loading] = useAuthState(auth);
 
+    // Auth state
+    const [user, loading] = useAuthState(auth);
     const [signOutCalled, setSignOutCalled] = useState(false);
 
     //user information
@@ -41,7 +58,14 @@ const ProfilePage = () => {
     const [email, setEmail] = useState("");
     const [profileImageUrl, setProfileImageUrl] = useState<string | null>(null);
 
-    //user status
+    // Edit mode fields
+    const [editableFirstName, setEditableFirstName] = useState("");
+    const [editableLastName, setEditableLastName] = useState("");
+    const [editablePhoneNumber, setEditablePhoneNumber] = useState("");
+    const [editableEmail, setEditableEmail] = useState("");
+
+
+    // User roles and states
     const [isAdmin, setIsAdmin] = useState(false);
     const [isOrganizer, setIsOrganizer] = useState(false);
     const [requestPending, setRequestPending] = useState(false); //if user has pending request -> true
@@ -116,6 +140,7 @@ const ProfilePage = () => {
         }
     };
 
+    // Sign out handler
     const handleSignOut = async () => {
         try {
             await signOut(auth); // 1. Firebase sign out
@@ -174,22 +199,23 @@ const ProfilePage = () => {
     };
 
 
-
-
-
     //update user data
     const handleSaveChanges = async () => {
         if (!user) return;
 
         const updatedData = {
-            first_name: firstName,
-            last_name: lastName,
-            phone: phoneNumber,
-            email: email,
+            first_name: editableFirstName.trim(),
+            last_name: editableLastName.trim(),
+            phone: editablePhoneNumber.trim(),
+            email: editableEmail.trim(),
         };
 
         try {
             await updateUserData(user, updatedData);
+            setFirstName(editableFirstName);
+            setLastName(editableLastName);
+            setPhoneNumber(editablePhoneNumber);
+            setEmail(editableEmail);
             console.log("User data updated successfully.");
         } catch (error) {
             console.error("Error updating user data:", error);
@@ -207,7 +233,7 @@ const ProfilePage = () => {
     // };
     //////////////////////////////////////////
 
-    //handle email switch
+    //handle email switch - update db instantly
     const handleEmailToggle = async (checked: boolean) => {
         setEmailNotifications(checked);
         if (user) {
@@ -329,11 +355,27 @@ const ProfilePage = () => {
                         </div>
 
                         <div>
-                            <Text strong style={{ fontSize: "18px" }}>
-                                {firstName || "Name"} {lastName || "Last Name"}
-                            </Text>
-                            <br />
+                            <div style={{ display: "flex", alignItems: "center", gap: "10px", flexWrap: "wrap", marginBottom:"5px"}}>
+                                <Text strong style={{ fontSize: "24px" }}>
+                                    {firstName || "Name"} {lastName || "Last Name"}
+                                </Text>
+                                {isAdmin && (
+                                    <span
+                                        style={{
+                                            backgroundColor: "#C8E6C9",
+                                            color: "#2E7D32",
+                                            fontSize: "12px",
+                                            padding: "2px 8px",
+                                            borderRadius: "12px",
+                                            fontWeight: 500,
+                                        }}
+                                    >
+                                        Admin
+                                    </span>
+                                )}
+                            </div>
                             <Text type="secondary">{email || "example@bu.edu"}</Text>
+
                         </div>
                     </Space>
 
@@ -452,7 +494,7 @@ const ProfilePage = () => {
             ) : (
 
                 <div style={{ flex: 1, padding: "40px 24px" }}>
-                    {/* Account Info Edit Form */}
+                    {/* Account Info Section with Edit Form */}
                     <Form
                         layout="vertical"
                         style={{ maxWidth: "1024px", margin: "0 auto" }}
@@ -462,8 +504,8 @@ const ProfilePage = () => {
                                 <Form.Item label="First Name">
                                     <Input
                                         placeholder="First Name"
-                                        value={firstName}
-                                        onChange={(e) => setFirstName(e.target.value)}
+                                        value={isEditing ? editableFirstName : firstName}
+                                        onChange={(e) => setEditableFirstName(e.target.value)}
                                         size="large"
                                         disabled={!isEditing}
                                     />
@@ -473,8 +515,8 @@ const ProfilePage = () => {
                                 <Form.Item label="Last Name">
                                     <Input
                                         placeholder="Last Name"
-                                        value={lastName}
-                                        onChange={(e) => setLastName(e.target.value)}
+                                        value={isEditing ? editableLastName : lastName}
+                                        onChange={(e) => setEditableLastName(e.target.value)}
                                         size="large"
                                         disabled={!isEditing}
                                     />
@@ -484,8 +526,8 @@ const ProfilePage = () => {
                                 <Form.Item label="Phone Number">
                                     <Input
                                         placeholder="Phone Number"
-                                        value={phoneNumber}
-                                        onChange={(e) => setPhoneNumber(e.target.value)}
+                                        value={isEditing ? editablePhoneNumber : phoneNumber}
+                                        onChange={(e) => setEditablePhoneNumber(e.target.value)}
                                         size="large"
                                         disabled={!isEditing}
                                     />
@@ -495,22 +537,42 @@ const ProfilePage = () => {
                                 <Form.Item label="Email Address">
                                     <Input
                                         placeholder="Email Address"
-                                        value={email}
-                                        onChange={(e) => setEmail(e.target.value)}
+                                        value={isEditing ? editableEmail : email}
+                                        onChange={(e) => setEditableEmail(e.target.value)}
                                         size="large"
                                         disabled={!isEditing}
                                     />
                                 </Form.Item>
                             </Col>
                         </Row>
-                        <div style={{ display: "flex", justifyContent: "flex-end", marginTop: "24px" }}>
+                        <div style={{ display: "flex", gap: "10px", justifyContent: "flex-end", marginTop: "24px" }}>
+
+                            {isEditing && (
+                                <Button
+                                    style={{ marginLeft: "12px" }}
+                                    onClick={() => {
+                                        setIsEditing(false);
+                                    }}
+                                >
+                                    Cancel
+                                </Button>
+                            )}
+
                             <Button
                                 type="primary"
                                 style={{ backgroundColor: "#2E7D32" }}
-                                onClick={async () => {
-                                    if (isEditing) await handleSaveChanges();
-                                    setIsEditing(prev => !prev);
+                                onClick={() => {
+                                    if (!isEditing) {
+                                        setEditableFirstName(firstName);
+                                        setEditableLastName(lastName);
+                                        setEditablePhoneNumber(phoneNumber);
+                                        setEditableEmail(email);
+                                    } else {
+                                        handleSaveChanges(); // save if editing
+                                    }
+                                    setIsEditing(!isEditing);
                                 }}
+
                             >
                                 {isEditing ? "Save" : "Edit"}
                             </Button>
