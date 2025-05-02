@@ -1,3 +1,18 @@
+/**
+ * CreateEventPage
+ * 
+ * This page allows authenticated organizers to create new food event posts.
+ * Users must be logged in and have "organizer" status to access the form.
+ * 
+ * Key Features:
+ * - Form for event details including title, location, description, and time range.
+ * - Food type selection via dropdown with checkboxes.
+ * - Optional image selection using ImageSearch component.
+ * - Multiple food providers can be added and removed dynamically.
+ * - Events are posted to Firestore with current user ID as creator.
+ * - Admins see an "Admin" button in the header; all users see account navigation.
+ */
+
 "use client";
 import React, { useState, useEffect } from "react";
 import { UserOutlined, LogoutOutlined, MailOutlined, DownOutlined } from "@ant-design/icons";
@@ -72,7 +87,7 @@ const CreateEventPage: React.FC = () => {
   }, [user, loading, router]);
 
   //Options of food types
-  const options = ['Halal', 'Vegetarian', 'Vegan', 'Gluten Free', 'Nut Free'];
+  const options = ['Halal', 'Vegetarian', 'Vegan', 'Gluten Free', 'Nut Free', 'Snacks', 'Asian', 'Mexican', 'Turkish'];
 
   //Interact with the options of food types
   const handleMenuClick = (e: MenuInfo) => {

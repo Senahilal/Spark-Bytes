@@ -1,3 +1,22 @@
+/**
+ * EditEventModal.tsx
+ * 
+ * This modal component provides a UI for organizers to edit existing events.
+ * When opened, it fetches the event data using the `eventId` and pre-fills the form.
+ * Users can modify fields like title, location, description, area, start/end date, food providers, and availability.
+ * 
+ * On submission:
+ * - It validates the form.
+ * - Updates the event in Firebase Firestore.
+ * - Notifies the parent component (if provided) via `onEventUpdated`.
+ * 
+ * Features:
+ * - Prevents selecting past dates/times.
+ * - Displays current food providers with tag-style UI.
+ * - Allows changing availability via colored buttons.
+ */
+
+
 import React, { useEffect, useState } from 'react';
 import { Modal, Form, Input, Select, DatePicker, Button, Space, Tag, Row, Col, Card } from 'antd';
 import dayjs, { Dayjs } from 'dayjs';
@@ -89,9 +108,10 @@ const EditEventModal: React.FC<EditEventModalProps> = ({ eventId, visible, onClo
                     startDate: dayjs(data.start.toDate()).tz(easternTimeZone),
                     endDate: dayjs(data.end.toDate()).tz(easternTimeZone),
                     availability: data.availability || 'high',
+                    food_type: data.food_type || [],
                     foodProviderInput: '',
                 });
-                setFoodItems(data.foodProvider || []);
+                setFoodItems(data.food_provider || []);
                 setAvailability(data.availability || 'high');
             }
         };
@@ -114,6 +134,7 @@ const EditEventModal: React.FC<EditEventModalProps> = ({ eventId, visible, onClo
                 location: values.location,
                 start: values.startDate.toDate(),
                 end: values.endDate.toDate(),
+                food_type: values.food_type,
                 food_provider: foodItems,
                 availability: values.availability,
                 last_updated_by: currentUser.uid,
@@ -161,7 +182,7 @@ const EditEventModal: React.FC<EditEventModalProps> = ({ eventId, visible, onClo
     };
 
     return (
-        
+
         <Modal
             title={null}
             open={visible}
@@ -179,7 +200,7 @@ const EditEventModal: React.FC<EditEventModalProps> = ({ eventId, visible, onClo
                 <h2 style={{ color: 'white', fontSize: '24px', margin: 0 }}>Edit Event</h2>
             </div>
 
-            <div style={{ padding: '40px 28px' }}>
+            <div style={{ padding: '40px 28px', justifyContent: 'center' }}>
                 <Form form={form} layout="vertical">
                     <Row gutter={24}>
                         {/* Left column */}
@@ -228,6 +249,18 @@ const EditEventModal: React.FC<EditEventModalProps> = ({ eventId, visible, onClo
 
                             </Form.Item>
 
+                            <Form.Item label="Food Type" name="food_type">
+                                <Select
+                                    mode="multiple"
+                                    placeholder="Select food types"
+                                    allowClear
+                                >
+                                    {['Halal', 'Vegetarian', 'Vegan', 'Gluten Free', 'Nut Free', 'Snacks', 'Asian', 'Mexican', 'Turkish'].map(type => (
+                                        <Select.Option key={type} value={type}>{type}</Select.Option>
+                                    ))}
+                                </Select>
+                            </Form.Item>
+
 
                             <Form.Item label="Food Provider" name="foodProviderInput">
                                 <Input.Search
@@ -245,43 +278,50 @@ const EditEventModal: React.FC<EditEventModalProps> = ({ eventId, visible, onClo
                                     </Tag>
                                 ))}
                             </div>
-
-                            {/* Availability Buttons */}
-                            <Form.Item label="Availability" name="availability">
-                                <div style={{
-                                    display: 'flex',
-                                    gap: '8px',
-                                    flexWrap: 'wrap'
-                                }}>
-                                    {/* Availability buttons for respective colors */}
-                                    {[
-                                        { value: 'high', label: 'High', color: 'green' },
-                                        { value: 'medium', label: 'Medium', color: 'orange' },
-                                        { value: 'low', label: 'Low', color: 'red' },
-                                        { value: 'none', label: 'None', color: '#aaa' }
-                                    ].map(({ value, label, color }) => (
-                                        <Button
-                                            key={value}
-                                            type={availability === value ? 'primary' : 'default'}
-                                            onClick={() => {
-                                                setAvailability(value);
-                                                form.setFieldsValue({ availability: value });
-                                            }}
-                                            style={{
-                                                borderColor: color,
-                                                backgroundColor: availability === value ? color : '#fff',
-                                                color: availability === value ? '#fff' : color,
-                                                fontWeight: 600
-                                            }}
-                                        >
-                                            {label}
-                                        </Button>
-                                    ))}
-                                </div>
-                            </Form.Item>
                         </Col>
                     </Row>
-                    {/*These are our cancel and save buttons*/}
+
+                    {/* Availability Section with Centered Label and Buttons */}
+                    <Form.Item name="availability">
+                        <div style={{ textAlign: 'center' }}>
+                            <label style={{ display: 'block', marginBottom: 8 }}>
+                                Availability
+                            </label>
+                            <div style={{
+                                display: 'flex',
+                                justifyContent: 'center',
+                                gap: '8px',
+                                flexWrap: 'wrap'
+                            }}>
+                                {[
+                                    { value: 'high', label: 'High', color: 'green' },
+                                    { value: 'medium', label: 'Medium', color: 'orange' },
+                                    { value: 'low', label: 'Low', color: 'red' },
+                                    { value: 'none', label: 'None', color: '#aaa' }
+                                ].map(({ value, label, color }) => (
+                                    <Button
+                                        key={value}
+                                        type={availability === value ? 'primary' : 'default'}
+                                        onClick={() => {
+                                            setAvailability(value);
+                                            form.setFieldsValue({ availability: value });
+                                        }}
+                                        style={{
+                                            borderColor: color,
+                                            backgroundColor: availability === value ? color : '#fff',
+                                            color: availability === value ? '#fff' : color,
+                                            fontWeight: 600
+                                        }}
+                                    >
+                                        {label}
+                                    </Button>
+                                ))}
+                            </div>
+                        </div>
+                    </Form.Item>
+
+
+                    {/*CANCEL AND SAVE buttons*/}
                     <div style={{
                         marginTop: 40,
                         display: 'flex',
