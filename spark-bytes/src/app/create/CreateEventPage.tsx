@@ -87,7 +87,7 @@ const CreateEventPage: React.FC = () => {
   }, [user, loading, router]);
 
   //Options of food types
-  const options = ['Halal', 'Vegetarian', 'Vegan', 'Gluten Free', 'Nut Free', 'Asian', 'Mexican', 'Turkish'];
+  const options = ['Halal', 'Vegetarian', 'Vegan', 'Gluten Free', 'Nut Free', 'Snacks', 'Asian', 'Mexican', 'Turkish'];
 
   //Interact with the options of food types
   const handleMenuClick = (e: MenuInfo) => {
