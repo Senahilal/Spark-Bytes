@@ -41,6 +41,13 @@ const ProfilePage = () => {
     const [email, setEmail] = useState("");
     const [profileImageUrl, setProfileImageUrl] = useState<string | null>(null);
 
+    //edit fields:
+    const [editableFirstName, setEditableFirstName] = useState("");
+    const [editableLastName, setEditableLastName] = useState("");
+    const [editablePhoneNumber, setEditablePhoneNumber] = useState("");
+    const [editableEmail, setEditableEmail] = useState("");
+
+
     //user status
     const [isAdmin, setIsAdmin] = useState(false);
     const [isOrganizer, setIsOrganizer] = useState(false);
@@ -182,14 +189,18 @@ const ProfilePage = () => {
         if (!user) return;
 
         const updatedData = {
-            first_name: firstName,
-            last_name: lastName,
-            phone: phoneNumber,
-            email: email,
+            first_name: editableFirstName.trim(),
+            last_name: editableLastName.trim(),
+            phone: editablePhoneNumber.trim(),
+            email: editableEmail.trim(),
         };
 
         try {
             await updateUserData(user, updatedData);
+            setFirstName(editableFirstName);
+            setLastName(editableLastName);
+            setPhoneNumber(editablePhoneNumber);
+            setEmail(editableEmail);
             console.log("User data updated successfully.");
         } catch (error) {
             console.error("Error updating user data:", error);
@@ -452,7 +463,7 @@ const ProfilePage = () => {
             ) : (
 
                 <div style={{ flex: 1, padding: "40px 24px" }}>
-                    {/* Account Info Edit Form */}
+                    {/* Account Info Section with Edit Form */}
                     <Form
                         layout="vertical"
                         style={{ maxWidth: "1024px", margin: "0 auto" }}
@@ -462,8 +473,8 @@ const ProfilePage = () => {
                                 <Form.Item label="First Name">
                                     <Input
                                         placeholder="First Name"
-                                        value={firstName}
-                                        onChange={(e) => setFirstName(e.target.value)}
+                                        value={isEditing ? editableFirstName : firstName}
+                                        onChange={(e) => setEditableFirstName(e.target.value)}
                                         size="large"
                                         disabled={!isEditing}
                                     />
@@ -473,8 +484,8 @@ const ProfilePage = () => {
                                 <Form.Item label="Last Name">
                                     <Input
                                         placeholder="Last Name"
-                                        value={lastName}
-                                        onChange={(e) => setLastName(e.target.value)}
+                                        value={isEditing ? editableLastName : lastName}
+                                        onChange={(e) => setEditableLastName(e.target.value)}
                                         size="large"
                                         disabled={!isEditing}
                                     />
@@ -484,8 +495,8 @@ const ProfilePage = () => {
                                 <Form.Item label="Phone Number">
                                     <Input
                                         placeholder="Phone Number"
-                                        value={phoneNumber}
-                                        onChange={(e) => setPhoneNumber(e.target.value)}
+                                        value={isEditing ? editablePhoneNumber : phoneNumber}
+                                        onChange={(e) => setEditablePhoneNumber(e.target.value)}
                                         size="large"
                                         disabled={!isEditing}
                                     />
@@ -495,22 +506,42 @@ const ProfilePage = () => {
                                 <Form.Item label="Email Address">
                                     <Input
                                         placeholder="Email Address"
-                                        value={email}
-                                        onChange={(e) => setEmail(e.target.value)}
+                                        value={isEditing ? editableEmail : email}
+                                        onChange={(e) => setEditableEmail(e.target.value)}
                                         size="large"
                                         disabled={!isEditing}
                                     />
                                 </Form.Item>
                             </Col>
                         </Row>
-                        <div style={{ display: "flex", justifyContent: "flex-end", marginTop: "24px" }}>
+                        <div style={{ display: "flex", gap: "10px", justifyContent: "flex-end", marginTop: "24px" }}>
+
+                            {isEditing && (
+                                <Button
+                                    style={{ marginLeft: "12px" }}
+                                    onClick={() => {
+                                        setIsEditing(false);
+                                    }}
+                                >
+                                    Cancel
+                                </Button>
+                            )}
+
                             <Button
                                 type="primary"
                                 style={{ backgroundColor: "#2E7D32" }}
-                                onClick={async () => {
-                                    if (isEditing) await handleSaveChanges();
-                                    setIsEditing(prev => !prev);
+                                onClick={() => {
+                                    if (!isEditing) {
+                                        setEditableFirstName(firstName);
+                                        setEditableLastName(lastName);
+                                        setEditablePhoneNumber(phoneNumber);
+                                        setEditableEmail(email);
+                                    } else {
+                                        handleSaveChanges(); // save if editing
+                                    }
+                                    setIsEditing(!isEditing);
                                 }}
+
                             >
                                 {isEditing ? "Save" : "Edit"}
                             </Button>
