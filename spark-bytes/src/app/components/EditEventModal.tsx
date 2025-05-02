@@ -42,21 +42,33 @@ const EditEventModal: React.FC<EditEventModalProps> = ({ eventId, visible, onClo
 
 
     // Disable end time before selected start time
-    const getDisabledEndTime = (current: Dayjs | null) => {
-        if (!startDate || !current || !current.isSame(startDate, 'day')) return {};
+    const getDisabledEndTime = (): {
+        disabledHours?: () => number[];
+        disabledMinutes?: (hour: number) => number[];
+    } => {
+        if (!startDate) return {};
 
-        const startHour = startDate.hour();
-        const startMinute = startDate.minute();
+        const isToday = (date: Dayjs) => date.isSame(startDate, 'day');
 
         return {
-            disabledHours: () =>
-                Array.from({ length: 24 }, (_, h) => h).filter((h) => h < startHour),
-            disabledMinutes: (selectedHour: number) =>
-                selectedHour === startHour
-                    ? Array.from({ length: 60 }, (_, m) => m < startMinute)
-                    : [],
+            disabledHours: () => {
+                const now = form.getFieldValue('endDate');
+                if (!now || !isToday(now)) return [];
+                const startHour = startDate.hour();
+                return Array.from({ length: 24 }, (_, h) => h).filter(h => h < startHour);
+            },
+            disabledMinutes: (selectedHour) => {
+                const now = form.getFieldValue('endDate');
+                if (!now || !isToday(now)) return [];
+                const startHour = startDate.hour();
+                const startMinute = startDate.minute();
+                return selectedHour === startHour
+                    ? Array.from({ length: 60 }, (_, m) => m).filter(m => m < startMinute)
+                    : [];
+            }
         };
     };
+
 
 
 
