@@ -6,11 +6,13 @@ interface ShareButtonProps {
   text: string;
   url?: string;
 }
+// This component is used to share content 
 
 const ShareButton: React.FC<ShareButtonProps> = ({ title, text, url }) => {
   const handleShare = async (e: React.MouseEvent) => {
     e.stopPropagation();
     
+    // Check if the browser supports the Web Share API
     if (navigator.share) {
       try {
         await navigator.share({
