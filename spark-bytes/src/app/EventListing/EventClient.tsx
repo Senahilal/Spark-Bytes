@@ -371,15 +371,16 @@ export default function EventClient() {
               allowClear
               maxTagCount={2}
             >
-              <Option value="Pizza">Pizza</Option>
-              <Option value="Mexican">Mexican</Option>
-              <Option value="Asian">Asian</Option>
               <Option value="Snacks">Snacks</Option>
               <Option value="Desserts">Desserts</Option>
               <Option value="Vegan">Vegan</Option>
               <Option value="Vegetarian">Vegetarian</Option>
               <Option value="Halal">Halal</Option>
-              <Option value="Test Food Type">Test Food Type</Option>
+              <Option value="Gluten Free">Gluten Free</Option>
+              <Option value="Nut Free">Nut Free</Option>
+              <Option value="Turkish">Turkish</Option>
+              <Option value="Mexican">Mexican</Option>
+              <Option value="Asian">Asian</Option>
             </Select>
           </ConfigProvider>
 
