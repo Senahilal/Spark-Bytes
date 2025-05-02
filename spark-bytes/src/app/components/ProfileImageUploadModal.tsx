@@ -3,6 +3,10 @@ import React, { useState } from 'react';
 import { Modal, Button, Upload, message } from 'antd';
 import { UploadOutlined } from '@ant-design/icons';
 
+
+//This component is used to upload a profile image
+//It uses the antd library to create a modal with a file upload button
+//It also uses the Upload component from antd to handle file uploads
 interface Props {
     isOpen: boolean;
     onClose: () => void;

@@ -20,7 +20,7 @@ const CloseButton: React.FC<CloseButtonProps> = ({
   const [hoverColor, setHoverColor] = useState(bgColor);
 
 
-
+  // Set hover color based on the background color
   const handleMouseOver = () => {
     if (bgColor === '#888') {
       setHoverColor('#666');
@@ -33,11 +33,13 @@ const CloseButton: React.FC<CloseButtonProps> = ({
     }
   };
   
+  // Reset hover color to original background color
   const handleMouseOut = () => {
     setHoverColor(bgColor);
   };
   
   return (
+    //This button is to close based on color
     <button 
       onClick={onClick} 
       className={className}

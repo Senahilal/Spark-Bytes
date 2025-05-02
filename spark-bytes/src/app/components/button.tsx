@@ -42,6 +42,7 @@ const Button: React.FC<ButtonProps> = ({
   }
   
   return (
+    //This component allows us to use the button as a link or a regular button
     <AntdButton
     type="primary" 
       style={buttonStyle} 
