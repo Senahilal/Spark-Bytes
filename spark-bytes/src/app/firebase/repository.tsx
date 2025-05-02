@@ -283,14 +283,18 @@ export async function deleteEvent(eventId: string) {
 // today's events - components/todaysEvents.tsx
 export async function fetchTodaysEvents() {
   try {
+    // Create date for the start of today (midnight)
     const today = new Date();
-    today.setHours(0, 0);
+    today.setHours(0, 0, 0, 0);
     
+    // Create date for the end of today (23:59:59.999)
     const endOfToday = new Date();
-    endOfToday.setHours(23, 59);
+    endOfToday.setHours(23, 59, 59, 999);
     
     const startTimestamp = Timestamp.fromDate(today);
     const endTimestamp = Timestamp.fromDate(endOfToday);
+    
+    console.log("Fetching events between:", today, "and", endOfToday);
     
     const eventsRef = collection(db, "events");
     const q = query(
@@ -305,7 +309,8 @@ export async function fetchTodaysEvents() {
       ...doc.data()
     }));
     
-    console.log("Today's Events:", eventsList);
+    console.log("Today's Events found:", eventsList.length);
+    console.log("Today's Events details:", eventsList);
     return eventsList;
   } catch (err) {
     console.error("Error fetching today's events:", err);

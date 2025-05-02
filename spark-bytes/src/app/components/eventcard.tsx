@@ -66,50 +66,66 @@ const EventCard = ({
 
   const [isEventPassed, setIsEventPassed] = useState(false);
 
-useEffect(() => {
-  // Check if event has already passed
-  const checkIfEventPassed = () => {
-    if (!endTime || endTime === 'Unknown') return false;
-    
-    const now = new Date();
-    
-    try {
-      const timeStr = endTime.toLowerCase();
-      let eventEndTime = new Date();
+  useEffect(() => {
+    // Check if event has already passed
+    const checkIfEventPassed = () => {
+      if (!date || !endTime || endTime === 'Unknown') return false;
       
-      // Parse the time string
-      const timeMatch = timeStr.match(/(\d+):(\d+)\s*(am|pm)/i);
-      if (timeMatch) {
-        let hours = parseInt(timeMatch[1]);
-        const minutes = parseInt(timeMatch[2]);
-        const ampm = timeMatch[3].toLowerCase();
+      const now = new Date();
+      console.log(`Checking event: ${title} with date: ${date} and end time: ${endTime}`);
+      
+      try {
+        // Parse the date
+        const dateArr = date.split('/');
+        if (dateArr.length !== 3) return false;
         
-        // Convert to 24-hour format
-        if (ampm === 'pm' && hours < 12) hours += 12;
-        if (ampm === 'am' && hours === 12) hours = 0;
+        const eventMonth = parseInt(dateArr[0]) - 1; // JS months are 0-indexed
+        const eventDay = parseInt(dateArr[1]);
+        const eventYear = parseInt(dateArr[2]);
         
-        // Set the hours and minutes
-        eventEndTime.setHours(hours, minutes, 0, 0);
+        // Parse the time
+        const timeStr = endTime.toLowerCase();
+        const timeMatch = timeStr.match(/(\d+):(\d+)\s*(am|pm)/i);
         
-        // Compare with current time
-        return now > eventEndTime;
+        if (timeMatch) {
+          let hours = parseInt(timeMatch[1]);
+          const minutes = parseInt(timeMatch[2]);
+          const ampm = timeMatch[3].toLowerCase();
+          
+          // Convert to 24-hour format
+          if (ampm === 'pm' && hours < 12) hours += 12;
+          if (ampm === 'am' && hours === 12) hours = 0;
+          
+          // Create event end date object
+          const eventEndDate = new Date(eventYear, eventMonth, eventDay, hours, minutes);
+          
+          console.log(`Event end datetime: ${eventEndDate}, Current datetime: ${now}`);
+          
+          // Compare full datetime
+          if (eventEndDate < now) {
+            console.log(`Event ${title} has ended`);
+            return true;
+          } else {
+            console.log(`Event ${title} has not ended yet`);
+            return false;
+          }
+        }
+        
+        return false;
+      } catch (error) {
+        console.error('Error checking if event passed:', error);
+        return false;
       }
-      
-      return false;
-    } catch (error) {
-      console.error('Error checking if event passed:', error);
-      return false;
-    }
-  };
-  
-  setIsEventPassed(checkIfEventPassed());
-  
-  const intervalId = setInterval(() => {
+    };
+    
     setIsEventPassed(checkIfEventPassed());
-  }, 60000); // Check every minute
-  
-  return () => clearInterval(intervalId);
-}, [endTime]);
+    
+    const intervalId = setInterval(() => {
+      setIsEventPassed(checkIfEventPassed());
+    }, 60000); // Check every minute
+    
+    return () => clearInterval(intervalId);
+  }, [date, endTime, title]); // Added date to dependencies
 
   const showModal = () => {
     setIsModalVisible(true);
