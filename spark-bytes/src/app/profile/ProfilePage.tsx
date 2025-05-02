@@ -355,11 +355,27 @@ const ProfilePage = () => {
                         </div>
 
                         <div>
-                            <Text strong style={{ fontSize: "18px" }}>
-                                {firstName || "Name"} {lastName || "Last Name"}
-                            </Text>
-                            <br />
+                            <div style={{ display: "flex", alignItems: "center", gap: "10px", flexWrap: "wrap", marginBottom:"5px"}}>
+                                <Text strong style={{ fontSize: "24px" }}>
+                                    {firstName || "Name"} {lastName || "Last Name"}
+                                </Text>
+                                {isAdmin && (
+                                    <span
+                                        style={{
+                                            backgroundColor: "#C8E6C9",
+                                            color: "#2E7D32",
+                                            fontSize: "12px",
+                                            padding: "2px 8px",
+                                            borderRadius: "12px",
+                                            fontWeight: 500,
+                                        }}
+                                    >
+                                        Admin
+                                    </span>
+                                )}
+                            </div>
                             <Text type="secondary">{email || "example@bu.edu"}</Text>
+
                         </div>
                     </Space>
 
