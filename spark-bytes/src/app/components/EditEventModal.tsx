@@ -27,26 +27,51 @@ const EditEventModal: React.FC<EditEventModalProps> = ({ eventId, visible, onClo
     const [availability, setAvailability] = useState<string>('high');
     const [startDate, setStartDate] = useState<dayjs.Dayjs | null>(null);
 
-    // Disable dates before today
+    // Disable dates before today - for start date date picker
     const disablePastDates = (current: Dayjs) => {
         return current && current < dayjs().startOf('day');
     };
 
     // Disable end dates before selected start date
     const disableInvalidEndDates = (current: Dayjs): boolean => {
-        const today = dayjs().startOf('day');
         if (!current) return false;
-
-        // If no startDate selected, disable past dates only
+        const today = dayjs().startOf('day');
         if (!startDate) return current.isBefore(today);
 
-        // If startDate is selected, disable before either today or startDate (whichever is later)
-        const minDate = startDate.isAfter(today) ? startDate : today;
-        return current.isBefore(minDate);
+        return current.isBefore(today) || current.isBefore(startDate.startOf('day'));
     };
 
 
+    // Disable end time before selected start time
+    const getDisabledEndTime = (): {
+        disabledHours?: () => number[];
+        disabledMinutes?: (hour: number) => number[];
+    } => {
+        if (!startDate) return {};
+
+        const isToday = (date: Dayjs) => date.isSame(startDate, 'day');
+
+        return {
+            disabledHours: () => {
+                const now = form.getFieldValue('endDate');
+                if (!now || !isToday(now)) return [];
+                const startHour = startDate.hour();
+                return Array.from({ length: 24 }, (_, h) => h).filter(h => h < startHour);
+            },
+            disabledMinutes: (selectedHour) => {
+                const now = form.getFieldValue('endDate');
+                if (!now || !isToday(now)) return [];
+                const startHour = startDate.hour();
+                const startMinute = startDate.minute();
+                return selectedHour === startHour
+                    ? Array.from({ length: 60 }, (_, m) => m).filter(m => m < startMinute)
+                    : [];
+            }
+        };
+    };
+
     // Fetch event data when modal opens, so that way the fields can be prefilled
+
     useEffect(() => {
         if (!eventId || !visible) return;
 
@@ -198,7 +223,9 @@ const EditEventModal: React.FC<EditEventModalProps> = ({ eventId, visible, onClo
                                     format="MMMM DD, YYYY hh:mm A"
                                     style={{ width: '100%' }}
                                     disabledDate={disableInvalidEndDates}
+                                    disabledTime={getDisabledEndTime}
                                 />
+
                             </Form.Item>
 
 
