@@ -1,3 +1,22 @@
+/**
+ * EditEventModal.tsx
+ * 
+ * This modal component provides a UI for organizers to edit existing events.
+ * When opened, it fetches the event data using the `eventId` and pre-fills the form.
+ * Users can modify fields like title, location, description, area, start/end date, food providers, and availability.
+ * 
+ * On submission:
+ * - It validates the form.
+ * - Updates the event in Firebase Firestore.
+ * - Notifies the parent component (if provided) via `onEventUpdated`.
+ * 
+ * Features:
+ * - Prevents selecting past dates/times.
+ * - Displays current food providers with tag-style UI.
+ * - Allows changing availability via colored buttons.
+ */
+
+
 import React, { useEffect, useState } from 'react';
 import { Modal, Form, Input, Select, DatePicker, Button, Space, Tag, Row, Col, Card } from 'antd';
 import dayjs, { Dayjs } from 'dayjs';

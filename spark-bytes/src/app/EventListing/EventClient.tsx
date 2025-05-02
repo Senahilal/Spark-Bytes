@@ -1,3 +1,17 @@
+/**
+ * EventClient.tsx
+ *
+ * This is the main public-facing event discovery page.
+ * It displays all posted events and supports:
+ * - Text search (by title, description, location, area, or food type)
+ * - Filters for date, campus location, and food type
+ * - Pagination to view events 6 per page
+ * - Conditional  navigation buttons for logged-in organizers (post event) and admins (admin page)
+ * - Real-time Firebase integration for fetching events and user roles
+ *
+ * 
+ */
+
 'use client';
 
 import React, { useState, useEffect, useRef } from 'react';
@@ -44,6 +58,7 @@ export default function EventClient() {
     return sortedEvents.slice(startIndex, endIndex);
   };
 
+  // On user login state change, check if the user is an admin or organizer
   useEffect(() => {
     const checkUser = async () => {
       if (user) {
@@ -79,23 +94,26 @@ export default function EventClient() {
   const [selectedLocation, setSelectedLocation] = useState<string[]>([]);
   const [selectedFoodType, setSelectedFoodType] = useState<string[]>([]);
 
+  // Re-apply filters whenever user types or changes filter criteria
   useEffect(() => {
     const applyFilters = () => {
       let filtered = originalEventsRef.current;
 
-      if (searchQuery.trim() !== "") { 
-        const query = searchQuery.toLowerCase(); 
-        filtered = filtered.filter((event) => 
-          event.title?.toLowerCase().includes(query) || 
+      // Keyword text search across title, description, location, etc.
+      if (searchQuery.trim() !== "") {
+        const query = searchQuery.toLowerCase();
+        filtered = filtered.filter((event) =>
+          event.title?.toLowerCase().includes(query) ||
           event.description?.toLowerCase().includes(query) ||
-          event.location?.toLowerCase().includes(query) || 
+          event.location?.toLowerCase().includes(query) ||
           event.area?.toLowerCase().includes(query) ||
-          (event.food_type && event.food_type.some((type: string) => 
-            type.toLowerCase().includes(query) 
-          )) 
-        ); 
-      } 
+          (event.food_type && event.food_type.some((type: string) =>
+            type.toLowerCase().includes(query)
+          ))
+        );
+      }
 
+      // Date filter (match only events that happen on selected date)
       if (selectedDate) {
         const selected = selectedDate.format("MM/DD/YYYY");
 
@@ -108,6 +126,7 @@ export default function EventClient() {
         });
       }
 
+      // Filter by food types (match any of selected types)
       if (selectedFoodType.length > 0) {
         filtered = filtered.filter((event) =>
           event.food_type?.some((type: string) => selectedFoodType.includes(type))
@@ -155,12 +174,15 @@ export default function EventClient() {
             right: '16px',
             gap: '10px'
           }}>
+
+            {/* Show Post Event if user is organizer */}
             {isOrganizer && (
               <Button href="/create">
                 Post an Event
               </Button>
             )}
-            
+
+            {/* Show Admin Panel button if user is admin */}
             {isAdmin && (
               <Button href="/admin">
                 Admin
@@ -201,6 +223,7 @@ export default function EventClient() {
               width: '100%',
             }}
           >
+            {/* Text input search bar for filtering by keywords */}
             <input
               type="text"
               value={searchQuery}
@@ -283,14 +306,14 @@ export default function EventClient() {
                   selectorBg: "transparent",              // background
                   multipleItemBg: "rgba(227, 244, 201, 0.5)",  //  tags in multi-select
                   optionSelectedBg: "rgba(227, 244, 201, 0.7)", // background when option is selected
-                  activeOutlineColor: "#E3F4C9",        
+                  activeOutlineColor: "#E3F4C9",
                   controlHeight: 45,
                   borderRadius: 8,
                 },
               },
               token: {
-                colorBorder: "#E3F4C9",             
-                colorPrimary: "#036D19",                  
+                colorBorder: "#E3F4C9",
+                colorPrimary: "#036D19",
               },
             }}
           >
@@ -300,9 +323,9 @@ export default function EventClient() {
               onChange={(value) => setSelectedLocation(value)}
               style={{
                 width: 350,
-                backgroundColor: "transparent",          
-                border: "0.8px solid #E3F4C9",         
-                boxShadow: "0 1px 3px rgba(0,0,0,0.1)",  
+                backgroundColor: "transparent",
+                border: "0.8px solid #E3F4C9",
+                boxShadow: "0 1px 3px rgba(0,0,0,0.1)",
                 borderRadius: "8px",
               }}
               allowClear
@@ -323,7 +346,7 @@ export default function EventClient() {
                   selectorBg: "#transparent",              // Background color
                   multipleItemBg: "rgba(227, 244, 201, 0.5)",  //  tags in multi-select
                   optionSelectedBg: "rgba(227, 244, 201, 0.7)",        // Background color when option is selected
-                  activeOutlineColor: "#E3F4C9", 
+                  activeOutlineColor: "#E3F4C9",
                   controlHeight: 45,
                   borderRadius: 8,
                 },
@@ -340,9 +363,9 @@ export default function EventClient() {
               onChange={(value) => setSelectedFoodType(value)}
               style={{
                 width: 350,
-                backgroundColor: "transparent",          
-                border: "0.8px solid #E3F4C9",         
-                boxShadow: "0 1px 3px rgba(0,0,0,0.1)",  
+                backgroundColor: "transparent",
+                border: "0.8px solid #E3F4C9",
+                boxShadow: "0 1px 3px rgba(0,0,0,0.1)",
                 borderRadius: "8px",
               }}
               allowClear
@@ -413,37 +436,37 @@ export default function EventClient() {
 
         {/* Pagination */}
 
-      {/* Pagination */}
-      <div style={{ 
-          marginTop: '50px', 
+        {/* Pagination */}
+        <div style={{
+          marginTop: '50px',
           marginBottom: '30px',
-          display: 'flex', 
+          display: 'flex',
           justifyContent: 'center',
-          width: '100%' 
+          width: '100%'
         }}>
           <ConfigProvider
-    theme={{
-      token: {
-        colorPrimary: "#036D19",
-        colorBorder: "#E3F4C9",
-      },
-      components: {
-        Pagination: {
-          itemActiveBg: "rgba(3, 109, 25, 0.1)",
-        }
-      }
-    }}>
-          <Pagination
-            current={currentPage}
-            total={events.length}
-            onChange={handlePageChange}
-            pageSize={6}
-            style={{ 
-              textAlign: 'center',
-              margin: '0 auto'
-            }}
-        
-          />
+            theme={{
+              token: {
+                colorPrimary: "#036D19",
+                colorBorder: "#E3F4C9",
+              },
+              components: {
+                Pagination: {
+                  itemActiveBg: "rgba(3, 109, 25, 0.1)",
+                }
+              }
+            }}>
+            <Pagination
+              current={currentPage}
+              total={events.length}
+              onChange={handlePageChange}
+              pageSize={6}
+              style={{
+                textAlign: 'center',
+                margin: '0 auto'
+              }}
+
+            />
           </ConfigProvider>
         </div>
       </div>

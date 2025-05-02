@@ -1,3 +1,21 @@
+/**
+ * ReqCard.tsx
+ *
+ * Displays a summary card for an organizer access request.
+ * Clicking the card opens a modal showing full request details.
+ * Admins can accept or reject the request directly in the modal.
+ *
+ * Props:
+ * - id: request document ID
+ * - user_id: UID of the user who submitted the request
+ * - user_name: Name of the user (optional- since its optional field for user doc)
+ * - user_email: Email of the user
+ * - message: Request message text
+ * - status: Current request status ("pending", "accepted", or "rejected")
+ * - date: Formatted submission date string
+ * - time: Formatted submission time string
+ */
+
 "use client"
 
 import React, { useState } from 'react';
