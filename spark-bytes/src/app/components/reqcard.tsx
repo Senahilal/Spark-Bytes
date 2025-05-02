@@ -30,6 +30,8 @@ const ReqCard = ({
   const [isModalVisible, setIsModalVisible] = useState(false);
   const [currentStatus, setCurrentStatus] = useState(status || "pending");
 
+  //This function handles the decision of accepting or rejecting the request that users send to admin
+  
   const handleDecision = async (decision: "accepted" | "rejected") => {
     try {
       await updateDoc(doc(db, "requests", id), {

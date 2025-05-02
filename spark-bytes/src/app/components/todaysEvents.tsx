@@ -13,6 +13,7 @@ const TodaysEvents = () => {
   const [events, setEvents] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
 
+  //Check if the user is logged in
   useEffect(() => {
     const unsubscribe = auth.onAuthStateChanged((user) => {
       setCurrentUserId(user ? user.uid : null);
@@ -21,6 +22,7 @@ const TodaysEvents = () => {
     return () => unsubscribe(); // Clean up the listener on unmount
   }, []);
 
+  //This fetches the events of the day and loads them up on the page
   useEffect(() => {
     const loadTodaysEvents = async () => {
       try {

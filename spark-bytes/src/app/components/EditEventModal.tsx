@@ -20,6 +20,7 @@ interface EditEventModalProps {
     onEventUpdated?: (updatedEvent: any) => void; // <- notify parent to update the specific card
 }
 
+//This const is used for editing events. It uses a form to have preset values based on the eventId
 const EditEventModal: React.FC<EditEventModalProps> = ({ eventId, visible, onClose, onEventUpdated }) => {
     const [form] = Form.useForm();
     const [foodItems, setFoodItems] = useState<string[]>([]);
@@ -69,10 +70,7 @@ const EditEventModal: React.FC<EditEventModalProps> = ({ eventId, visible, onClo
         };
     };
 
-
-
-
-
+    // Fetch event data when modal opens, so that way the fields can be prefilled
 
     useEffect(() => {
         if (!eventId || !visible) return;
@@ -81,6 +79,7 @@ const EditEventModal: React.FC<EditEventModalProps> = ({ eventId, visible, onClo
             const ref = doc(db, 'events', eventId);
             const snap = await getDoc(ref);
             const data = snap.data();
+            //Using the setFieldsValue method to set the values of the form fields
             if (data) {
                 form.setFieldsValue({
                     title: data.title,
@@ -100,6 +99,7 @@ const EditEventModal: React.FC<EditEventModalProps> = ({ eventId, visible, onClo
         fetchEvent();
     }, [eventId, visible, form]);
 
+    //This ensures that the updated values get saved to the database, and the modal closes
     const handleSave = async () => {
         try {
             const values = await form.validateFields();
@@ -144,6 +144,7 @@ const EditEventModal: React.FC<EditEventModalProps> = ({ eventId, visible, onClo
     };
 
 
+    //This function handles the addition of food providers to the list
     const handleAddFoodProvider = () => {
         const current = form.getFieldValue('foodProviderInput') || '';
         if (current.trim()) {
@@ -152,6 +153,7 @@ const EditEventModal: React.FC<EditEventModalProps> = ({ eventId, visible, onClo
         }
     };
 
+    //This function handles the removal of food providers from the list
     const handleRemoveFoodProvider = (index: number) => {
         const updated = [...foodItems];
         updated.splice(index, 1);
@@ -159,6 +161,7 @@ const EditEventModal: React.FC<EditEventModalProps> = ({ eventId, visible, onClo
     };
 
     return (
+        
         <Modal
             title={null}
             open={visible}
@@ -250,6 +253,7 @@ const EditEventModal: React.FC<EditEventModalProps> = ({ eventId, visible, onClo
                                     gap: '8px',
                                     flexWrap: 'wrap'
                                 }}>
+                                    {/* Availability buttons for respective colors */}
                                     {[
                                         { value: 'high', label: 'High', color: 'green' },
                                         { value: 'medium', label: 'Medium', color: 'orange' },
@@ -277,7 +281,7 @@ const EditEventModal: React.FC<EditEventModalProps> = ({ eventId, visible, onClo
                             </Form.Item>
                         </Col>
                     </Row>
-
+                    {/*These are our cancel and save buttons*/}
                     <div style={{
                         marginTop: 40,
                         display: 'flex',

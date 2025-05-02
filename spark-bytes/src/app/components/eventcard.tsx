@@ -10,6 +10,9 @@ import { db } from "@/app/firebase/config";
 import EditEventModal from './EditEventModal';
 
 
+//This component is used to display an event card with details like title, location, date, time, food type, and a button to notify the user about the event.
+// It also includes a modal that shows more details about the event and allows the user to delete or edit the event if they are the owner.
+
 // interface - add more if needed
 interface EventCardProps {
   id: string;
@@ -120,6 +123,9 @@ useEffect(() => {
     setIsModalVisible(false);
   };
 
+
+  //Called when user clicks on notify me button
+  //This function will add the user to the followers list of the event
   const handleNotifyMe = async (e: React.MouseEvent) => {
     e.stopPropagation();
 
@@ -150,6 +156,9 @@ useEffect(() => {
     }
   };
 
+  //Called when user clicks on delete button
+  //This function will delete the event from the database
+  //and notify the parent component to refresh the events
   const handleDelete = async (e: React.MouseEvent) => {
     e.stopPropagation();
     try {
@@ -425,7 +434,7 @@ useEffect(() => {
                         availability === 'low' ? 'red' : '#888'
                 }}>
                   <MdPeople size={18} />
-                  <span>{isEventPassed ? 'Attendance' : 'Food Availability'}</span>
+                  <span>{isEventPassed ? 'Food Availability':'Food Availability'}</span>
                 </div>
                 <div style={{
                   marginTop: '8px',
